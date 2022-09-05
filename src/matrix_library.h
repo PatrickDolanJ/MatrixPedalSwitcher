@@ -12,6 +12,8 @@ class AGD2188
 	void read_date();
 
 	private:
+	byte convert_to_byte(bool OnOrOff, int x, int y);
+
 	const byte AGD2188_ADDRESS = 0x71; 
 	const byte NOW = 0x01;
 	// Lay out the constants for reading back the switch states
@@ -49,8 +51,6 @@ class AGD2188
 	const byte W_Y7 = 0b111;
 	const byte y_byte_array[8]= {W_Y0,W_Y1,W_Y2,W_Y3,W_Y4,W_Y5,W_Y6,W_Y7};
 	///////////////////
-	
-
 };
  
 #endif

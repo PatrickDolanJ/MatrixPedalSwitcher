@@ -2,6 +2,7 @@
 // currently you have to construct the byte 
 // https://www.farnell.com/datasheets/1793938.pdf
 #include <Wire.h>
+#include <matrix_library.h>
 #include <Arduino.h>
 
 //const byte AGD2188_ADDRESS = 0x71;  //Arduino uses 7 bit addresses. this probably means that arduino 
@@ -51,14 +52,14 @@
 
 //const byte y_byte_array[8]= {W_Y0,W_Y1,W_Y2,W_Y3,W_Y4,W_Y5,W_Y6,W_Y7};
 ///////////////////
-void setup()
+AGD2188::AGD2188()
 {
   Wire.begin(); // join i2c bus (address optional for master)
   //Serial.begin(115200);
 }
 
-void loop()
-{
+//void loop()
+//{
   // This pair of loops is identical to the above, except it adds 128 to the value to signify the "ON" state.
 //   for(int y = 0; y < 8; y++){
 //     byte y_value = y;
@@ -88,9 +89,9 @@ void loop()
 //       delay(100);
 //     }
 //   }
- }
+//}
 
-  byte convert_to_byte(bool OnOrOff, int x, int y){
+  byte AGD2188::convert_to_byte(bool OnOrOff, int x, int y){
     byte x_byte = x_byte_array[x-1];
     byte y_byte = y_byte_array[y-1];
     byte OnOrOff_byte = 0b0;
@@ -104,11 +105,11 @@ void loop()
     return write_converted;
 }
 
-void read_data(int x){  ///currently set to void but might be benefitial to return array of connections. 
+void AGD2188::read_data(int x){  ///currently set to void but might be benefitial to return array of connections. 
   const byte read_byte = 0xE3; // write_data(x_address);   this needs the initial byte to be in READ MODE, then it needs the alternate X code as in Table 8.
-  byte data_array[2];  //first needs to write x_adress, then 
+  byte data_array[2];   //first needs to write x_adress, then 
   data_array[0] = read_byte;
-  data_array[1] = x_byte_array[x-1];
+  data_array[1] = x_byte_array[x-1]; // THIS NEEDS TO BE FIXED \\
   Wire.beginTransmission(read_byte);
 
   Wire.requestFrom(AGD2188_ADDRESS, 2); //2nd arguement is probably expecting 2 bytes back 
@@ -120,7 +121,7 @@ void read_data(int x){  ///currently set to void but might be benefitial to retu
 }
 
 
- void write_data(bool OnOrOff, int x, int y){ //void write_date(int x, int y)
+ void AGD2188::write_data(bool OnOrOff, int x, int y){ //void write_date(int x, int y)
    byte data_input = convert_to_byte(OnOrOff,x,y);
    byte data_array[2]; //passing in to this fuction the data we want to write 
    data_array[0] = data_input; //on off is 1st bit, nw=ext 4 is x adress last three is the y address
@@ -135,7 +136,7 @@ void read_data(int x){  ///currently set to void but might be benefitial to retu
 // After you setup the read address, all you have to do is request 2 bytes.  The first byte is always all "0".
 // (See bottom trace in Figure 35)
 
-void wipe_chip()
+void AGD2188::wipe_chip()
 {
   // These FOR loops will cycle from X0 - Y0 to X7 - Y7
   // The "x_value" is derived from Table 7 (AX3-AX0).  Note that it's not contiguous because they reserve
