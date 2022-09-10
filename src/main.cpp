@@ -4,6 +4,7 @@
 
 AGD2188 matrix;
 bool wipe_chip_once = true;
+byte testByte = 0;
 
 //#include <Wire.h>
 void setup() {
@@ -12,9 +13,14 @@ void setup() {
 }
 
 void loop() {
-  if(wipe_chip_once)
-  {
-  matrix.wipe_chip();
-  wipe_chip_once = false;
-  }
+  // if(wipe_chip_once)
+  // {
+  // matrix.wipe_chip();
+  // wipe_chip_once = false;
+  // }
+  //testByte += 1;
+  //Serial.println(testByte);
+
+
+
 }
