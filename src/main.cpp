@@ -19,7 +19,18 @@ void loop() {
    {
    matrix.wipe_chip();
    wipe_chip_once = false;
-   ArrayToWrite(test_array,8);
+   //ArrayToWrite(test_array,8);
+  for (int i =0; i<8; i++){
+    for (int j =0; j<8; j++){
+      matrix.write_data(true,i,j);
+      matrix.read_data(i);
+      delay(500);
+    }
+
+
+  }
+
+
    }
   
 }
@@ -46,8 +57,11 @@ void ArrayToWrite(int input_array[8], int sizeOfArray){
        }
   }
 
+  matrix.read_data(7);
+
   //Step Three: iterate through and checck for next value 
   
+  //still thinking on this.
 
 
 } 
