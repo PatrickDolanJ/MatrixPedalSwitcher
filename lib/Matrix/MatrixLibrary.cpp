@@ -55,9 +55,9 @@ const byte y_byte_array[8]= {W_Y0,W_Y1,W_Y2,W_Y3,W_Y4,W_Y5,W_Y6,W_Y7};
 ///////////////////
 AGD2188::AGD2188()
 {
-  Wire.begin(); // join i2c bus (address optional for master)
+  Wire.begin(); // join i2c bus (address optional for master) this may not be good to do inside a library, may be better handled by dependecy injection or just let main handle it.
   //Serial.begin(115200);
-  //Serial.println("THIS IS FROM INSIDE THE MATRIX NEYO");
+  Serial.println("THIS IS FROM INSIDE THE MATRIX NEYO");
 }
 
 //void loop()
@@ -107,13 +107,15 @@ AGD2188::AGD2188()
     return write_converted;
 }
 
-void AGD2188::read_data(int x){  ///currently set to void but might be benefitial to return array of connections. 
-  const byte read_byte = 0xE3; // write_data(x_address);   this needs the initial byte to be in READ MODE, then it needs the alternate X code as in Table 8.
-  byte data_array[2];   //first needs to write x_adress, then 
-  data_array[0] = read_byte;
-  data_array[1] = x_byte_array[x-1]; // THIS NEEDS TO BE FIXED \\
-  Wire.beginTransmission(read_byte);
-
+void AGD2188::read_data(int x){ 
+  //const byte read_byte = 0xE3; // write_data(x_address);   this needs the initial byte to be in READ MODE, then it needs the alternate X code as in Table 8.
+  //This is as the person on the arduino forums has it, but im not sure this will actually work...
+  byte data_array[2];
+  data_array[0] = x_byte_array[x-1]; 
+  data_array[1] = NOW;
+  Wire.beginTransmission(AGD2188_ADDRESS);
+  Wire.write(data_array,2);
+  Wire.endTransmission();
   Wire.requestFrom(AGD2188_ADDRESS, 2); //2nd arguement is probably expecting 2 bytes back 
   while(Wire.available())//this probably functions likea stream. meaning its says while there is data on the next line, do this loop
   {
@@ -131,6 +133,16 @@ void AGD2188::read_data(int x){  ///currently set to void but might be benefitia
    Wire.beginTransmission(AGD2188_ADDRESS); // transmit to device
    Wire.write(data_array, 2);
    Wire.endTransmission();    // stop transmitting
+   String m_message;
+   if (OnOrOff){
+    m_message = "Connected: ";
+   } else {
+    m_message = "Disconnected: ";
+   }
+  m_message += x;
+  m_message += " to ";
+  m_message += y;
+  Serial.println(m_message);
 }
 
 // To execute a read, you first have to WRITE the address value to the device.
@@ -140,6 +152,8 @@ void AGD2188::read_data(int x){  ///currently set to void but might be benefitia
 
 void AGD2188::wipe_chip()
 {
+  delay(1000);
+  Serial.println(millis());
   // These FOR loops will cycle from X0 - Y0 to X7 - Y7
   // The "x_value" is derived from Table 7 (AX3-AX0).  Note that it's not contiguous because they reserve
   // values for the read register values (seen above).  Kind of a pain.
@@ -148,32 +162,25 @@ void AGD2188::wipe_chip()
   // This loop pair will ensure everything is initialized to NOT CONNECTED the very first time it runs.
   // It will look like a whole bunch of nothing is happening on the Serial port.
  for(int y = 0; y < 8; y++){  //this is a nested for loop where for each y it does each x. Set up the Y Loop
-    byte y_value = y;
+    int y_value = y;
     for(int x = 0; x < 8; x += 1){  // Set up X Loop
-      byte x_value;
-      int send_value;      
-      if (x >= 6){             //so this is all to deal with the "reserved" in figure 7 not 8
-        x_value = x + 2;       //jump ahead to skip over resserved 
-      }
-      else {
-        x_value = x;
-      }
-      
-      send_value = x_value*8+y_value;
-      write_data(false,0,0);
-      Serial.print("Wrote ");
-      Serial.println(send_value);      
-      read_data(X0);
-      read_data(X1);
-      read_data(X2);
-      read_data(X3);
-      read_data(X4);
-      read_data(X5);
-      read_data(X6);
-      read_data(X7);
-      delay(100);
+      int x_value = x;      
+      write_data(false,x_value,y_value);
+      //String comma = " , ";
+      //String output = x + comma + y;
+      //Serial.println(output);
+      // read_data(1);
+      // read_data(2);
+      // read_data(3);
+      // read_data(4);
+      // read_data(5);
+      // read_data(6);
+      // read_data(7);
+      // read_data(8);
     }
   }
-  Serial.println("Chip wiped");
+  String m_chip_wiped = "Chip wiped";
+  String output_message = m_chip_wiped + millis(); //this take on average 9 millsecs.
+  Serial.println(output_message);
 }
 
