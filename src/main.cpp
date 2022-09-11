@@ -19,16 +19,14 @@ void loop() {
    {
    matrix.wipe_chip();
    wipe_chip_once = false;
-   //ArrayToWrite(test_array,8);
-  for (int i =0; i<8; i++){
-    for (int j =0; j<8; j++){
-      matrix.write_data(true,i,j);
-      matrix.read_data(i);
-      delay(500);
-    }
-
-
-  }
+   ArrayToWrite(test_array,8);
+  // for (int i =0; i<8; i++){
+  //   for (int j =0; j<8; j++){
+  //     matrix.write_data(true,i,j);
+  //     matrix.read_data(i);
+  //     delay(500);
+  //   }
+  // }
 
 
    }
@@ -56,12 +54,40 @@ void ArrayToWrite(int input_array[8], int sizeOfArray){
          matrix.write_data(true,7,i);
        }
   }
-
-  matrix.read_data(7);
+  //matrix.read_data(7); uncomment to check
 
   //Step Three: iterate through and checck for next value 
+  int preVal = minVal;
+  int curVal = minVal;
+
+  // for (int i = 0; i < sizeOfArray; i++){
+    // finds the next highest number in the array
+    int interval = 1;
+    for(int p = 0; p < sizeOfArray; p++){
+      Serial.print(input_array[p]);
+      if(input_array[p]==(preVal+interval)){
+        curVal = preVal+interval;
+      }
+      if(curVal == preVal && p == 7){
+        Serial.println(interval);
+        interval ++;
+        if(interval <6){
+          p=-1;
+        }
+      }
+    }
+    String m_message = "prev than cur: ";
+    m_message += preVal;
+    m_message += " , ";
+    m_message += curVal;
+    Serial.print(m_message);
+
+  //}
   
-  //still thinking on this.
+
+
 
 
 } 
+
+

@@ -180,7 +180,7 @@ void AGD2188::wipe_chip()
     }
   }
   String m_chip_wiped = "Chip wiped";
-  String output_message = m_chip_wiped + millis(); //this take on average 9 millsecs.
+  String output_message = m_chip_wiped + millis(); //this take on average 9 millsecs without printing to serial.
   Serial.println(output_message);
 }
 
