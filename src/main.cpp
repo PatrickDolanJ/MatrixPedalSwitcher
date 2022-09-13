@@ -20,7 +20,7 @@ void loop() {
    matrix.wipe_chip();
    wipe_chip_once = false;
    ArrayToWrite(test_array,8);
-  // for (int i =0; i<8; i++){
+  // for (int i =0; i<8; i++){ TESTING
   //   for (int j =0; j<8; j++){
   //     matrix.write_data(true,i,j);
   //     matrix.read_data(i);
@@ -49,45 +49,56 @@ void ArrayToWrite(int input_array[8], int sizeOfArray){
 
   //Step Two: Assign input device to each of the positions with minVal;
   for (int i = 0; i < sizeOfArray; i++){
-    
       if(input_array[i]==minVal){
          matrix.write_data(true,7,i);
        }
   }
   //matrix.read_data(7); uncomment to check
 
-  //Step Three: iterate through and checck for next value 
+  //Step Three: iterate through and check for next value 
   int preVal = minVal;
   int curVal = minVal;
 
-  // for (int i = 0; i < sizeOfArray; i++){
-    // finds the next highest number in the array
+   for (int i = 0; i < sizeOfArray; i++){
+    // 3.0 finds the next highest number in the array
     int interval = 1;
     for(int p = 0; p < sizeOfArray; p++){
-      Serial.print(input_array[p]);
       if(input_array[p]==(preVal+interval)){
         curVal = preVal+interval;
       }
       if(curVal == preVal && p == 7){
-        Serial.println(interval);
         interval ++;
         if(interval <6){
           p=-1;
         }
       }
     }
-    String m_message = "prev than cur: ";
-    m_message += preVal;
-    m_message += " , ";
-    m_message += curVal;
-    Serial.print(m_message);
+    // String m_message = "prev than cur: ";
+    // m_message += preVal;
+    // m_message += " , ";
+    // m_message += curVal;
+    // Serial.println(m_message);
 
-  //}
-  
-
-
-
-
+    // 3.5 This connects all of the currently highest values to all of the previous highest values
+    if(curVal!=preVal){
+     for(int o = 0; o < sizeOfArray; o++){
+      if(input_array[o]==curVal){
+        for(int l = 0; l<sizeOfArray; l++){
+          if(input_array[l]==preVal){
+          matrix.write_data(true,o,l);
+          }
+        }
+      }
+    }
+    preVal = curVal;
+    }
+   }
+   // Step 4: Connect highest values to output
+   for(int m = 0; m <sizeOfArray; m++){
+    if(input_array[m]==curVal){
+      matrix.write_data(true,m,7);
+    }
+   }
 } 
 
 

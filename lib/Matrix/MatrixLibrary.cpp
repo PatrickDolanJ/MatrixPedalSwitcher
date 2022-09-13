@@ -52,46 +52,15 @@ const byte W_Y6 = 0b110;
 const byte W_Y7 = 0b111;
 
 const byte y_byte_array[8]= {W_Y0,W_Y1,W_Y2,W_Y3,W_Y4,W_Y5,W_Y6,W_Y7};
-///////////////////
+
+/////////////////// Constructor //////////////////////
 AGD2188::AGD2188()
 {
   Wire.begin(); // join i2c bus (address optional for master) this may not be good to do inside a library, may be better handled by dependecy injection or just let main handle it.
   //Serial.begin(115200);
   Serial.println("THIS IS FROM INSIDE THE MATRIX NEYO");
 }
-
-//void loop()
-//{
-  // This pair of loops is identical to the above, except it adds 128 to the value to signify the "ON" state.
-//   for(int y = 0; y < 8; y++){
-//     byte y_value = y;
-//     for(int x = 0; x < 8; x += 1){
-//       byte x_value;
-//       int send_value;      
-//       if (x >= 6){
-//         x_value = x + 2;
-//       }
-//       else {
-//         x_value = x;
-//       }      
-//       send_value = x_value*8+y_value+128;  // Add 128 here to toggle "ON" (DATA bit in Table 7)
-//       write_data(send_value);
-
-//       Serial.print("Wrote ");
-//       Serial.println(send_value);
-      
-//       read_data(X0);
-//       read_data(X1);
-//       read_data(X2);
-//       read_data(X3);
-//       read_data(X4);
-//       read_data(X5);
-//       read_data(X6);
-//       read_data(X7);
-//       delay(100);
-//     }
-//   }
-//}
+/////////////////////////////////////////////////////
 
   byte AGD2188::convert_to_byte(bool OnOrOff, int x, int y){
     byte x_byte = x_byte_array[x-1];
