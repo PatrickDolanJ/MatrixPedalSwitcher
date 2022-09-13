@@ -1,12 +1,11 @@
-// things to add. hardcoded ummmm bits for each x and y address. this would allow you to pass human readable numbers, x and y numbers
-// currently you have to construct the byte 
+
 // https://www.farnell.com/datasheets/1793938.pdf
 #include <Arduino.h>
 #include <Wire.h>
 #include <MatrixLibrary.h>
 
-
-const byte AGD2188_ADDRESS = 0x71;  //Arduino uses 7 bit addresses. this probably means that arduino 
+byte AGD2188_ADDRESS_DEFAULT = 0b1110;
+byte AGD2188_ADDRESS = 0x71;  //Arduino uses 7 bit addresses. this probably means that arduino 
 //only has 128 possible adress that it can write to. you probably have to drop the least signifigant bit 
 //which we guess means we drop the highest bit meaning the one all the way to the left. If you have 
 //an 8 bit address, drop the LSB and shift right
@@ -27,6 +26,21 @@ const byte X7 = 0x7D;
 const byte ON_BIT = 0b1;
 const byte OFF_BIT = 0b0;
 //////////////////////////
+
+// 0-7 address bits(3) These are determined by the state of the three
+// address pins on the chip                            
+const byte ADDRESS_0 = 0b000;
+const byte ADDRESS_1 = 0b001;
+const byte ADDRESS_2 = 0b010;
+const byte ADDRESS_3 = 0b011;
+const byte ADDRESS_4 = 0b100;
+const byte ADDRESS_5 = 0b101;
+const byte ADDRESS_6 = 0b110;
+const byte ADDRESS_7 = 0b111;
+
+const byte ADDRESS_BITS[8] = {ADDRESS_0,ADDRESS_1,ADDRESS_2,ADDRESS_3,ADDRESS_4,ADDRESS_5, ADDRESS_6,ADDRESS_7};
+////////////////////////////////
+
 
 // //Settign up x array for converting to BYTE
 const byte W_X0 = 0b0000;
@@ -53,12 +67,24 @@ const byte W_Y7 = 0b111;
 
 const byte y_byte_array[8]= {W_Y0,W_Y1,W_Y2,W_Y3,W_Y4,W_Y5,W_Y6,W_Y7};
 
-/////////////////// Constructor //////////////////////
+/////////////////// Constructors //////////////////////
 AGD2188::AGD2188()
 {
   Wire.begin(); // join i2c bus (address optional for master) this may not be good to do inside a library, may be better handled by dependecy injection or just let main handle it.
-  //Serial.begin(115200);
-  Serial.println("THIS IS FROM INSIDE THE MATRIX NEYO");
+}
+
+
+// Overloaded constructor for addressing multiple chips //
+AGD2188::AGD2188(int address)
+{
+  if(address <0 || address > 7){
+    Serial.println("ERROR: only 0-7 are valid AGD2188 addresses");
+  } else {
+
+
+
+  }
+  Wire.begin(); 
 }
 /////////////////////////////////////////////////////
 
@@ -135,9 +161,6 @@ void AGD2188::wipe_chip()
     for(int x = 0; x < 8; x += 1){  // Set up X Loop
       int x_value = x;      
       write_data(false,x_value,y_value);
-      //String comma = " , ";
-      //String output = x + comma + y;
-      //Serial.println(output);
       // read_data(1);
       // read_data(2);
       // read_data(3);
@@ -153,3 +176,70 @@ void AGD2188::wipe_chip()
   Serial.println(output_message);
 }
 
+void AGD2188::ArrayToWrite(int input_array[8], int sizeOfArray){
+  // step One: find lowest number in array.
+  int minVal = 7;
+  for (int i = 0; i < sizeOfArray; i++){
+    if(input_array[i] !=0 && input_array[i] < minVal){
+      minVal = input_array[i];
+    }
+  }
+
+  //Step Two: Assign input device to each of the positions with minVal;
+  for (int i = 0; i < sizeOfArray; i++){
+      if(input_array[i]==minVal){
+         write_data(true,7,i);
+       }
+  }
+
+  //Step Three: iterate through and check for next value 
+  int preVal = minVal;
+  int curVal = minVal;
+
+   for (int i = 0; i < sizeOfArray; i++){
+    // 3.0 finds the next highest number in the array
+    int interval = 1;
+    for(int p = 0; p < sizeOfArray; p++){
+      if(input_array[p]==(preVal+interval)){
+        curVal = preVal+interval;
+      }
+      if(curVal == preVal && p == 7){
+        interval ++;
+        if(interval <6){
+          p=-1;
+        }
+      }
+    }
+    // 3.5 This connects all of the currently highest values to all of the previous highest values
+    if(curVal!=preVal){
+     for(int o = 0; o < sizeOfArray; o++){
+      if(input_array[o]==curVal){
+        for(int l = 0; l<sizeOfArray; l++){
+          if(input_array[l]==preVal){
+          write_data(true,l,o);
+          }
+        }
+      }
+    }
+    preVal = curVal;
+    }
+   }
+   // Step 4: Connect highest values to output
+   for(int m = 0; m <sizeOfArray; m++){
+    if(input_array[m]==curVal){
+      write_data(true,m,7);
+    }
+  }
+} 
+//////////////////////////////////////////////////////////////
+
+void AGD2188::test_chip(){
+ for (int i =0; i<8; i++){
+    for (int j =0; j<8; j++){
+      write_data(true,i,j);
+      read_data(i);
+      delay(500);
+    }
+  }
+  wipe_chip();
+}
