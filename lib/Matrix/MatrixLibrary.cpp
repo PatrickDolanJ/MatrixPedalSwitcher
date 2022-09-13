@@ -89,8 +89,8 @@ AGD2188::AGD2188(int address)
 /////////////////////////////////////////////////////
 
   byte AGD2188::convert_to_byte(bool OnOrOff, int x, int y){
-    byte x_byte = x_byte_array[x-1];
-    byte y_byte = y_byte_array[y-1];
+    byte x_byte = x_byte_array[x];
+    byte y_byte = y_byte_array[y];
     byte OnOrOff_byte = 0b0;
 
     if(OnOrOff){
@@ -99,6 +99,8 @@ AGD2188::AGD2188(int address)
         OnOrOff_byte = OFF_BIT;
     }
     byte write_converted = OnOrOff_byte << 7 | x_byte << 3 | y_byte;
+    Serial.print("BIN value: ");
+    Serial.println(write_converted, BIN);
     return write_converted;
 }
 
