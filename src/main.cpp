@@ -18,17 +18,7 @@ void loop() {
    {
    matrix.wipe_chip();
    wipe_chip_once = false;
-   matrix.test_chip();
-   //matrix.ArrayToWrite(test_array,8);
-  // for (int i =0; i<8; i++){ TESTING
-  //   for (int j =0; j<8; j++){
-  //     matrix.write_data(true,i,j);
-  //     matrix.read_data(i);
-  //     delay(500);
-  //   }
-  // }
-
-
+   matrix.ArrayToWrite(test_array,8);
    }
   
 }
