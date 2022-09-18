@@ -15,7 +15,7 @@ class AGD2188
 	void test_chip();
 
 	private:
-	byte convert_to_byte(bool OnOrOff, int x, int y);
+	//byte convert_to_byte(bool OnOrOff, int x, int y);
 };
  
 #endif

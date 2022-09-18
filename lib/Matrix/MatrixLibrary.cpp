@@ -88,7 +88,7 @@ AGD2188::AGD2188(int address)
 }
 /////////////////////////////////////////////////////
 
-  byte AGD2188::convert_to_byte(bool OnOrOff, int x, int y){
+  byte convert_to_byte(bool OnOrOff, int x, int y){
     byte x_byte = x_byte_array[x];
     byte y_byte = y_byte_array[y];
     byte OnOrOff_byte = 0b0;
