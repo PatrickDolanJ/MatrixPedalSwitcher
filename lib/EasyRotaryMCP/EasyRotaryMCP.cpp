@@ -83,7 +83,8 @@ RotaryEncOverMCP rotaryEncoders[] = {
     RotaryEncOverMCP(&mcp, 6, 7, &ThisIsAFunction, 4),// physical pins 27 and 28  https://github.com/adafruit/Adafruit-MCP23017-Arduino-Library/
     RotaryEncOverMCP(&mcp, 8, 9, &ThisIsAFunction, 5),// physical pins 1 and 2  https://github.com/adafruit/Adafruit-MCP23017-Arduino-Library/
     RotaryEncOverMCP(&mcp, 10, 11, &ThisIsAFunction, 6),// physical pins 3 and 4  https://github.com/adafruit/Adafruit-MCP23017-Arduino-Library/
-    RotaryEncOverMCP(&mcp, 12, 13, &ThisIsAFunction, 8)// physical pins 7 and 8  https://github.com/adafruit/Adafruit-MCP23017-Arduino-Library/
+    RotaryEncOverMCP(&mcp, 12, 13, &ThisIsAFunction, 7),
+    RotaryEncOverMCP(&mcp, 14, 15, &ThisIsAFunction, 8)// physical pins 7 and 8  https://github.com/adafruit/Adafruit-MCP23017-Arduino-Library/
     
 };
 constexpr int numEncoders = (int)(sizeof(rotaryEncoders)/sizeof(*rotaryEncoders));
