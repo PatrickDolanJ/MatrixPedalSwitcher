@@ -77,21 +77,22 @@ uint8_t PCF8574::getAddress()
 // TODO    @800 KHz -> ??
 uint8_t PCF8574::read8()
 {
-  Serial.println("Adress Byte: ");
-  Serial.println(_address << 1 | 1);
+  
   //this should send a read command, previously the LSB was 
   // untouched which meant it was constantly
   // in write, clearly this works sometimes, but may have caused the 
   //the adress to be agnostic??
-  if (_wire->requestFrom(_address << 1 | 1, (uint8_t)1) != 1){
-    _error = PCF8574_I2C_ERROR;
-    
-    return _dataIn; // last value
-  }
+  // if (_wire->requestFrom(_address, (uint8_t)1) != 1){
+  //   _error = PCF8574_I2C_ERROR;
+  //   Serial.println(_error);
+  //   return _dataIn; // last value
+  // }
 
-  if(Wire.available()){
-    _dataIn = _wire->read();
-  }
+  // if(Wire.available()){
+  //   _dataIn = _wire->read();
+  // }
+  _wire->requestFrom(_address,1);
+  _dataIn == _wire->read();
   return _dataIn;
 }
 

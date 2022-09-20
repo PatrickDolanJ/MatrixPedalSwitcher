@@ -30,30 +30,34 @@ RotaryData myData;
 
 //For Rotary Buttons
 PCF8574 pcf21(0x21);
-PCF8574 pcf22(0x22);
-const int IRQPIN = 3;
+//PCF8574 pcf22(0x22);
+const int IRQPIN = 3; //Rotary Push Buttons
+const int FOOTINTR = 18; // For the Foot Switches
 volatile bool flag = false;
+volatile bool flag2 = false;
 void pcf_irq()
 {
   flag = true;
+}
+
+void pcf_irq2(){
+  flag2 == true;
 }
 //
 
 void setup() {
   Serial.begin(115200);
-  Serial1.begin(9600);
+  Serial2.begin(9600);
   Serial.println("From setup");
-  Serial1.print("page 1");
+  Serial2.print("page 1");
   sendEndCommand();
+	pinMode(pcf21, 0, INPUT_PULLUP);
+
 
   matrix = AGD2188();
-
-  pcf21.begin();
-  pcf22.begin();
   pinMode(IRQPIN, INPUT_PULLUP);
   rotary.startup(*updateUI);
   attachInterrupt(digitalPinToInterrupt(IRQPIN), pcf_irq, FALLING);
-  pcf21.read8();
 }
 
 void loop() {
@@ -67,8 +71,7 @@ void loop() {
     if (flag)
       {
         flag = false;
-        int x = pcf21.read8();
-        //int y = pcf22.read8();
+        int x = pcf21.read();
         Serial.print("READ Knobs:\t");
         Serial.println(x, HEX);
         // Serial.print("READ Foots:\t");
@@ -94,15 +97,15 @@ void updateUI(bool clockwise, int id){
    }
    
    
-   Serial1.print("n" + String(loopArrayPosition) + ".val="+String(i_loop[loopArrayPosition]));
+   Serial2.print("n" + String(loopArrayPosition) + ".val="+String(i_loop[loopArrayPosition]));
    sendEndCommand();
    }
  }
 
  void sendEndCommand(){
-   Serial1.write(b_end_message);
-   Serial1.write(b_end_message);
-   Serial1.write(b_end_message);
+   Serial2.write(b_end_message);
+   Serial2.write(b_end_message);
+   Serial2.write(b_end_message);
  }
 
 void cycleMenu(){
@@ -112,7 +115,7 @@ void cycleMenu(){
   } else {
     menuState++;
   }
-  Serial1.print("page "+String(menuState));
+  Serial2.print("page "+String(menuState));
   sendEndCommand();
 }
 
