@@ -3,79 +3,83 @@
 #include <EasyRotaryMCP.h>
 #include <PCF8574.h>
 
-
-AGD2188 matrix;
-bool wipe_chip_once = true;
-byte testByte = 0;
+const String device = "PedalSwitcher";
+AGD2188 matrix; // This still needs to interact with both chips!! 
+EasyRotary rotary;
+RotaryData myData;
 int test_array[8] {3,1,0,0,0,1,0,0}; // expected outcome should be to connect x7 to y1 and y5, then connect x1 and x5 to y0, then x0 to y7;
 int menuState = 1;
 const byte b_end_message = 0xff;
 
 //Loop Positions 
 int i_loop[8] = {0,0,0,0,0,0,0,0};
-//
-
-bool state;
 
 //Function prototypes
 void updateUI(bool clockwise, int id);
 void sendLoopPositions(bool clockwise, int id);
 void sendEndCommand();
 void cycleMenu();
-//
-
-
-EasyRotary rotary;
-RotaryData myData;
 
 //For Rotary Buttons
 PCF8574 pcf21(0x21);
-//PCF8574 pcf22(0x22);
-const int IRQPIN = 3; //Rotary Push Buttons
-const int FOOTINTR = 18; // For the Foot Switches
-volatile bool flag = false;
-volatile bool flag2 = false;
-void pcf_irq()
+PCF8574 pcf22(0x22);
+const int ROTARY_INTERUPT_PIN = 3; //Rotary Push Buttons
+const int FOOT_INTERUPT_PIN = 18; // For the Foot Switches
+volatile bool rotary_flag = false;
+volatile bool foot_flag = false;
+
+void ROTARY_INTERUPT()
 {
-  flag = true;
+  rotary_flag = true;
 }
 
-void pcf_irq2(){
-  flag2 == true;
+void FOOT_INTERUPT(){
+  foot_flag = true;
 }
 //
 
 void setup() {
+  //To Computer
   Serial.begin(115200);
+  //To Nextion
   Serial2.begin(9600);
-  Serial.println("From setup");
+
+  Serial.println(device + " booting");
+
+  //This should eventually not need to happen
   Serial2.print("page 1");
   sendEndCommand();
+
+  //Not sure yet what this does
 	pinMode(pcf21, 0, INPUT_PULLUP);
+  pinMode(pcf22, 1, INPUT_PULLUP);
 
+  matrix = AGD2188(); // THis is the default address
 
-  matrix = AGD2188();
-  pinMode(IRQPIN, INPUT_PULLUP);
+  pinMode(ROTARY_INTERUPT_PIN, INPUT_PULLUP);
+  pinMode(FOOT_INTERUPT_PIN,INPUT_PULLUP);
+
   rotary.startup(*updateUI);
-  attachInterrupt(digitalPinToInterrupt(IRQPIN), pcf_irq, FALLING);
+
+  attachInterrupt(digitalPinToInterrupt(ROTARY_INTERUPT_PIN), ROTARY_INTERUPT, FALLING);
+  attachInterrupt(digitalPinToInterrupt(FOOT_INTERUPT_PIN),FOOT_INTERUPT,FALLING);
+
+  
+  matrix.wipe_chip();
+  matrix.ArrayToWrite(test_array,8);
+  matrix.wipe_chip();
+
 }
 
 void loop() {
-   if(wipe_chip_once)
-   {
-   matrix.wipe_chip();
-   wipe_chip_once = false;
-   matrix.ArrayToWrite(test_array,8);
-   }
+  //THIS IS A MESS
     myData = rotary.checkInterrupt();
-    if (flag)
+    if (rotary_flag)
       {
-        flag = false;
+        rotary_flag = false;
         int x = pcf21.read();
         Serial.print("READ Knobs:\t");
         Serial.println(x, HEX);
-        // Serial.print("READ Foots:\t");
-        // Serial.println(y, HEX);
         if(x == 0xFF){
           cycleMenu();
         }
