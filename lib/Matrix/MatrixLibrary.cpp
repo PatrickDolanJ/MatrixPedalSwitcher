@@ -5,7 +5,7 @@
 #include <MatrixLibrary.h>
 
 byte AGD2188_ADDRESS_DEFAULT = 0b1110;
-byte AGD2188_ADDRESS = 0x71;  //Arduino uses 7 bit addresses. this probably means that arduino 
+byte AGD2188_ADDRESS = 0x70;  //Arduino uses 7 bit addresses. this probably means that arduino 
 //only has 128 possible adress that it can write to. you probably have to drop the least signifigant bit 
 //which we guess means we drop the highest bit meaning the one all the way to the left. If you have 
 //an 8 bit address, drop the LSB and shift right
@@ -50,7 +50,7 @@ const byte W_X3 = 0b0011;
 const byte W_X4 = 0b0100;
 const byte W_X5 = 0b0101;
 const byte W_X6 = 0b1000;
-const byte W_X7 = 0b0001;
+const byte W_X7 = 0b1001;
 
 const byte x_byte_array[8] = {W_X0,W_X1,W_X2,W_X3,W_X4,W_X5,W_X6,W_X7};
 /////////////////
@@ -178,7 +178,25 @@ void AGD2188::wipe_chip()
   Serial.println(output_message);
 }
 
+  ///////////BIG BOY
+
 void AGD2188::ArrayToWrite(int input_array[8], int sizeOfArray){
+  //Step 0.5 CHECK IF ALL ZEROS
+  wipe_chip();
+  bool should_pass = true;
+  for(int i = 0; i < sizeOfArray; i++){
+    if(input_array[i]!=0){
+      should_pass = false;
+    }
+  }
+
+  if(should_pass){
+    write_data(true,7,7);
+    return;
+  }
+
+
+
   // step One: find lowest number in array.
   int minVal = 7;
   for (int i = 0; i < sizeOfArray; i++){
