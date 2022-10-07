@@ -4,11 +4,12 @@
 #include <Wire.h>
 #include <MatrixLibrary.h>
 
-byte AGD2188_ADDRESS_DEFAULT = 0b1110;
-byte AGD2188_ADDRESS = 0x70;  //Arduino uses 7 bit addresses. this probably means that arduino 
+const byte AGD2188_ADDRESS_STARTER = 0b1110;
+const byte AGD2188_ADDRESS_DEFAULT = 0x70;  //Arduino uses 7 bit addresses. this probably means that arduino 
 //only has 128 possible adress that it can write to. you probably have to drop the least signifigant bit 
 //which we guess means we drop the highest bit meaning the one all the way to the left. If you have 
 //an 8 bit address, drop the LSB and shift right
+byte matrix_address;
 const byte NOW = 0x01;
 // 0x71 remember that 0x just neans its a hex number and the two following digits are the actual hex 71 = 1110001
 // in the datasheet figure 33, this matches the A0-A2 address bytes
@@ -70,9 +71,9 @@ const byte y_byte_array[8]= {W_Y0,W_Y1,W_Y2,W_Y3,W_Y4,W_Y5,W_Y6,W_Y7};
 /////////////////// Constructors //////////////////////
 AGD2188::AGD2188()
 {
-  Wire.begin(); // join i2c bus (address optional for master) this may not be good to do inside a library, may be better handled by dependecy injection or just let main handle it.
+  matrix_address  = AGD2188_ADDRESS_DEFAULT;
+  Wire.begin(); // join i2c bus (address optional for master) multiple Wire.begins are fine
 }
-
 
 // Overloaded constructor for addressing multiple chips //
 AGD2188::AGD2188(int address)
@@ -80,9 +81,8 @@ AGD2188::AGD2188(int address)
   if(address <0 || address > 7){
     Serial.println("ERROR: only 0-7 are valid AGD2188 addresses");
   } else {
-
-
-
+    matrix_address = AGD2188_ADDRESS_STARTER << 3 | ADDRESS_BITS[address];
+    Serial.print(matrix_address, BIN);
   }
   Wire.begin(); 
 }
@@ -110,10 +110,10 @@ void AGD2188::read_data(int x){
   byte data_array[2];
   data_array[0] = x_byte_array[x-1]; 
   data_array[1] = NOW;
-  Wire.beginTransmission(AGD2188_ADDRESS);
+  Wire.beginTransmission(matrix_address);
   Wire.write(data_array,2);
   Wire.endTransmission();
-  Wire.requestFrom(AGD2188_ADDRESS, 2); //2nd arguement is probably expecting 2 bytes back 
+  Wire.requestFrom(matrix_address, 2); //2nd arguement is probably expecting 2 bytes back 
   while(Wire.available())//this probably functions likea stream. meaning its says while there is data on the next line, do this loop
   {
     Serial.println(Wire.read(), BIN);// this probably spits out a byte at a time
@@ -127,7 +127,7 @@ void AGD2188::read_data(int x){
    byte data_array[2]; //passing in to this fuction the data we want to write 
    data_array[0] = data_input; //on off is 1st bit, nw=ext 4 is x adress last three is the y address
    data_array[1] = NOW;  // Hardcoded 2nd byte to NOW.  See comment below about DON'T CARE for read address setup.
-   Wire.beginTransmission(AGD2188_ADDRESS); // transmit to device
+   Wire.beginTransmission(matrix_address); // transmit to device
    Wire.write(data_array, 2);
    Wire.endTransmission();    // stop transmitting
    String m_message;
@@ -163,14 +163,6 @@ void AGD2188::wipe_chip()
     for(int x = 0; x < 8; x += 1){  // Set up X Loop
       int x_value = x;      
       write_data(false,x_value,y_value);
-      // read_data(1);
-      // read_data(2);
-      // read_data(3);
-      // read_data(4);
-      // read_data(5);
-      // read_data(6);
-      // read_data(7);
-      // read_data(8);
     }
   }
   String m_chip_wiped = "Chip wiped";

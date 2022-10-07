@@ -9,61 +9,77 @@ const String device = "PedalSwitcher";
 
 //---------For Mapping to Nextion Display -----------
 
-//ONE
-const String INPUT_ONE_LEFT = "j0";
-const String INPUT_ONE_RIGHT = "j1";
-const String OUTPUT_ONE_LEFT = "j16";
-const String OUTPUT_ONE_RIGHT = "j17";
+//A
+const String INPUT_A_LEFT = "A_L_VOL_IN";
+const String INPUT_A_RIGHT = "A_R_VOL_IN";
+const String OUTPUT_A_LEFT = "A_L_VOL_OUT";
+const String OUTPUT_A_RIGHT = "A_R_VOL_OUT";
+const String LEFT_A_PHASE = "A_L_PHASE";
+const String RIGHT_A_PHASE = "A_R_PHASE";
 
-//TWO
-const String INPUT_TWO_LEFT = "j2";
-const String INPUT_TWO_RIGHT = "j3";
-const String OUTPUT_TWO_LEFT = "j18";
-const String OUTPUT_TWO_RIGHT = "j19";
+//B
+const String INPUT_B_LEFT = "B_L_VOL_IN";
+const String INPUT_B_RIGHT = "B_R_VOL_IN";
+const String OUTPUT_B_LEFT = "B_L_VOL_OUT";
+const String OUTPUT_B_RIGHT = "B_R_VOL_OUT";
+const String LEFT_B_PHASE = "B_L_PHASE";
+const String RIGHT_B_PHASE = "B_R_PHASE";
 
-//THREE
-const String INPUT_THREE_LEFT = "j4";
-const String INPUT_THREE_RIGHT = "j5";
-const String OUTPUT_THREE_LEFT = "j20";
-const String OUTPUT_THREE_RIGHT = "j21";
+//C
+const String INPUT_C_LEFT = "C_L_VOL_IN";
+const String INPUT_C_RIGHT = "C_R_VOL_IN";
+const String OUTPUT_C_LEFT = "C_L_VOL_OUT";
+const String OUTPUT_C_RIGHT = "C_R_VOL_OUT";
+const String LEFT_C_PHASE = "C_L_PHASE";
+const String RIGHT_C_PHASE = "C_R_PHASE";
 
-//FOUR
-const String INPUT_FOUR_LEFT = "j6";
-const String INPUT_FOUR_RIGHT = "j7";
-const String OUTPUT_FOUR_LEFT = "j22";
-const String OUTPUT_FOUR_RIGHT = "j23";
+//D
+const String INPUT_D_LEFT = "D_L_VOL_IN";
+const String INPUT_D_RIGHT = "D_R_VOL_IN";
+const String OUTPUT_D_LEFT = "D_L_VOL_OUT";
+const String OUTPUT_D_RIGHT = "D_R_VOL_OUT";
+const String LEFT_D_PHASE = "D_L_PHASE";
+const String RIGHT_D_PHASE = "D_R_PHASE";
 
-//FIVE
-const String INPUT_FIVE_LEFT = "j8";
-const String INPUT_FIVE_RIGHT = "j9";
-const String OUTPUT_FIVE_LEFT = "j24";
-const String OUTPUT_FIVE_RIGHT = "j25";
+//E
+const String INPUT_E_LEFT = "E_L_VOL_IN";
+const String INPUT_E_RIGHT = "E_R_VOL_IN";
+const String OUTPUT_E_LEFT = "E_L_VOL_OUT";
+const String OUTPUT_E_RIGHT = "E_R_VOL_OUT";
+const String LEFT_E_PHASE = "E_L_PHASE";
+const String RIGHT_E_PHASE = "E_R_PHASE";
 
-//SIX
-const String INPUT_SIX_LEFT = "j10";
-const String INPUT_SIX_RIGHT = "j11";
-const String OUTPUT_SIX_LEFT = "j26";
-const String OUTPUT_SIX_RIGHT = "j27";
+//F
+const String INPUT_F_LEFT = "F_L_VOL_IN";
+const String INPUT_F_RIGHT = "F_R_VOL_IN";
+const String OUTPUT_F_LEFT = "F_L_VOL_OUT";
+const String OUTPUT_F_RIGHT = "F_R_VOL_OUT";
+const String LEFT_F_PHASE = "F_L_PHASE";
+const String RIGHT_F_PHASE = "F_R_PHASE";
 
 
-//SEVEN
-const String INPUT_SEVEN_LEFT = "j12";
-const String INPUT_SEVEN_RIGHT = "j13";
-const String OUTPUT_SEVEN_LEFT = "j28";
-const String OUTPUT_SEVEN_RIGHT = "j29";
+//G
+const String INPUT_G_LEFT = "G_L_VOL_IN";
+const String INPUT_G_RIGHT = "G_R_VOL_IN";
+const String OUTPUT_G_LEFT = "G_L_VOL_OUT";
+const String OUTPUT_G_RIGHT = "G_R_VOL_OUT";
+const String LEFT_G_PHASE = "G_L_PHASE";
+const String RIGHT_G_PHASE = "G_R_PHASE";
 
-String VOLUME_FOR_DISPLAY[7][4] = {
-  {INPUT_ONE_LEFT,   INPUT_ONE_RIGHT,   OUTPUT_ONE_LEFT,   OUTPUT_ONE_RIGHT},
-  {INPUT_TWO_LEFT,   INPUT_TWO_RIGHT,   OUTPUT_TWO_LEFT,   OUTPUT_TWO_RIGHT},
-  {INPUT_THREE_LEFT, INPUT_THREE_RIGHT, OUTPUT_THREE_LEFT, OUTPUT_THREE_RIGHT},
-  {INPUT_FOUR_LEFT,  INPUT_FOUR_RIGHT,  OUTPUT_FOUR_LEFT,  OUTPUT_FOUR_RIGHT},
-  {INPUT_FIVE_LEFT,  INPUT_FIVE_RIGHT,  OUTPUT_FIVE_LEFT,  OUTPUT_FIVE_RIGHT},
-  {INPUT_SIX_LEFT,   INPUT_SIX_RIGHT,   OUTPUT_SIX_LEFT,   OUTPUT_SIX_RIGHT},
-  {INPUT_SEVEN_LEFT, INPUT_SEVEN_RIGHT, OUTPUT_SEVEN_LEFT, OUTPUT_SEVEN_RIGHT}};
+
+String VOLUME_FOR_DISPLAY[7][6] = {
+// LEFT IN VOL(0)  RIGHT IN VOL(1)  LEFT OUT VOL(2)  RIGHT OUT VOL(3)  LEFT PHASE(4)  RIGHT PHASE(5)    
+  {INPUT_A_LEFT,   INPUT_A_RIGHT,   OUTPUT_A_LEFT,   OUTPUT_A_RIGHT,   LEFT_A_PHASE,  RIGHT_A_PHASE   },
+  {INPUT_B_LEFT,   INPUT_B_RIGHT,   OUTPUT_B_LEFT,   OUTPUT_B_RIGHT,   LEFT_B_PHASE,  RIGHT_B_PHASE   },
+  {INPUT_C_LEFT,   INPUT_C_RIGHT,   OUTPUT_C_LEFT,   OUTPUT_C_RIGHT,   LEFT_C_PHASE,  RIGHT_C_PHASE   },
+  {INPUT_D_LEFT,   INPUT_D_RIGHT,   OUTPUT_D_LEFT,   OUTPUT_D_RIGHT,   LEFT_D_PHASE,  RIGHT_D_PHASE   },
+  {INPUT_E_LEFT,   INPUT_E_RIGHT,   OUTPUT_E_LEFT,   OUTPUT_E_RIGHT,   LEFT_E_PHASE,  RIGHT_E_PHASE   },
+  {INPUT_F_LEFT,   INPUT_F_RIGHT,   OUTPUT_F_LEFT,   OUTPUT_F_RIGHT,   LEFT_F_PHASE,  RIGHT_F_PHASE   },
+  {INPUT_G_LEFT,   INPUT_G_RIGHT,   OUTPUT_G_LEFT,   OUTPUT_G_RIGHT,   LEFT_G_PHASE,  RIGHT_G_PHASE  } };
 
 //-----------------------------MATRIX----------------------
-AGD2188 matrix; // This still needs to interact with both chips!! 
-
+AGD2188 matrix; 
+//AGD2188 matrix_left = AGD2188(1);
 
 //------------------------------MENU THINGS------------------------------
 enum E_MenuState {loops = 1,input = 2,left_output = 3,right_output = 4,NUM_MENU_STATES = 5};
@@ -113,6 +129,8 @@ void setup() {
 
   MenuState = static_cast<E_MenuState>(1);
   Serial.println(device + " booting");
+
+  AGD2188 matrix_left = AGD2188(1);
 
   //This should eventually not need to happen
   sendLoopPositions();
