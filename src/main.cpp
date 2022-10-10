@@ -241,7 +241,7 @@ void loop() {
         if(x == 0xFF){
           highlightMenu(false);
           cycleMenu();
-          longPress() ? changePhase() : cycleMenu();
+          longPress() ? changeReturn() : cycleMenu();
           highlightMenu(true);
         }
       }
