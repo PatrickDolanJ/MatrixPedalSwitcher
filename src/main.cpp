@@ -182,6 +182,8 @@ void changeReturn(int id);
 void startCounter();
 bool checkPress(int durationInSeconds);
 int hexToId(byte hexVal);
+void sendReturn(int arrayId);
+void initializeDisplay();
 
 //--------------------For Rotary Buttons------------------------
 
@@ -208,11 +210,9 @@ void setup() {
   Serial.begin(115200);  //To Computer
   Serial2.begin(9600);  //To Nextion
   Serial.println(DEVICE + " booting");
-  MenuState = static_cast<E_MenuState>(1);
 
-  sendLoopPositions();
-  sendEndCommand();
-  //highlightMenu(true);
+  //readLastSetupFromSD and apply to cur
+  initializeDisplay();
 
 	pinMode(pcf21, 0, INPUT_PULLUP);
   pinMode(pcf22, 1, INPUT_PULLUP);
@@ -245,17 +245,14 @@ void loop() {
         Serial.print("READ Knobs:\t");
         Serial.println(x, HEX);
         if(x == 0xFF && x!=x_post){
-          highlightMenu(false);
           checkPress(LONG_PRESS_INTERVAL_S) ? changeReturn(hexToId(x_post)) : cycleMenu();
-          Serial.println(String(currentTime - previousMillis));
-          highlightMenu(true);
         }
           x_post = x;
       }
       if(foot_flag){
         foot_flag = false;
         int y = pcf22.read();
-        Serial.print("Read Foot: " + String(y, HEX));
+        Serial.println("Read Foot: " + String(y, HEX));
         
       }
 }
@@ -313,12 +310,14 @@ void updateUI(bool isClockwise, int id){
  }
 
 void cycleMenu(){
+  highlightMenu(false);
   if(MenuState == NUM_MENU_OPTIONS-1){
     MenuState = static_cast<E_MenuState>(1);
   } else {
     MenuState = static_cast<E_MenuState>(MenuState+1);
   }
   Serial.println("MenuState = " + String(MenuState));
+  highlightMenu(true);
 }
 
 int volumeToDisplay(int volume){
@@ -353,6 +352,33 @@ void changeVolume(int id, bool isClockwise, int volume[]){
     sendVolumeToDisplay(idToArray, volumeForDisplay); 
 }
 
+void sendPhase(int arrayId){
+  String left_phase = "";
+  String right_phase = "";
+  int phase = cur_phase[arrayId];
+
+  if(phase == 0){
+    left_phase = PHASES_FOR_DISPLAY[arrayId][0];
+    right_phase = PHASES_FOR_DISPLAY[arrayId][0];
+  } else if (phase == 1){
+    left_phase = PHASES_FOR_DISPLAY[arrayId][0];
+    right_phase = PHASES_FOR_DISPLAY[arrayId][1];
+  } else if (phase == 2){
+    left_phase = PHASES_FOR_DISPLAY[arrayId][1];
+    right_phase = PHASES_FOR_DISPLAY[arrayId][0];
+  }
+  else if (phase == 3){
+    left_phase = PHASES_FOR_DISPLAY[arrayId][1];
+    right_phase = PHASES_FOR_DISPLAY[arrayId][1];
+  }
+   // The Columns of the two phases (5,6)
+    //currently not working, although the color seems changeable, not sure whats up 
+    Serial2.print(ADDRESS_FOR_DISPLAY[arrayId][5] + ".txt=" + '"' + left_phase + '"');
+    sendEndCommand();
+    Serial2.print(ADDRESS_FOR_DISPLAY[arrayId][6] + ".txt=" + '"' + right_phase + '"');
+    sendEndCommand();
+}
+
 void changePhase(int id, bool isClockwise){
 
   int idToArray = id -1;
@@ -369,42 +395,23 @@ void changePhase(int id, bool isClockwise){
       cur_phase[idToArray]--;
     }
   }
+ sendPhase(idToArray);
+}
 
-  String left_phase = "";
-  String right_phase = "";
-  int phase = cur_phase[idToArray];
-
-  if(phase == 0){
-    left_phase = PHASES_FOR_DISPLAY[idToArray][0];
-    right_phase = PHASES_FOR_DISPLAY[idToArray][0];
-  } else if (phase == 1){
-    left_phase = PHASES_FOR_DISPLAY[idToArray][0];
-    right_phase = PHASES_FOR_DISPLAY[idToArray][1];
-  } else if (phase == 2){
-    left_phase = PHASES_FOR_DISPLAY[idToArray][1];
-    right_phase = PHASES_FOR_DISPLAY[idToArray][0];
-  }
-  else if (phase == 3){
-    left_phase = PHASES_FOR_DISPLAY[idToArray][1];
-    right_phase = PHASES_FOR_DISPLAY[idToArray][1];
-  }
-    // The Columns of the two phases (5,6)
-    //currently not working, although the color seems changeable, not sure whats up 
-    Serial2.print(ADDRESS_FOR_DISPLAY[idToArray][5] + ".txt=" + '"' + left_phase + '"');
+void sendReturn(int arrayId){
+    String returnToDisplay = cur_return[arrayId] ? STEREO : MONO;
+    Serial2.print(ADDRESS_FOR_DISPLAY[arrayId][2] + ".txt=" + '"' + returnToDisplay + '"');
     sendEndCommand();
-    Serial2.print(ADDRESS_FOR_DISPLAY[idToArray][6] + ".txt=" + '"' + right_phase + '"');
-    sendEndCommand();
-
+    Serial.println(ADDRESS_FOR_DISPLAY[arrayId][2] + ".txt=" + '"' + returnToDisplay + '"');
 }
 
 void changeReturn(int id){
   Serial.print("id: " + String(id));
   int idToArray = id -1;
-  cur_return[idToArray] = !cur_return[idToArray];
-  String returnToDisplay = cur_return[idToArray] ? STEREO : MONO;
-  Serial2.print(ADDRESS_FOR_DISPLAY[idToArray][2] + ".txt=" + '"' + returnToDisplay + '"');
-  sendEndCommand();
-  Serial.println(ADDRESS_FOR_DISPLAY[idToArray][2] + ".txt=" + '"' + returnToDisplay + '"');
+  if(idToArray!=7){
+    cur_return[idToArray] = !cur_return[idToArray];
+    sendReturn(idToArray);
+  }
 }
 
 void highlightMenu(bool shouldHighlightOR){
@@ -475,8 +482,40 @@ bool checkPress(int durationInSeconds){
     }else return 8;
     }
 
+void initializeDisplay(){
+  //Phases
+  for(int i = 0; i <7; i++){
+      sendPhase(i);
+  }
+  //Loops
+    sendLoopPositions();
+    sendEndCommand();
+  //Input Volumes
+  for(int i = 0; i <8; i++){
+    sendVolumeToDisplay(i, cur_input_volumes[i]); 
+  }
+  //Return
+  for(int i = 0; i<7; i++){
+    sendReturn(i);
+  }
+  //Left Output
+  for(int i = 0; i <8; i++){
+    sendVolumeToDisplay(i, cur_left_output_volumes[i]); 
+  }
+  //Right Output
+  for(int i = 0; i <8; i++){
+    sendVolumeToDisplay(i, cur_right_output_volumes[i]); 
+  }
+  //Unhighlight
+  for(int i = 1; i <6; i++){
+    MenuState = static_cast<E_MenuState>(i);
+    highlightMenu(false);
+  }
 
-
+  MenuState = E_MenuState::loops;
+  highlightMenu(true);
+  
+}
 
 
 
