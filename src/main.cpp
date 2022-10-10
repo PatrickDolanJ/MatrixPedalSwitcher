@@ -9,8 +9,7 @@ const String DEVICE = "PedalSwitcher";
 const int DEFAULT_VOLUME = 125;
 const String DEFAULT_COLOR = "19703";
 const String HIGHLIGHT_COLOR = "62025"; 
-const int LONG_PRESS_INTERVAL_S = 3;
-unsigned long previousMillis = 0;
+const float LONG_PRESS_INTERVAL_S = 2.0;
 
 //---------For Nextion Display -----------
 const byte b_end_message = 0xff;
@@ -156,9 +155,11 @@ AGD2188 matrix_right;
 AGD2188 matrix_left;
 
 //------------------------------MENU THINGS------------------------------
-enum E_MenuState {loops = 1,input = 2, return_m = 3, left_output = 4,right_output = 5, phase = 6};
+enum E_MenuState {loops = 1,input = 2, left_output = 3,right_output = 4, phase = 5, NUM_MENU_OPTIONS=6};
 E_MenuState MenuState;
-const int NUM_MENU_OPTIONS = 6;
+unsigned long previousMillis = 0;
+unsigned long currentTime = 0;
+int x_post;
 
 //--------------------------DATA------------------------------ 
 int cur_loop_positions[7] = {0,0,0,0,0,0,0};
@@ -178,7 +179,9 @@ void changeVolume(int id, bool isClockwise, int volume_array[]);
 void changePhase(int id, bool isClockwise);
 void highlightMenu(bool shouldHighlight);
 void changeReturn(int id);
-bool longPress();
+void startCounter();
+bool checkPress(int durationInSeconds);
+int hexToId(byte hexVal);
 
 //--------------------For Rotary Buttons------------------------
 
@@ -236,14 +239,18 @@ void loop() {
       {
         rotary_flag = false;
         int x = pcf21.read();
+        if(x!=0xFF && x!=x_post){
+          startCounter();
+        }
         Serial.print("READ Knobs:\t");
         Serial.println(x, HEX);
-        if(x == 0xFF){
+        if(x == 0xFF && x!=x_post){
           highlightMenu(false);
-          cycleMenu();
-          longPress() ? changeReturn() : cycleMenu();
+          checkPress(LONG_PRESS_INTERVAL_S) ? changeReturn(hexToId(x_post)) : cycleMenu();
+          Serial.println(String(currentTime - previousMillis));
           highlightMenu(true);
         }
+          x_post = x;
       }
       if(foot_flag){
         foot_flag = false;
@@ -264,11 +271,6 @@ void updateUI(bool isClockwise, int id){
   //INPUT
   else if(MenuState == E_MenuState::input ){
     changeVolume(id, isClockwise, cur_input_volumes);
-  }
-  //RETURN
-  else if(MenuState == E_MenuState::return_m && id!=8){
-    //changeReturn(id);
-    MenuState = E_MenuState::left_output;
   }
   //LEFT OUTPUT VOL
   else if(MenuState == E_MenuState::left_output){
@@ -311,7 +313,7 @@ void updateUI(bool isClockwise, int id){
  }
 
 void cycleMenu(){
-  if(MenuState == NUM_MENU_OPTIONS){
+  if(MenuState == NUM_MENU_OPTIONS-1){
     MenuState = static_cast<E_MenuState>(1);
   } else {
     MenuState = static_cast<E_MenuState>(MenuState+1);
@@ -396,11 +398,13 @@ void changePhase(int id, bool isClockwise){
 }
 
 void changeReturn(int id){
+  Serial.print("id: " + String(id));
   int idToArray = id -1;
   cur_return[idToArray] = !cur_return[idToArray];
   String returnToDisplay = cur_return[idToArray] ? STEREO : MONO;
   Serial2.print(ADDRESS_FOR_DISPLAY[idToArray][2] + ".txt=" + '"' + returnToDisplay + '"');
   sendEndCommand();
+  Serial.println(ADDRESS_FOR_DISPLAY[idToArray][2] + ".txt=" + '"' + returnToDisplay + '"');
 }
 
 void highlightMenu(bool shouldHighlightOR){
@@ -417,11 +421,6 @@ void highlightMenu(bool shouldHighlightOR){
       Serial2.print(ADDRESS_FOR_DISPLAY[i][0] + ".pco=" + color);
       sendEndCommand();
       Serial2.print(ADDRESS_FOR_DISPLAY[i][1] + ".pco=" + color);
-      sendEndCommand();
-    }
-  } else if (MenuState == E_MenuState::return_m){
-    for (int i = 0; i <8; i++){
-      Serial2.print(ADDRESS_FOR_DISPLAY[i][2] + ".pco=" + color);
       sendEndCommand();
     }
   } else if (MenuState == E_MenuState::left_output){
@@ -446,15 +445,36 @@ void highlightMenu(bool shouldHighlightOR){
   }
 }
 
-bool longPress(){
-  unsigned long interval = LONG_PRESS_INTERVAL_S * 1000;
-  unsigned long currentTime = millis();
-  if(currentTime - previousMillis >= interval){
-    previousMillis = currentTime;
-    return true;
-  } 
-  return false;
+void startCounter(){
+previousMillis = millis();
 }
+
+
+bool checkPress(int durationInSeconds){
+  long interval = durationInSeconds * 1000;
+  unsigned long currentTime = millis();
+  long intervalActual = currentTime - previousMillis;
+  return (intervalActual >= interval);
+  } 
+
+  int hexToId(byte hexVal){
+    if(hexVal == 0xFE){
+      return 1;
+    } else if (hexVal == 0xFD){
+      return 2;
+    } else if (hexVal == 0xFB){
+      return 3;
+    } else if (hexVal == 0xF7){
+      return 4;
+    } else if (hexVal == 0xEF){
+      return 5;
+    } else if (hexVal == 0xDF){
+      return 6;
+    } else if (hexVal == 0xBF){
+      return 7;
+    }else return 8;
+    }
+
 
 
 
