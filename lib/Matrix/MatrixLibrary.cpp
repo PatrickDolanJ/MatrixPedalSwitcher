@@ -175,13 +175,13 @@ void AGD2188::wipe_chip()
 void AGD2188::ArrayToWrite(int input_array[8], int sizeOfArray){
   //Step 0.5 CHECK IF ALL ZEROS
   wipe_chip();
+  // this check if all are zero in which case connect input to output
   bool should_pass = true;
   for(int i = 0; i < sizeOfArray; i++){
     if(input_array[i]!=0){
       should_pass = false;
     }
   }
-
   if(should_pass){
     write_data(true,7,7);
     return;

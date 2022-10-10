@@ -9,7 +9,7 @@ const String DEVICE = "PedalSwitcher";
 const int DEFAULT_VOLUME = 125;
 const String DEFAULT_COLOR = "19703";
 const String HIGHLIGHT_COLOR = "62025"; 
-const float LONG_PRESS_INTERVAL_S = 2.0;
+const float LONG_PRESS_INTERVAL_S = 1.75;
 
 //---------For Nextion Display -----------
 const byte b_end_message = 0xff;
@@ -490,28 +490,31 @@ void initializeDisplay(){
   //Loops
     sendLoopPositions();
     sendEndCommand();
+    MenuState = E_MenuState::input;
   //Input Volumes
   for(int i = 0; i <8; i++){
-    sendVolumeToDisplay(i, cur_input_volumes[i]); 
+    sendVolumeToDisplay(i, volumeToDisplay(cur_input_volumes[i])); 
   }
   //Return
   for(int i = 0; i<7; i++){
     sendReturn(i);
   }
   //Left Output
+  MenuState = E_MenuState::left_output;
   for(int i = 0; i <8; i++){
-    sendVolumeToDisplay(i, cur_left_output_volumes[i]); 
+    sendVolumeToDisplay(i, volumeToDisplay(cur_left_output_volumes[i])); 
   }
   //Right Output
+  MenuState = E_MenuState::right_output;
   for(int i = 0; i <8; i++){
-    sendVolumeToDisplay(i, cur_right_output_volumes[i]); 
+    sendVolumeToDisplay(i, volumeToDisplay(cur_right_output_volumes[i])); 
   }
   //Unhighlight
   for(int i = 1; i <6; i++){
     MenuState = static_cast<E_MenuState>(i);
     highlightMenu(false);
   }
-
+  //Highlight Loops First and set MenuState
   MenuState = E_MenuState::loops;
   highlightMenu(true);
   
