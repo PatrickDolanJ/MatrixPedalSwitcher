@@ -9,11 +9,16 @@ const String DEVICE = "PedalSwitcher";
 const int DEFAULT_VOLUME = 125;
 const String DEFAULT_COLOR = "19703";
 const String HIGHLIGHT_COLOR = "62025"; 
+const int LONG_PRESS_INTERVAL_S = 3;
+unsigned long previousMillis = 0;
 
 //---------For Nextion Display -----------
 const byte b_end_message = 0xff;
 const String STEREO = "S";
 const String MONO = "M";
+const String HOME_PAGE = "page 0";
+const String SAVE_PRESET_PAGE = "page 1";
+const String FOOTSWITCH_PAGE = "page 2";
 
 //A
 const String A_LOOP_POS = "A_LOOP_POS";
@@ -173,6 +178,7 @@ void changeVolume(int id, bool isClockwise, int volume_array[]);
 void changePhase(int id, bool isClockwise);
 void highlightMenu(bool shouldHighlight);
 void changeReturn(int id);
+bool longPress();
 
 //--------------------For Rotary Buttons------------------------
 
@@ -235,8 +241,15 @@ void loop() {
         if(x == 0xFF){
           highlightMenu(false);
           cycleMenu();
+          longPress() ? changePhase() : cycleMenu();
           highlightMenu(true);
         }
+      }
+      if(foot_flag){
+        foot_flag = false;
+        int y = pcf22.read();
+        Serial.print("Read Foot: " + String(y, HEX));
+        
       }
 }
 ///////////////////////////////////////////////////////////////////////////////////
@@ -254,7 +267,8 @@ void updateUI(bool isClockwise, int id){
   }
   //RETURN
   else if(MenuState == E_MenuState::return_m && id!=8){
-    changeReturn(id);
+    //changeReturn(id);
+    MenuState = E_MenuState::left_output;
   }
   //LEFT OUTPUT VOL
   else if(MenuState == E_MenuState::left_output){
@@ -430,6 +444,16 @@ void highlightMenu(bool shouldHighlightOR){
       sendEndCommand();
     }
   }
+}
+
+bool longPress(){
+  unsigned long interval = LONG_PRESS_INTERVAL_S * 1000;
+  unsigned long currentTime = millis();
+  if(currentTime - previousMillis >= interval){
+    previousMillis = currentTime;
+    return true;
+  } 
+  return false;
 }
 
 
