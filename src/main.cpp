@@ -160,6 +160,8 @@ E_MenuState MenuState;
 unsigned long previousMillis = 0;
 unsigned long currentTime = 0;
 int x_post;
+int firstButtonVal = 0;
+int secondButtonVal = 0;
 
 //--------------------------DATA------------------------------ 
 int cur_loop_positions[7] = {0,0,0,0,0,0,0};
@@ -184,6 +186,8 @@ bool checkPress(int durationInSeconds);
 int hexToId(byte hexVal);
 void sendReturn(int arrayId);
 void initializeDisplay();
+void doButton();
+void doFoot();
 
 //--------------------For Rotary Buttons------------------------
 
@@ -237,23 +241,10 @@ void loop() {
     myData = rotary.checkInterrupt(); //  if interupt occured calls UpdateUI()
     if (rotary_flag)
       {
-        rotary_flag = false;
-        int x = pcf21.read();
-        if(x!=0xFF && x!=x_post){
-          startCounter();
-        }
-        Serial.print("READ Knobs:\t");
-        Serial.println(x, HEX);
-        if(x == 0xFF && x!=x_post){
-          checkPress(LONG_PRESS_INTERVAL_S) ? changeReturn(hexToId(x_post)) : cycleMenu();
-        }
-          x_post = x;
+      doButton();
       }
       if(foot_flag){
-        foot_flag = false;
-        int y = pcf22.read();
-        Serial.println("Read Foot: " + String(y, HEX));
-        
+      doFoot();  
       }
 }
 ///////////////////////////////////////////////////////////////////////////////////
@@ -516,8 +507,42 @@ void initializeDisplay(){
   }
   //Highlight Loops First and set MenuState
   MenuState = E_MenuState::loops;
-  highlightMenu(true);
-  
+  highlightMenu(true); 
+}
+
+void doButton(){
+    rotary_flag = false;
+        int x = pcf21.read();
+        if(x!=0xFF && x!=x_post){
+          startCounter();
+        }
+        Serial.print("READ Knobs:\t");
+        Serial.println(x, HEX);
+        if(x == 0xFF && x!=x_post){
+          checkPress(LONG_PRESS_INTERVAL_S) ? changeReturn(hexToId(x_post)) : cycleMenu();
+        }
+          x_post = x;
+}
+
+void doFoot(){
+        foot_flag = false;
+        int y = pcf22.read();
+        Serial.println("Read Foot: " + String(y, HEX));
+        if(y!= 0xFF && firstButtonVal!=0){
+          firstButtonVal = y;
+        }
+
+        if(y!= 0xFF && firstButtonVal != 0 && secondButtonVal !=0){
+          secondButtonVal = y;
+        }
+        // when 2 are pressed and when released sends original hex again aka the other one pressed
+
+        if(y == 0xFF){
+          y = 0;
+          Serial.println("First Button: " + String(firstButtonVal) + " Second Button: " + String(secondButtonVal));
+          firstButtonVal = 0;
+          firstButtonVal = 0;
+        }
 }
 
 
