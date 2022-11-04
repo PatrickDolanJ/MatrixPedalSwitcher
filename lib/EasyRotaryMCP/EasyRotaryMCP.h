@@ -15,7 +15,7 @@ struct RotaryData{
 class EasyRotary{
 
 public :
-EasyRotary();
+EasyRotary(int InteruptPin);
 RotaryData checkInterrupt();
 void startup(void (*function)(bool,int));
 bool getClockwise();

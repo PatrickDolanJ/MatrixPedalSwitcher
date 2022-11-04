@@ -61,7 +61,7 @@ void RotaryEncoderChanged(bool clockwise, int id);
  * an interrupt capable pin on the Arduino, either
  * D3 or D2.
  * */
-byte arduinoIntPin = 2;
+byte arduinoIntPin;
 
 
 
@@ -92,16 +92,6 @@ void ThisIsAFunction(bool clockwise,int id){
     ActionFunction(clockwise, id);
 }
 
-
-// void RotaryEncoderChanged(bool clockwise, int id) {
-    
-//     //   Serial.println("Encoder " + String(id) + ": "
-//     //           + (clockwise ? String("clockwise") : String("counter-clock-wise")));
-//             data.clockwise = clockwise;
-//             data.id = id; 
-//             //Serial.println(String(data.id) + String(data.clockwise));
-// }
-
 void EasyRotary::startup(void (*function)(bool clockwise,int id)){
     ActionFunction = function;
     pinMode(arduinoIntPin,INPUT);
@@ -122,8 +112,10 @@ void EasyRotary::startup(void (*function)(bool clockwise,int id)){
     attachInterrupt(digitalPinToInterrupt(arduinoIntPin), intCallBack, FALLING);
 }
 
-EasyRotary::EasyRotary(){
+EasyRotary::EasyRotary(int InteruptPin){
+    arduinoIntPin = InteruptPin;
     Serial.println("MCP23017 Interrupt");
+
 }
 
 // The int handler will just signal that the int has happened

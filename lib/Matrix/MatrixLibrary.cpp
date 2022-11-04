@@ -104,8 +104,8 @@ AGD2188::AGD2188(int address)
     return write_converted;
 }
 
-void AGD2188::read_data(int x){ 
-  //const byte read_byte = 0xE3; // write_data(x_address);   this needs the initial byte to be in READ MODE, then it needs the alternate X code as in Table 8.
+void AGD2188::readData(int x){ 
+  //const byte read_byte = 0xE3; // writeData(x_address);   this needs the initial byte to be in READ MODE, then it needs the alternate X code as in Table 8.
   //This is as the person on the arduino forums has it, but im not sure this will actually work...
   byte data_array[2];
   data_array[0] = x_byte_array[x-1]; 
@@ -122,7 +122,7 @@ void AGD2188::read_data(int x){
 }
 
 
- void AGD2188::write_data(bool OnOrOff, int x, int y){ //void write_date(int x, int y)
+ void AGD2188::writeData(bool OnOrOff, int x, int y){ //void write_date(int x, int y)
    byte data_input = convert_to_byte(OnOrOff,x,y);
    byte data_array[2]; //passing in to this fuction the data we want to write 
    data_array[0] = data_input; //on off is 1st bit, nw=ext 4 is x adress last three is the y address
@@ -147,7 +147,7 @@ void AGD2188::read_data(int x){
 // After you setup the read address, all you have to do is request 2 bytes.  The first byte is always all "0".
 // (See bottom trace in Figure 35)
 
-void AGD2188::wipe_chip()
+void AGD2188::wipeChip()
 {
   unsigned long preTime = millis();
   // These FOR loops will cycle from X0 - Y0 to X7 - Y7
@@ -161,7 +161,7 @@ void AGD2188::wipe_chip()
     int y_value = y;
     for(int x = 0; x < 8; x += 1){  // Set up X Loop
       int x_value = x;      
-      write_data(false,x_value,y_value);
+      writeData(false,x_value,y_value);
     }
   }
   String m_chip_wiped = "Chip wiped(ms):  ";
@@ -171,9 +171,9 @@ void AGD2188::wipe_chip()
 
   ///////////BIG BOY
 
-void AGD2188::ArrayToWrite(int input_array[8], int sizeOfArray){
+void AGD2188::writeArray(int input_array[8], int sizeOfArray){
   //Step 0.5 CHECK IF ALL ZEROS
-  wipe_chip();
+  wipeChip();
   // this check if all are zero in which case connect input to output
   bool should_pass = true;
   for(int i = 0; i < sizeOfArray; i++){
@@ -182,7 +182,7 @@ void AGD2188::ArrayToWrite(int input_array[8], int sizeOfArray){
     }
   }
   if(should_pass){
-    write_data(true,7,7);
+    writeData(true,7,7);
     return;
   }
 
@@ -197,7 +197,7 @@ void AGD2188::ArrayToWrite(int input_array[8], int sizeOfArray){
   //Step Two: Assign input device to each of the positions with minVal;
   for (int i = 0; i < sizeOfArray; i++){
       if(input_array[i]==minVal){
-         write_data(true,7,i);
+         writeData(true,7,i);
        }
   }
 
@@ -225,7 +225,7 @@ void AGD2188::ArrayToWrite(int input_array[8], int sizeOfArray){
       if(input_array[o]==curVal){
         for(int l = 0; l<sizeOfArray; l++){
           if(input_array[l]==preVal){
-          write_data(true,l,o);
+          writeData(true,l,o);
           }
         }
       }
@@ -236,19 +236,19 @@ void AGD2188::ArrayToWrite(int input_array[8], int sizeOfArray){
    // Step 4: Connect highest values to output
    for(int m = 0; m <sizeOfArray; m++){
     if(input_array[m]==curVal){
-      write_data(true,m,7);
+      writeData(true,m,7);
     }
   }
 } 
 //////////////////////////////////////////////////////////////
 
-void AGD2188::test_chip(){
+void AGD2188::testChip(){
  for (int i =0; i<8; i++){
     for (int j =0; j<8; j++){
-      write_data(true,i,j);
-      read_data(i);
+      writeData(true,i,j);
+      readData(i);
       delay(500);
     }
   }
-  wipe_chip();
+  wipeChip();
 }
