@@ -99,8 +99,8 @@ AGD2188::AGD2188(int address)
         OnOrOff_byte = OFF_BIT;
     }
     byte write_converted = OnOrOff_byte << 7 | x_byte << 3 | y_byte;
-    Serial.print("BIN value: ");
-    Serial.println(write_converted, BIN);
+    //Serial.print("BIN value: ");
+    //Serial.println(write_converted, BIN);
     return write_converted;
 }
 
@@ -130,16 +130,16 @@ void AGD2188::read_data(int x){
    Wire.beginTransmission(matrix_address); // transmit to device
    Wire.write(data_array, 2);
    Wire.endTransmission();    // stop transmitting
-   String m_message;
-   if (OnOrOff){
-    m_message = "Connected: ";
-   } else {
-    m_message = "Disconnected: ";
-   }
-  m_message += x;
-  m_message += " to ";
-  m_message += y;
-  Serial.println(m_message);
+  //  String m_message;
+  //  if (OnOrOff){
+  //   m_message = "Connected: ";
+  //  } else {
+  //   m_message = "Disconnected: ";
+  //  }
+  // m_message += x;
+  // m_message += " to ";
+  // m_message += y;
+  // Serial.println(m_message);
 }
 
 // To execute a read, you first have to WRITE the address value to the device.
@@ -149,8 +149,7 @@ void AGD2188::read_data(int x){
 
 void AGD2188::wipe_chip()
 {
-  delay(1000);
-  Serial.println(millis());
+  unsigned long preTime = millis();
   // These FOR loops will cycle from X0 - Y0 to X7 - Y7
   // The "x_value" is derived from Table 7 (AX3-AX0).  Note that it's not contiguous because they reserve
   // values for the read register values (seen above).  Kind of a pain.
@@ -165,8 +164,8 @@ void AGD2188::wipe_chip()
       write_data(false,x_value,y_value);
     }
   }
-  String m_chip_wiped = "Chip wiped";
-  String output_message = m_chip_wiped + millis(); //this take on average 9 millsecs without printing to serial.
+  String m_chip_wiped = "Chip wiped(ms):  ";
+  String output_message = m_chip_wiped + (millis()-preTime); //this take on average 9 millsecs without printing to serial.
   Serial.println(output_message);
 }
 
@@ -186,8 +185,6 @@ void AGD2188::ArrayToWrite(int input_array[8], int sizeOfArray){
     write_data(true,7,7);
     return;
   }
-
-
 
   // step One: find lowest number in array.
   int minVal = 7;

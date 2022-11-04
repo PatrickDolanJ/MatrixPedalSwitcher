@@ -215,13 +215,15 @@ void setup() {
   Serial2.begin(9600);  //To Nextion
   Serial.println(DEVICE + " booting");
 
+
   //readLastSetupFromSD and apply to cur
   initializeDisplay();
 
 	pinMode(pcf21, 0, INPUT_PULLUP);
   pinMode(pcf22, 1, INPUT_PULLUP);
 
-  matrix_right = AGD2188(); // This is the default address
+  matrix_right = AGD2188(4); // This is the default address
+  matrix_right.test_chip();
   //matrix_left = AGD2188(1);
 
   pinMode(ROTARY_INTERUPT_PIN, INPUT_PULLUP);
@@ -243,7 +245,8 @@ void loop() {
       {
       doButton();
       }
-      if(foot_flag){
+    if (foot_flag)
+      {
       doFoot();  
       }
 }
