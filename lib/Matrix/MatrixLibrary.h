@@ -13,6 +13,8 @@ class AGD2188
 	void readData(int x);
 	void writeArray(int input_array[8], int sizeOfArray);
 	void testChip();
+	private:
+	byte matrix_address;
 };
  
 #endif

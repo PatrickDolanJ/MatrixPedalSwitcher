@@ -3,13 +3,15 @@
 #include <EasyRotaryMCP.h>
 #include <PCF8574.h>
 #include <NextionCommands.h>
+#include <SPI.h>
 
 
 //--------------------------Device Config-------------------
+
 const String DEVICE_NAME = "PedalSwitcher";
 const int DEFAULT_VOLUME = 125;
 const String DEFAULT_COLOR = "19703";
-const String HIGHLIGHT_COLOR = "62025"; 
+const String HIGHLIGHT_COLOR = "65535"; 
 const float LONG_PRESS_INTERVAL_S = 1.75;
 const byte ROTARY_ADDRESS = 0x21;
 const byte FOOTSWITCH_ADDRESS = 0x22;
@@ -18,6 +20,16 @@ const int FOOT_INTERUPT_PIN = 18;
 const int RIGHT_MATRIX_ADDRESS = 0;
 const int LEFT_MATRIX_ADDRESS = 4;
 const int ROTARY_ENCODER_INTERUPT_PIN = 2;
+
+//-------------For Digital Pots----------------
+const int spiDelay = 1;
+
+const int cs0_pin = 32; // 1
+const int cs1_pin = 33; // 2
+const int cs2_pin = 34; // 3
+const int cs3_pin = 35; // 4
+const int cs4_pin = 36; // 5
+const int cs5_pin = 37; // 6
 
 //-----------------------------MATRIX----------------------------
 AGD2188 MatrixRight(RIGHT_MATRIX_ADDRESS); 
@@ -51,12 +63,13 @@ void changePhase(int id, bool isClockwise);
 void highlightMenu(bool shouldHighlight);
 void changeReturn(int id);
 void startCounter();
-bool checkPress(int durationInSeconds);
+bool checkPress(int durationInSeconds, int id);
 int hexToId(byte hexVal);
 void sendReturn(int arrayId);
 void initializeDisplay();
 void doButton();
 void doFoot();
+void setVolumesDefault();
 
 //----------------------------Buttons/RotaryEncoders---------------------------
 EasyRotary RotaryEncoders(ROTARY_ENCODER_INTERUPT_PIN); //for reading rotary encoder data **NOT BUTTONS**
@@ -81,14 +94,11 @@ void setup() {
   Serial2.begin(9600);  //To Nextion
   Serial.println(DEVICE_NAME + " booting");
 
-
-  //readLastSetupFromSD and apply to cur
   initializeDisplay();
+  setVolumesDefault();
 
 	pinMode(pcf21, 0, INPUT_PULLUP);
   pinMode(pcf22, 1, INPUT_PULLUP);
-
-  MatrixRight.testChip();
   
   pinMode(ROTARY_INTERUPT_PIN, INPUT_PULLUP);
   pinMode(FOOT_INTERUPT_PIN,INPUT_PULLUP);
@@ -98,7 +108,20 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(ROTARY_INTERUPT_PIN), ROTARY_INTERUPT, FALLING);
   attachInterrupt(digitalPinToInterrupt(FOOT_INTERUPT_PIN),FOOT_INTERUPT,FALLING);
 
+  pinMode(cs0_pin, OUTPUT);
+  pinMode(cs1_pin, OUTPUT);
+  pinMode(cs2_pin, OUTPUT);
+  pinMode(cs3_pin, OUTPUT);
+  pinMode(cs4_pin, OUTPUT);
+  pinMode(cs5_pin, OUTPUT);
+
+  SPI.begin();
+
   MatrixRight.wipeChip();
+  MatrixLeft.wipeChip();
+
+  MatrixRight.writeArray(cur_loop_positions,7);
+  MatrixLeft.writeArray(cur_loop_positions,7);
   
   
 }
@@ -113,6 +136,12 @@ void loop() {
       {
       doFoot();  
       }
+    //  MatrixRight.writeData(true, 7, 1);
+    //  MatrixRight.readData(8);
+    //  delay(3000);
+    //  MatrixRight.writeData(false, 7, 1);
+    //  MatrixRight.readData(8);
+    //  delay(3000);
 }
 //-----------------------------------------------------------------------------
 
@@ -124,6 +153,7 @@ void updateUI(bool isClockwise, int id){
         changeLoopPositions(isClockwise, id);
         sendLoopPositions();
         MatrixRight.writeArray(cur_loop_positions,7);
+        MatrixLeft.writeArray(cur_loop_positions,7);
         }
       break;
 
@@ -210,7 +240,7 @@ void sendVolumeToDisplay(int idForArray, int volumeForDisplay){
 
 void changeVolume(int id, bool isClockwise, int volume[]){
     int idToArray = id -1;
-    isClockwise ? volume[idToArray]-- : volume[idToArray]++;
+    isClockwise ? volume[idToArray]++ : volume[idToArray]--;
     capVolume(volume, idToArray);
     int volumeForDisplay = volumeToDisplay(volume[idToArray]);
     sendVolumeToDisplay(idToArray, volumeForDisplay); 
@@ -329,11 +359,12 @@ PreviousMillis = millis();
 }
 
 
-bool checkPress(int durationInSeconds){
+bool checkPress(int durationInSeconds, int id){
   long interval = durationInSeconds * 1000;
   unsigned long CurrentTime = millis();
   long intervalActual = CurrentTime - PreviousMillis;
-  return (intervalActual >= interval);
+  bool isLongPress = intervalActual >= interval;
+  return (isLongPress);
   } 
 
   int hexToId(byte hexVal){
@@ -412,7 +443,8 @@ void doButton(){
         Serial.print("READ Knobs:\t");
         Serial.println(RotaryButtonValue, HEX);
         if(RotaryButtonValue == 0xFF && RotaryButtonValue!=PreviousRotaryButtonValue){
-          checkPress(LONG_PRESS_INTERVAL_S) ? changeReturn(hexToId(PreviousRotaryButtonValue)) : cycleMenu();
+          int id = hexToId(PreviousRotaryButtonValue);
+          checkPress(LONG_PRESS_INTERVAL_S,id) ? changeReturn(id) : cycleMenu();
         }
           PreviousRotaryButtonValue = RotaryButtonValue;
 }
@@ -436,6 +468,76 @@ void doFoot(){
           FirstFootButtonValue = 0;
           FirstFootButtonValue = 0;
         }
+}
+
+
+void digitalPotWrite(int pot, int value){
+  if(pot <= 5){
+    digitalWrite(cs0_pin, LOW);
+    delayMicroseconds(spiDelay);
+    SPI.transfer(pot);
+    SPI.transfer(value);
+    delayMicroseconds(spiDelay);
+    digitalWrite(cs0_pin, HIGH);
+  }
+  if(pot >= 6 || pot <= 11){
+    digitalWrite(cs1_pin, LOW);
+    delayMicroseconds(spiDelay);
+    SPI.transfer(pot - 6);   
+    SPI.transfer(value);
+    delayMicroseconds(spiDelay);
+    digitalWrite(cs1_pin, HIGH);
+  }
+  if(pot >= 12 || pot <= 17){
+    digitalWrite(cs2_pin, LOW);
+    delayMicroseconds(spiDelay);
+    SPI.transfer(pot - 12);
+    SPI.transfer(value);
+    delayMicroseconds(spiDelay);
+    digitalWrite(cs2_pin, HIGH);
+  }
+  if(pot >= 18 || pot <= 23){
+    digitalWrite(cs3_pin, LOW);
+    delayMicroseconds(spiDelay);
+    SPI.transfer(pot - 18);
+    SPI.transfer(value);
+    delayMicroseconds(spiDelay);
+    digitalWrite(cs3_pin, HIGH);
+  }
+  if(pot >= 24 || pot <= 29){
+    digitalWrite(cs4_pin, LOW);
+    delayMicroseconds(spiDelay);
+    SPI.transfer(pot - 24);
+    SPI.transfer(value);
+    delayMicroseconds(spiDelay);
+    digitalWrite(cs4_pin, HIGH);
+  }
+  if(pot >= 30 || pot <= 35){
+    digitalWrite(cs5_pin, LOW);
+    delayMicroseconds(spiDelay);
+    SPI.transfer(pot - 30);
+    SPI.transfer(value);
+    delayMicroseconds(spiDelay);
+    digitalWrite(cs5_pin, HIGH);
+  }
+}
+
+void setVolumesDefault(){
+
+pinMode(cs0_pin, OUTPUT);
+pinMode(cs1_pin, OUTPUT);
+pinMode(cs2_pin, OUTPUT);
+pinMode(cs3_pin, OUTPUT);
+pinMode(cs4_pin, OUTPUT);
+pinMode(cs5_pin, OUTPUT);
+// initialize SPI:
+SPI.begin();
+
+for(int i = 0; i<36; i++){
+  digitalPotWrite(i, 255);//pot, level
+  Serial.print(i);
+  Serial.println("on");
+}
 }
 
 

@@ -23,6 +23,8 @@ const byte X4 = 0x35;
 const byte X5 = 0x3D;
 const byte X6 = 0x75;
 const byte X7 = 0x7D;
+
+const byte X_ADDRESS_FOR_READING[] = {X0,X1,X2,X3,X4,X5,X6,X7};
 //Making the first bit to tell to turn off or on connection
 const byte ON_BIT = 0b1;
 const byte OFF_BIT = 0b0;
@@ -82,7 +84,7 @@ AGD2188::AGD2188(int address)
     Serial.println("ERROR: only 0-7 are valid AGD2188 addresses");
   } else {
     matrix_address = AGD2188_ADDRESS_STARTER << 3 | ADDRESS_BITS[address];
-    Serial.print(matrix_address, BIN);
+    Serial.print(matrix_address, HEX);
   }
   Wire.begin(); 
 }
@@ -108,7 +110,7 @@ void AGD2188::readData(int x){
   //const byte read_byte = 0xE3; // writeData(x_address);   this needs the initial byte to be in READ MODE, then it needs the alternate X code as in Table 8.
   //This is as the person on the arduino forums has it, but im not sure this will actually work...
   byte data_array[2];
-  data_array[0] = x_byte_array[x-1]; 
+  data_array[0] = X_ADDRESS_FOR_READING[x-1];//x_byte_array[x-1]; 
   data_array[1] = NOW;
   Wire.beginTransmission(matrix_address);
   Wire.write(data_array,2);
@@ -166,7 +168,7 @@ void AGD2188::wipeChip()
   }
   String m_chip_wiped = "Chip wiped(ms):  ";
   String output_message = m_chip_wiped + (millis()-preTime); //this take on average 9 millsecs without printing to serial.
-  Serial.println(output_message);
+  Serial.println(output_message + " " + matrix_address);
 }
 
   ///////////BIG BOY
