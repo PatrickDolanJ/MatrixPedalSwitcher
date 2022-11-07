@@ -16,7 +16,7 @@ const String OUTPUT_A_LEFT = "A_L_VOL_OUT";
 const String OUTPUT_A_RIGHT = "A_R_VOL_OUT";
 const String LEFT_A_PHASE = "A_L_PHASE";
 const String RIGHT_A_PHASE = "A_R_PHASE";
-  //Phase Display
+//Phase Display
 const String A_PHASE_IN = "A";
 const String A_PHASE_OUT = "a";
 //
@@ -115,7 +115,6 @@ const String OUTPUT_MAIN_RIGHT = "M_R_VOL_OUT";
 
 String ADDRESS_FOR_DISPLAY[8][7] = {
 // ADDRESS IN NEXTION 
-// There are some places in the code that need to change if this changes BE AWARE!!
 // LEFT IN VOL(0)   RIGHT IN VOL(1)    RETURN(2)  LEFT OUT VOL(3)       RIGHT OUT VOL(4)    LEFT PHASE(5)  RIGHT PHASE(6)    
   {INPUT_A_LEFT,    INPUT_A_RIGHT,     A_RETURN  ,OUTPUT_A_LEFT,        OUTPUT_A_RIGHT,    LEFT_A_PHASE,  RIGHT_A_PHASE   },
   {INPUT_B_LEFT,    INPUT_B_RIGHT,     B_RETURN  ,OUTPUT_B_LEFT,        OUTPUT_B_RIGHT,    LEFT_B_PHASE,  RIGHT_B_PHASE   },

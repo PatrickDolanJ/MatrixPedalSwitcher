@@ -7,7 +7,7 @@ class AGD2188
 {
 	public:
 	AGD2188(); // default constructor addresses 1110000 adress
-	AGD2188(int address); // non default allows 0-7 AGD2188
+	AGD2188(byte address); // non default allows 0-7 AGD2188
 	void wipeChip();
 	void writeData(bool OnorOff, int x, int y);
 	void readData(int x);

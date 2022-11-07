@@ -3,28 +3,15 @@
 #include <EasyRotaryMCP.h>
 #include <PCF8574.h>
 #include <NextionCommands.h>
+#include <DeviceConfig.h>
 
-
-//--------------------------Device Config-------------------
-const String DEVICE_NAME = "PedalSwitcher";
-const int DEFAULT_VOLUME = 125;
-const String DEFAULT_COLOR = "19703";
-const String HIGHLIGHT_COLOR = "62025"; 
-const float LONG_PRESS_INTERVAL_S = 1.75;
-const byte ROTARY_ADDRESS = 0x21;
-const byte FOOTSWITCH_ADDRESS = 0x22;
-const int ROTARY_INTERUPT_PIN = 3; 
-const int FOOT_INTERUPT_PIN = 18; 
-const int RIGHT_MATRIX_ADDRESS = 0;
-const int LEFT_MATRIX_ADDRESS = 4;
-const int ROTARY_ENCODER_INTERUPT_PIN = 2;
 
 //-----------------------------MATRIX----------------------------
 AGD2188 MatrixRight(RIGHT_MATRIX_ADDRESS); 
 AGD2188 MatrixLeft(LEFT_MATRIX_ADDRESS);
 
 //------------------------------MENU------------------------------
-enum E_MenuState {loops = 1,input = 2, left_output = 3,right_output = 4, phase = 5, NUM_MENU_OPTIONS=6};
+enum E_MenuState {LOOPS = 1,INPUT_VOLUMES = 2, LEFT_OUTPUT_VOLUMES = 3,RIGHT_OUTPUT_VOLUMES = 4, PHASE = 5, NUM_MENU_OPTIONS=6};
 E_MenuState MenuState;
 unsigned long PreviousMillis = 0;
 unsigned long CurrentTime = 0;
@@ -33,11 +20,11 @@ int FirstFootButtonValue = 0;
 int SecondFootButtonValue = 0;
 
 //------------------------------DATA------------------------------ 
-int cur_loop_positions[7] = {0,0,0,0,0,0,0};
-int cur_input_volumes[8] = {DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME};
-int cur_left_output_volumes[8] = {DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME};
-int cur_right_output_volumes[8] = {DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME};
-int cur_phase[8] = {0,0,0,0,0,0,0,0};
+int CurrentLoopPositions[7] = {0,0,0,0,0,0,0};
+int CurrentInputVolumes[8] = {DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME};
+int CurrentLeftOutputVolumes[8] = {DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME};
+int CurrentRightOutputVolumes[8] = {DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME};
+int CurrentPhase[8] = {0,0,0,0,0,0,0,0};
 bool cur_return[8] = {1,1,1,1,1,1,1,1};
 
 //----------------------Function prototypes------------------------
@@ -119,27 +106,27 @@ void loop() {
 void updateUI(bool isClockwise, int id){
   
   switch (MenuState){
-    case (E_MenuState::loops):
+    case (E_MenuState::LOOPS):
       if(id!=8){
         changeLoopPositions(isClockwise, id);
         sendLoopPositions();
-        MatrixRight.writeArray(cur_loop_positions,7);
+        MatrixRight.writeArray(CurrentLoopPositions,7);
         }
       break;
 
-    case(E_MenuState::input):
-      changeVolume(id, isClockwise, cur_input_volumes);
+    case(E_MenuState::INPUT_VOLUMES):
+      changeVolume(id, isClockwise, CurrentInputVolumes);
       break;
 
-    case(E_MenuState::left_output):
-      changeVolume(id, isClockwise, cur_left_output_volumes);
+    case(E_MenuState::LEFT_OUTPUT_VOLUMES):
+      changeVolume(id, isClockwise, CurrentLeftOutputVolumes);
       break;
     
-    case(E_MenuState::right_output):
-      changeVolume(id, isClockwise, cur_right_output_volumes);
+    case(E_MenuState::RIGHT_OUTPUT_VOLUMES):
+      changeVolume(id, isClockwise, CurrentRightOutputVolumes);
       break;
     
-    case(E_MenuState::phase):
+    case(E_MenuState::PHASE):
       if(id!=8){
         changePhase(id, isClockwise);
       }
@@ -149,19 +136,19 @@ void updateUI(bool isClockwise, int id){
  
  void changeLoopPositions(bool isClockwise, int id){
    int loopArrayPosition = id-1;
-   int loopArrayValue = cur_loop_positions[loopArrayPosition];
+   int loopArrayValue = CurrentLoopPositions[loopArrayPosition];
    if(loopArrayPosition!=7){
    if(isClockwise){
-      loopArrayValue==7 ? cur_loop_positions[loopArrayPosition] = 0 : cur_loop_positions[loopArrayPosition]++;
+      loopArrayValue==7 ? CurrentLoopPositions[loopArrayPosition] = 0 : CurrentLoopPositions[loopArrayPosition]++;
    } else {
-      loopArrayValue==0 ? cur_loop_positions[loopArrayPosition] = 7 : cur_loop_positions[loopArrayPosition]--;
+      loopArrayValue==0 ? CurrentLoopPositions[loopArrayPosition] = 7 : CurrentLoopPositions[loopArrayPosition]--;
    }
    }
  }
 
   void sendLoopPositions(){
     for(int i = 0; i < 8; i++){
-    Serial2.print(LOOPS_FOR_DISPLAY[i] + ".val=" + String(cur_loop_positions[i]));
+    Serial2.print(LOOPS_FOR_DISPLAY[i] + ".val=" + String(CurrentLoopPositions[i]));
     sendEndCommand();
   }
   }
@@ -194,15 +181,15 @@ void capVolume(int volume[], int arrayPosition){
 } 
 
 void sendVolumeToDisplay(int idForArray, int volumeForDisplay){ 
-  if (MenuState == E_MenuState::input){
+  if (MenuState == E_MenuState::INPUT_VOLUMES){
     Serial2.print(ADDRESS_FOR_DISPLAY[idForArray][0] + ".val=" +String(volumeForDisplay));
     sendEndCommand();
     Serial2.print(ADDRESS_FOR_DISPLAY[idForArray][1] + ".val=" +String(volumeForDisplay));
     sendEndCommand();
-  } else if(MenuState == E_MenuState::left_output){
+  } else if(MenuState == E_MenuState::LEFT_OUTPUT_VOLUMES){
     Serial2.print(ADDRESS_FOR_DISPLAY[idForArray][3] + ".val=" +String(volumeForDisplay));
     sendEndCommand();
-  } else if(MenuState == E_MenuState::right_output){
+  } else if(MenuState == E_MenuState::RIGHT_OUTPUT_VOLUMES){
     Serial2.print(ADDRESS_FOR_DISPLAY[idForArray][4] + ".val=" +String(volumeForDisplay));
     sendEndCommand();
   }
@@ -219,19 +206,19 @@ void changeVolume(int id, bool isClockwise, int volume[]){
 void sendPhase(int arrayId){
   String left_phase = "";
   String right_phase = "";
-  int phase = cur_phase[arrayId];
+  int PHASE = CurrentPhase[arrayId];
 
-  if(phase == 0){
+  if(PHASE == 0){
     left_phase = PHASES_FOR_DISPLAY[arrayId][0];
     right_phase = PHASES_FOR_DISPLAY[arrayId][0];
-  } else if (phase == 1){
+  } else if (PHASE == 1){
     left_phase = PHASES_FOR_DISPLAY[arrayId][0];
     right_phase = PHASES_FOR_DISPLAY[arrayId][1];
-  } else if (phase == 2){
+  } else if (PHASE == 2){
     left_phase = PHASES_FOR_DISPLAY[arrayId][1];
     right_phase = PHASES_FOR_DISPLAY[arrayId][0];
   }
-  else if (phase == 3){
+  else if (PHASE == 3){
     left_phase = PHASES_FOR_DISPLAY[arrayId][1];
     right_phase = PHASES_FOR_DISPLAY[arrayId][1];
   }
@@ -246,16 +233,16 @@ void changePhase(int id, bool isClockwise){
 
   int idToArray = id -1;
   if(isClockwise){
-    if(cur_phase[idToArray] == 3){
-      cur_phase[idToArray] = 0;
+    if(CurrentPhase[idToArray] == 3){
+      CurrentPhase[idToArray] = 0;
     } else {
-      cur_phase[idToArray]++;
+      CurrentPhase[idToArray]++;
     }
   } else {
-    if(cur_phase[idToArray]==0){
-      cur_phase[idToArray] = 3;
+    if(CurrentPhase[idToArray]==0){
+      CurrentPhase[idToArray] = 3;
     } else {
-      cur_phase[idToArray]--;
+      CurrentPhase[idToArray]--;
     }
   }
  sendPhase(idToArray);
@@ -281,14 +268,14 @@ void highlightMenu(bool shouldHighlightOR){
   color = shouldHighlightOR ? HIGHLIGHT_COLOR : DEFAULT_COLOR;
   
   switch (MenuState){
-    case (E_MenuState::loops):
+    case (E_MenuState::LOOPS):
       for(int i = 0; i < 8; i++){
         Serial2.print(LOOPS_FOR_DISPLAY[i] + ".pco=" + color);
         sendEndCommand();
       }
       break;
 
-    case(E_MenuState::input):
+    case(E_MenuState::INPUT_VOLUMES):
       for(int i = 0; i <8; i++){
         Serial2.print(ADDRESS_FOR_DISPLAY[i][0] + ".pco=" + color);
         sendEndCommand();
@@ -297,21 +284,21 @@ void highlightMenu(bool shouldHighlightOR){
       }
       break;
 
-    case(E_MenuState::left_output):
+    case(E_MenuState::LEFT_OUTPUT_VOLUMES):
       for (int i = 0; i <8; i++){
         Serial2.print(ADDRESS_FOR_DISPLAY[i][3] + ".pco=" + color);
         sendEndCommand();
       }
       break;
     
-    case(E_MenuState::right_output):
+    case(E_MenuState::RIGHT_OUTPUT_VOLUMES):
       for (int i = 0; i <8; i++){
         Serial2.print(ADDRESS_FOR_DISPLAY[i][4] + ".pco=" + color);
         sendEndCommand();
       }
       break;
     
-    case(E_MenuState::phase):
+    case(E_MenuState::PHASE):
       for (int i = 0; i <8; i++){
         Serial2.print(ADDRESS_FOR_DISPLAY[i][5] + ".pco=" + color);
         sendEndCommand();
@@ -374,24 +361,24 @@ void initializeDisplay(){
   //Loops
     sendLoopPositions();
     sendEndCommand();
-    MenuState = E_MenuState::input;
+    MenuState = E_MenuState::INPUT_VOLUMES;
   //Input Volumes
   for(int i = 0; i <8; i++){
-    sendVolumeToDisplay(i, volumeToDisplay(cur_input_volumes[i])); 
+    sendVolumeToDisplay(i, volumeToDisplay(CurrentInputVolumes[i])); 
   }
   //Return
   for(int i = 0; i<7; i++){
     sendReturn(i);
   }
   //Left Output
-  MenuState = E_MenuState::left_output;
+  MenuState = E_MenuState::LEFT_OUTPUT_VOLUMES;
   for(int i = 0; i <8; i++){
-    sendVolumeToDisplay(i, volumeToDisplay(cur_left_output_volumes[i])); 
+    sendVolumeToDisplay(i, volumeToDisplay(CurrentLeftOutputVolumes[i])); 
   }
   //Right Output
-  MenuState = E_MenuState::right_output;
+  MenuState = E_MenuState::RIGHT_OUTPUT_VOLUMES;
   for(int i = 0; i <8; i++){
-    sendVolumeToDisplay(i, volumeToDisplay(cur_right_output_volumes[i])); 
+    sendVolumeToDisplay(i, volumeToDisplay(CurrentRightOutputVolumes[i])); 
   }
   //Unhighlight
   for(int i = 1; i <6; i++){
@@ -399,7 +386,7 @@ void initializeDisplay(){
     highlightMenu(false);
   }
   //Highlight Loops First and set MenuState
-  MenuState = E_MenuState::loops;
+  MenuState = E_MenuState::LOOPS;
   highlightMenu(true); 
 }
 

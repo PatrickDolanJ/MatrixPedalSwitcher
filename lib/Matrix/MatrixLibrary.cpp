@@ -1,49 +1,18 @@
+/*---------------DATASHEET----------------------
+  https://www.farnell.com/datasheets/1793938.pdf
+-----------------------------------------------*/
 
-// https://www.farnell.com/datasheets/1793938.pdf
 #include <Arduino.h>
 #include <Wire.h>
 #include <MatrixLibrary.h>
 
-const byte AGD2188_ADDRESS_STARTER = 0b1110;
-const byte AGD2188_ADDRESS_DEFAULT = 0x70;  //Arduino uses 7 bit addresses. this probably means that arduino 
-//only has 128 possible adress that it can write to. you probably have to drop the least signifigant bit 
-//which we guess means we drop the highest bit meaning the one all the way to the left. If you have 
-//an 8 bit address, drop the LSB and shift right
+const byte AGD2188_ADDRESS_DEFAULT = 0x70; 
 byte matrix_address;
 const byte NOW = 0x01;
-// 0x71 remember that 0x just neans its a hex number and the two following digits are the actual hex 71 = 1110001
-// in the datasheet figure 33, this matches the A0-A2 address bytes
-
-// Lay out the constants for reading back the switch states
-const byte X0 = 0x34;
-const byte X1 = 0x3C;
-const byte X2 = 0x74;
-const byte X3 = 0x7C;
-const byte X4 = 0x35;
-const byte X5 = 0x3D;
-const byte X6 = 0x75;
-const byte X7 = 0x7D;
-//Making the first bit to tell to turn off or on connection
 const byte ON_BIT = 0b1;
 const byte OFF_BIT = 0b0;
-//////////////////////////
 
-// 0-7 address bits(3) These are determined by the state of the three
-// address pins on the chip                            
-const byte ADDRESS_0 = 0b000;
-const byte ADDRESS_1 = 0b001;
-const byte ADDRESS_2 = 0b010;
-const byte ADDRESS_3 = 0b011;
-const byte ADDRESS_4 = 0b100;
-const byte ADDRESS_5 = 0b101;
-const byte ADDRESS_6 = 0b110;
-const byte ADDRESS_7 = 0b111;
-
-const byte ADDRESS_BITS[8] = {ADDRESS_0,ADDRESS_1,ADDRESS_2,ADDRESS_3,ADDRESS_4,ADDRESS_5, ADDRESS_6,ADDRESS_7};
-////////////////////////////////
-
-
-// //Settign up x array for converting to BYTE
+// //Settign up x address for converting to BYTE
 const byte W_X0 = 0b0000;
 const byte W_X1 = 0b0001;
 const byte W_X2 = 0b0010;
@@ -54,9 +23,8 @@ const byte W_X6 = 0b1000;
 const byte W_X7 = 0b1001;
 
 const byte x_byte_array[8] = {W_X0,W_X1,W_X2,W_X3,W_X4,W_X5,W_X6,W_X7};
-/////////////////
 
-// //Setting up y adress for converting to BYTE
+// //Setting up y address for converting to BYTE
 const byte W_Y0 = 0b000;
 const byte W_Y1 = 0b001;
 const byte W_Y2 = 0b010;
@@ -68,7 +36,7 @@ const byte W_Y7 = 0b111;
 
 const byte y_byte_array[8]= {W_Y0,W_Y1,W_Y2,W_Y3,W_Y4,W_Y5,W_Y6,W_Y7};
 
-/////////////////// Constructors //////////////////////
+//----------------------------- Constructors-------------------------------
 AGD2188::AGD2188()
 {
   matrix_address  = AGD2188_ADDRESS_DEFAULT;
@@ -76,17 +44,18 @@ AGD2188::AGD2188()
 }
 
 // Overloaded constructor for addressing multiple chips //
-AGD2188::AGD2188(int address)
+AGD2188::AGD2188(byte address)
 {
-  if(address <0 || address > 7){
-    Serial.println("ERROR: only 0-7 are valid AGD2188 addresses");
+  if(address <0x70 || address > 0x77){
+    Serial.println("ERROR: only 70-77 are valid AGD2188 addresses");
   } else {
-    matrix_address = AGD2188_ADDRESS_STARTER << 3 | ADDRESS_BITS[address];
-    Serial.print(matrix_address, BIN);
+    matrix_address = address;
+    Serial.print("Matrix initiated at: ");
+    Serial.println( matrix_address, HEX);
   }
   Wire.begin(); 
 }
-/////////////////////////////////////////////////////
+//--------------------------------------------------------------------------
 
   byte convert_to_byte(bool OnOrOff, int x, int y){
     byte x_byte = x_byte_array[x];
@@ -99,77 +68,71 @@ AGD2188::AGD2188(int address)
         OnOrOff_byte = OFF_BIT;
     }
     byte write_converted = OnOrOff_byte << 7 | x_byte << 3 | y_byte;
-    //Serial.print("BIN value: ");
-    //Serial.println(write_converted, BIN);
     return write_converted;
 }
 
 void AGD2188::readData(int x){ 
   //const byte read_byte = 0xE3; // writeData(x_address);   this needs the initial byte to be in READ MODE, then it needs the alternate X code as in Table 8.
-  //This is as the person on the arduino forums has it, but im not sure this will actually work...
   byte data_array[2];
   data_array[0] = x_byte_array[x-1]; 
   data_array[1] = NOW;
   Wire.beginTransmission(matrix_address);
   Wire.write(data_array,2);
   Wire.endTransmission();
-  Wire.requestFrom(matrix_address, 2); //2nd arguement is probably expecting 2 bytes back 
-  while(Wire.available())//this probably functions likea stream. meaning its says while there is data on the next line, do this loop
+  Wire.requestFrom(matrix_address, 2); 
+  while(Wire.available())
   {
-    Serial.println(Wire.read(), BIN);// this probably spits out a byte at a time
+    /*
+    This Returns a byte where each bit represents the state of the given x's connection to 
+    the position in the byte's y
+    EXAMPLE: given x 3
+    returned byte 10001001
+    means that x3 is connected to y 0,4 and 7
+    */
+    String message =  String(x) + "connected to: ";
+    Serial.print(message);
+    Serial.println(Wire.read(), BIN); 
   }
   Serial.println();  
 }
 
 
- void AGD2188::writeData(bool OnOrOff, int x, int y){ //void write_date(int x, int y)
+ void AGD2188::writeData(bool OnOrOff, int x, int y){ 
    byte data_input = convert_to_byte(OnOrOff,x,y);
-   byte data_array[2]; //passing in to this fuction the data we want to write 
-   data_array[0] = data_input; //on off is 1st bit, nw=ext 4 is x adress last three is the y address
-   data_array[1] = NOW;  // Hardcoded 2nd byte to NOW.  See comment below about DON'T CARE for read address setup.
-   Wire.beginTransmission(matrix_address); // transmit to device
+   byte data_array[2];  
+   data_array[0] = data_input; //on off is 1st bit, next 4 is x adress last three is the y address
+   data_array[1] = NOW;  
+   Wire.beginTransmission(matrix_address); 
    Wire.write(data_array, 2);
-   Wire.endTransmission();    // stop transmitting
-  //  String m_message;
-  //  if (OnOrOff){
-  //   m_message = "Connected: ";
-  //  } else {
-  //   m_message = "Disconnected: ";
-  //  }
-  // m_message += x;
-  // m_message += " to ";
-  // m_message += y;
-  // Serial.println(m_message);
+   Wire.endTransmission();    
 }
 
-// To execute a read, you first have to WRITE the address value to the device.
-// The second byte of the write is DON'T CARE, but it is necessary.  So we leave it as the "NOW" byte.
-// After you setup the read address, all you have to do is request 2 bytes.  The first byte is always all "0".
-// (See bottom trace in Figure 35)
 
 void AGD2188::wipeChip()
 {
   unsigned long preTime = millis();
   // These FOR loops will cycle from X0 - Y0 to X7 - Y7
   // The "x_value" is derived from Table 7 (AX3-AX0).  Note that it's not contiguous because they reserve
-  // values for the read register values (seen above).  Kind of a pain.
+  // values for the read register values (seen above).  
   // The "y_value" is contiguous, with 0b000 corresonding to Y0 and 0b111 corresponding to Y7
 
   // This loop pair will ensure everything is initialized to NOT CONNECTED the very first time it runs.
   // It will look like a whole bunch of nothing is happening on the Serial port.
- for(int y = 0; y < 8; y++){  //this is a nested for loop where for each y it does each x. Set up the Y Loop
+  //this take on average 22 millsecs without printing to serial.
+  //Alternative is to pull "reset" pin HIGH which should wipe the chip in about 200 nano sec.
+
+ for(int y = 0; y < 8; y++){  
     int y_value = y;
-    for(int x = 0; x < 8; x += 1){  // Set up X Loop
+    for(int x = 0; x < 8; x += 1){  
       int x_value = x;      
       writeData(false,x_value,y_value);
     }
   }
   String m_chip_wiped = "Chip wiped(ms):  ";
-  String output_message = m_chip_wiped + (millis()-preTime); //this take on average 9 millsecs without printing to serial.
+  String output_message = m_chip_wiped + (millis()-preTime); 
   Serial.println(output_message);
 }
 
-  ///////////BIG BOY
 
 void AGD2188::writeArray(int input_array[8], int sizeOfArray){
   //Step 0.5 CHECK IF ALL ZEROS
@@ -246,9 +209,9 @@ void AGD2188::testChip(){
  for (int i =0; i<8; i++){
     for (int j =0; j<8; j++){
       writeData(true,i,j);
-      readData(i);
-      delay(500);
+      delay(50);
     }
+    readData(i);
   }
   wipeChip();
 }
