@@ -1,23 +1,8 @@
 
-
-/*Do not try and download these two libraries: <Adafruit_MCP23017.h><Rotary.h> 
- * Instead, download the zip from: https://github.com/maxgerhardt/rotary-encoder-over-mcp23017 
- * The libraries are in there and I think he modified them.  I had to move the libraries from his
- * "lib" folder into arduino library folder and then put each on in a folder in order for Arduino to
- * see them.  
- * 
- * Another important thing is that if you are using just rotary encoders and not ones mounted to a breakout 
- * board, you MUST use 10k pulldown resistors on the encoders outside leads.  the encoders center lead 
- * is tied to 5VDC.  
- * 
- * One last thing.  The pin numbering stuff below is very confusing unless you know to look at: 
- * https://github.com/adafruit/Adafruit-MCP23017-Arduino-Library/ Pull this up then stare at the 
- * code and itll make sense
- * 
- * The default address as to be 0x20 although I don't see it anywhere
-
-
+/*
+ https://github.com/adafruit/Adafruit-MCP23017-Arduino-Library/ 
 */
+
 #include <Arduino.h>
 #include <Wire.h>
 #include <Adafruit_MCP23017.h>
@@ -38,14 +23,6 @@ typedef struct RotaryData Struct;
 
 RotaryData data;
 
-// bool EasyRotary::getClockwise(){
-//     return data.clockwise;
-// }
-
-// int EasyRotary::getId(){
-//     return data.id;
-// }
-
 
 //Array of pointers of all MCPs if there is more than one
 Adafruit_MCP23017* allMCPs[] = { &mcp };
@@ -62,8 +39,6 @@ void RotaryEncoderChanged(bool clockwise, int id);
  * D3 or D2.
  * */
 byte arduinoIntPin;
-
-
 
 
 /* variable to indicate that an interrupt has occured */

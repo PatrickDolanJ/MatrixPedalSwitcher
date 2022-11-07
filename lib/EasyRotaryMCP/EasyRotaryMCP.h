@@ -1,3 +1,4 @@
+
 #ifndef easy_rotary
 #define easy_rotary
 
@@ -20,8 +21,6 @@ RotaryData checkInterrupt();
 void startup(void (*function)(bool,int));
 bool getClockwise();
 int getId();
-
-private:
 
 };
 #endif

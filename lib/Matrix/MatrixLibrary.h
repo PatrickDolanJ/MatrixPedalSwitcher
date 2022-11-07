@@ -1,3 +1,12 @@
+/*
+Created by: PatrickDolanJ
+Credit: josh_d : https://forum.arduino.cc/t/writing-to-adg2188-switch-array-via-i2c/272611/6
+*/
+
+/*---------------DATASHEET----------------------
+  https://www.farnell.com/datasheets/1793938.pdf
+-----------------------------------------------*/
+
 #ifndef matrix_library
 #define matrix_library
  

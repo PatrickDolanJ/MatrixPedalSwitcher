@@ -112,12 +112,6 @@ void loop() {
       {
       doFoot();  
       }
-    //  MatrixRight.writeData(true, 7, 1);
-    //  MatrixRight.readData(8);
-    //  delay(3000);
-    //  MatrixRight.writeData(false, 7, 1);
-    //  MatrixRight.readData(8);
-    //  delay(3000);
 }
 //-----------------------------------------------------------------------------
 
