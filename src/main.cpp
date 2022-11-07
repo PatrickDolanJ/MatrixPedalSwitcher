@@ -96,8 +96,8 @@ void setup() {
   MatrixRight.wipeChip();
   MatrixLeft.wipeChip();
 
-  MatrixRight.writeArray(cur_loop_positions,7);
-  MatrixLeft.writeArray(cur_loop_positions,7);
+  MatrixRight.writeArray(CurrentLoopPositions,7);
+  MatrixLeft.writeArray(CurrentLoopPositions,7);
   
   
 }
@@ -128,8 +128,8 @@ void updateUI(bool isClockwise, int id){
       if(id!=8){
         changeLoopPositions(isClockwise, id);
         sendLoopPositions();
-        MatrixRight.writeArray(cur_loop_positions,7);
-        MatrixLeft.writeArray(cur_loop_positions,7);
+        MatrixRight.writeArray(CurrentLoopPositions,7);
+        MatrixLeft.writeArray(CurrentLoopPositions,7);
         }
       break;
 
@@ -448,54 +448,15 @@ void doFoot(){
 
 
 void digitalPotWrite(int pot, int value){
-  if(pot <= 5){
-    digitalWrite(cs0_pin, LOW);
+  int potPins[] = {cs0_pin,cs1_pin,cs2_pin,cs3_pin,cs4_pin,cs5_pin};
+  int potPinPosition = map(0,35,0,6,pot);
+
+    digitalWrite(potPins[potPinPosition], LOW);
     delayMicroseconds(spiDelay);
-    SPI.transfer(pot);
+    SPI.transfer(pot%6);
     SPI.transfer(value);
     delayMicroseconds(spiDelay);
-    digitalWrite(cs0_pin, HIGH);
-  }
-  if(pot >= 6 || pot <= 11){
-    digitalWrite(cs1_pin, LOW);
-    delayMicroseconds(spiDelay);
-    SPI.transfer(pot - 6);   
-    SPI.transfer(value);
-    delayMicroseconds(spiDelay);
-    digitalWrite(cs1_pin, HIGH);
-  }
-  if(pot >= 12 || pot <= 17){
-    digitalWrite(cs2_pin, LOW);
-    delayMicroseconds(spiDelay);
-    SPI.transfer(pot - 12);
-    SPI.transfer(value);
-    delayMicroseconds(spiDelay);
-    digitalWrite(cs2_pin, HIGH);
-  }
-  if(pot >= 18 || pot <= 23){
-    digitalWrite(cs3_pin, LOW);
-    delayMicroseconds(spiDelay);
-    SPI.transfer(pot - 18);
-    SPI.transfer(value);
-    delayMicroseconds(spiDelay);
-    digitalWrite(cs3_pin, HIGH);
-  }
-  if(pot >= 24 || pot <= 29){
-    digitalWrite(cs4_pin, LOW);
-    delayMicroseconds(spiDelay);
-    SPI.transfer(pot - 24);
-    SPI.transfer(value);
-    delayMicroseconds(spiDelay);
-    digitalWrite(cs4_pin, HIGH);
-  }
-  if(pot >= 30 || pot <= 35){
-    digitalWrite(cs5_pin, LOW);
-    delayMicroseconds(spiDelay);
-    SPI.transfer(pot - 30);
-    SPI.transfer(value);
-    delayMicroseconds(spiDelay);
-    digitalWrite(cs5_pin, HIGH);
-  }
+    digitalWrite(potPins[potPinPosition], HIGH);
 }
 
 void setVolumesDefault(){
