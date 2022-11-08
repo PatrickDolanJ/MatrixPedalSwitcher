@@ -1,4 +1,4 @@
-# The HeighLiner 
+# The Heighliner 
 
 Full Stereo Pedal Switcher Matrix with recallable phase and volumes.  
 
