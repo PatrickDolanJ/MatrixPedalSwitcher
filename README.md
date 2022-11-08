@@ -8,7 +8,7 @@ Full Stereo Pedal Switcher Matrix with recallable phase and volumes.
 
   
 
-### What is it? 
+## What is it? 
 
   
 
@@ -38,7 +38,7 @@ This is the job of a pedal switcher, but the Heighliner offers a few more featur
 
   
 
-### How to run 
+## How to run 
 
   
 
