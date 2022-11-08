@@ -85,7 +85,7 @@ Lastly, the main display is a Nextion NX3224T024_01. These are programmed using 
 3.) Add loading screen while device boots up.  
 4.) Control foot switch LEDs (PCF8574) at 0x23.   
 5.) Make better indication of return switching.  
-6.) Add I2C scanning on start up for easier debugging.
+6.) Add I2C scanning on start up for easier debugging.  
 7.) Address volume damping in parallel setup.
 
 ## Made by
