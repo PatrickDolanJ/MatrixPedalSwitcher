@@ -26,7 +26,8 @@ int CurrentInputVolumes[8] = {DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAU
 int CurrentLeftOutputVolumes[8] = {DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME};
 int CurrentRightOutputVolumes[8] = {DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME};
 int CurrentPhase[8] = {0,0,0,0,0,0,0,0};
-bool cur_return[8] = {1,1,1,1,1,1,1,1};
+bool CurrentReturns[8] = {1,1,1,1,1,1,1,1};
+int TestArray[] = {0,1,0,3,0,0,0};
 
 //----------------------Function prototypes------------------------
 void updateUI(bool isClockwise, int id);
@@ -99,19 +100,21 @@ void setup() {
   MatrixRight.writeArray(CurrentLoopPositions,7);
   MatrixLeft.writeArray(CurrentLoopPositions,7);
   
-  
+ 
 }
 //-----------------------------------LOOP-------------------------------------
 void loop() {
-    RotaryDataStuct = RotaryEncoders.checkInterrupt(); 
-    if (RotaryFlag)
-      {
-      doButton();
-      }
-    if (FootFlag)
-      {
-      doFoot();  
-      }
+    // RotaryDataStuct = RotaryEncoders.checkInterrupt(); 
+    // if (RotaryFlag)
+    //   {
+    //   doButton();
+    //   }
+    // if (FootFlag)
+    //   {
+    //   doFoot();  
+    //   }
+    MatrixLeft.writeArray(TestArray,7);
+    delay(500);
 }
 //-----------------------------------------------------------------------------
 
@@ -262,7 +265,7 @@ void changePhase(int id, bool isClockwise){
 }
 
 void sendReturn(int arrayId){
-    String returnToDisplay = cur_return[arrayId] ? STEREO : MONO;
+    String returnToDisplay = CurrentReturns[arrayId] ? STEREO : MONO;
     Serial2.print(ADDRESS_FOR_DISPLAY[arrayId][2] + ".txt=" + '"' + returnToDisplay + '"');
     sendEndCommand();
     Serial.println(ADDRESS_FOR_DISPLAY[arrayId][2] + ".txt=" + '"' + returnToDisplay + '"');
@@ -271,7 +274,7 @@ void sendReturn(int arrayId){
 void changeReturn(int id){
   int idToArray = id -1;
   if(idToArray!=7){
-    cur_return[idToArray] = !cur_return[idToArray];
+    CurrentReturns[idToArray] = !CurrentReturns[idToArray];
     sendReturn(idToArray);
   }
 }
