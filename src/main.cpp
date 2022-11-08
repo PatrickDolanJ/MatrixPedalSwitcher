@@ -51,7 +51,7 @@ void setVolumesDefault();
 //----------------------------Buttons/RotaryEncoders---------------------------
 EasyRotary RotaryEncoders(ROTARY_ENCODER_INTERUPT_PIN); //for reading rotary encoder data **NOT BUTTONS**
 RotaryData RotaryDataStuct; // struct for holding rotary encoder data
-PCF8574 pcf21(ROTARY_ADDRESS); // rotary encoder **BUTTONS**
+PCF8574 pcf21(ROTARY_BUTTONS_ADDRESS); // rotary encoder **BUTTONS**
 PCF8574 pcf22(FOOTSWITCH_ADDRESS); // foot switch buttons
 volatile bool RotaryFlag = false;
 volatile bool FootFlag = false;
@@ -99,22 +99,18 @@ void setup() {
 
   MatrixRight.writeArray(CurrentLoopPositions,7);
   MatrixLeft.writeArray(CurrentLoopPositions,7);
-  
- 
 }
 //-----------------------------------LOOP-------------------------------------
 void loop() {
-    // RotaryDataStuct = RotaryEncoders.checkInterrupt(); 
-    // if (RotaryFlag)
-    //   {
-    //   doButton();
-    //   }
-    // if (FootFlag)
-    //   {
-    //   doFoot();  
-    //   }
-    MatrixLeft.writeArray(TestArray,7);
-    delay(500);
+    RotaryDataStuct = RotaryEncoders.checkInterrupt(); 
+    if (RotaryFlag)
+      {
+      doButton();
+      }
+    if (FootFlag)
+      {
+      doFoot();  
+      }
 }
 //-----------------------------------------------------------------------------
 

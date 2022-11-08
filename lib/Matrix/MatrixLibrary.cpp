@@ -113,8 +113,6 @@ void AGD2188::readData(int x){
 
 
  void AGD2188::writeData(bool OnOrOff, int x, int y){ 
-  String message = "x: " + String(x) + " connected to y: " +  String(y);
-  Serial.print(message);
   byte data_input = convert_to_byte(OnOrOff,x,y);
   byte data_array[2];  
   data_array[0] = data_input; //on off is 1st bit, next 4 is x adress last three is the y address

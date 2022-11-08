@@ -8,7 +8,7 @@ const String HIGHLIGHT_COLOR = "62025";
 const float LONG_PRESS_INTERVAL_S = 1.75;
 
 //------------I2C Addresses-------------
-const byte ROTARY_ADDRESS = 0x21;
+const byte ROTARY_BUTTONS_ADDRESS = 0x21;
 const byte FOOTSWITCH_ADDRESS = 0x22;
 const byte RIGHT_MATRIX_ADDRESS = 0x70;
 const byte LEFT_MATRIX_ADDRESS = 0x74;
