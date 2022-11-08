@@ -12,7 +12,7 @@ AGD2188 MatrixRight(RIGHT_MATRIX_ADDRESS);
 AGD2188 MatrixLeft(LEFT_MATRIX_ADDRESS);
 
 //------------------------------MENU------------------------------
-enum E_MenuState {LOOPS = 1,INPUT_VOLUMES = 2, LEFT_OUTPUT_VOLUMES = 3,RIGHT_OUTPUT_VOLUMES = 4, PHASE = 5, NUM_MENU_OPTIONS=6};
+enum E_MenuState {LOOPS = 1,INPUT_VOLUMES = 2, LEFT_OUTPUT_VOLUMES = 3,RIGHT_OUTPUT_VOLUMES = 4, PHASE = 5, NUM_MENU_OPTIONS = 6};
 E_MenuState MenuState;
 unsigned long PreviousMillis = 0;
 unsigned long CurrentTime = 0;
@@ -72,7 +72,6 @@ void setup() {
   Serial.println(DEVICE_NAME + " booting");
 
   initializeDisplay();
-  setVolumesDefault();
 
 	pinMode(pcf21, 0, INPUT_PULLUP);
   pinMode(pcf22, 1, INPUT_PULLUP);
@@ -422,11 +421,11 @@ void doFoot(){
         FootFlag = false;
         int y = pcf22.read();
         Serial.println("Read Foot: " + String(y, HEX));
-        if(y!= 0xFF && FirstFootButtonValue!=0){
+        if(y!= 0xFF){
           FirstFootButtonValue = y;
         }
 
-        if(y!= 0xFF && FirstFootButtonValue != 0 && SecondFootButtonValue !=0){
+        if(y!= 0xFF && FirstFootButtonValue != 0){
           SecondFootButtonValue = y;
         }
         // when 2 are pressed and when released sends original hex again aka the other one pressed
@@ -460,13 +459,9 @@ pinMode(cs2_pin, OUTPUT);
 pinMode(cs3_pin, OUTPUT);
 pinMode(cs4_pin, OUTPUT);
 pinMode(cs5_pin, OUTPUT);
-// initialize SPI:
-SPI.begin();
 
 for(int i = 0; i<36; i++){
-  digitalPotWrite(i, 255);//pot, level
-  Serial.print(i);
-  Serial.println("on");
+  digitalPotWrite(i, DEFAULT_VOLUME);
 }
 }
 

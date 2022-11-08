@@ -61,7 +61,7 @@ AGD2188::AGD2188()
 // Overloaded constructor for addressing multiple chips //
 AGD2188::AGD2188(byte address)
 {
-  if(address <0x70 || address > 0x77){
+  if(address < 0x70 || address > 0x77){
     Serial.println("ERROR: only 70-77 are valid AGD2188 addresses");
   } else {
     matrix_address = address;
