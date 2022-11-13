@@ -1,6 +1,6 @@
 /*
 Created by: PatrickDolanJ
-Credit: josh_d : https://forum.arduino.cc/t/writing-to-adg2188-switch-array-via-i2c/272611/6
+Based On: josh_d : https://forum.arduino.cc/t/writing-to-adg2188-switch-array-via-i2c/272611/6
 */
 
 /*---------------DATASHEET----------------------
@@ -15,8 +15,8 @@ Credit: josh_d : https://forum.arduino.cc/t/writing-to-adg2188-switch-array-via-
 class AGD2188
 {
 	public:
-	AGD2188(); // default constructor addresses 1110000 adress
-	AGD2188(byte address); // non default allows 0-7 AGD2188
+	AGD2188(); // default constructor addresses 0x70 adress
+	AGD2188(byte address); // non default allows up to 8 AGD2188
 	void wipeChip();
 	void writeData(bool OnorOff, int x, int y);
 	void readData(int x);
