@@ -62,11 +62,11 @@ AGD2188::AGD2188()
 AGD2188::AGD2188(byte address)
 {
   if(address <0x70 || address > 0x77){
-    Serial.println("ERROR: only 70-77 are valid AGD2188 addresses");
+    //Serial.println("ERROR: only 70-77 are valid AGD2188 addresses");
   } else {
     matrix_address = address;
-    Serial.print("Matrix initiated at: ");
-    Serial.println( matrix_address, HEX);
+    //Serial.print("Matrix initiated at: ");
+    //Serial.println( matrix_address, HEX);
   }
   Wire.begin(); 
 }

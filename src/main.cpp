@@ -104,17 +104,15 @@ void setup() {
 }
 //-----------------------------------LOOP-------------------------------------
 void loop() {
-    // RotaryDataStuct = RotaryEncoders.checkInterrupt(); 
-    // if (RotaryFlag)
-    //   {
-    //   doButton();
-    //   }
-    // if (FootFlag)
-    //   {
-    //   doFoot();  
-    //   }
-    MatrixLeft.writeArray(TestArray,7);
-    delay(500);
+    RotaryDataStuct = RotaryEncoders.checkInterrupt(); 
+    if (RotaryFlag)
+      {
+      doButton();
+      }
+    if (FootFlag)
+      {
+      doFoot();  
+      }
 }
 //-----------------------------------------------------------------------------
 
