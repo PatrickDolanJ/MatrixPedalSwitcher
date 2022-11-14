@@ -72,6 +72,7 @@ void setup() {
   Serial.println(DEVICE_NAME + " booting");
 
   initializeDisplay();
+ 
 
 	pinMode(pcf21, 0, INPUT_PULLUP);
   pinMode(pcf22, 1, INPUT_PULLUP);
@@ -84,14 +85,17 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(ROTARY_INTERUPT_PIN), ROTARY_INTERUPT, FALLING);
   attachInterrupt(digitalPinToInterrupt(FOOT_INTERUPT_PIN),FOOT_INTERUPT,FALLING);
 
+  SPI.begin();
+  
   pinMode(cs0_pin, OUTPUT);
   pinMode(cs1_pin, OUTPUT);
   pinMode(cs2_pin, OUTPUT);
   pinMode(cs3_pin, OUTPUT);
   pinMode(cs4_pin, OUTPUT);
   pinMode(cs5_pin, OUTPUT);
+  setVolumesDefault();
 
-  SPI.begin();
+
 
   MatrixRight.wipeChip();
   MatrixLeft.wipeChip();
@@ -440,28 +444,59 @@ void doFoot(){
 
 
 void digitalPotWrite(int pot, int value){
-  int potPins[] = {cs0_pin,cs1_pin,cs2_pin,cs3_pin,cs4_pin,cs5_pin};
-  int potPinPosition = map(0,35,0,6,pot);
-
-    digitalWrite(potPins[potPinPosition], LOW);
+  if(pot <= 5){
+    digitalWrite(cs0_pin, LOW);
     delayMicroseconds(spiDelay);
-    SPI.transfer(pot%6);
+    SPI.transfer(pot);
     SPI.transfer(value);
     delayMicroseconds(spiDelay);
-    digitalWrite(potPins[potPinPosition], HIGH);
+    digitalWrite(cs0_pin, HIGH);
+  }
+  if(pot >= 6 || pot <= 11){
+    digitalWrite(cs1_pin, LOW);
+    delayMicroseconds(spiDelay);
+    SPI.transfer(pot - 6);
+    SPI.transfer(value);
+    delayMicroseconds(spiDelay);
+    digitalWrite(cs1_pin, HIGH);
+  }
+  if(pot >= 12 || pot <= 17){
+    digitalWrite(cs2_pin, LOW);
+    delayMicroseconds(spiDelay);
+    SPI.transfer(pot - 12);
+    SPI.transfer(value);
+    delayMicroseconds(spiDelay);
+    digitalWrite(cs2_pin, HIGH);
+  }
+  if(pot >= 18 || pot <= 23){
+    digitalWrite(cs3_pin, LOW);
+    delayMicroseconds(spiDelay);
+    SPI.transfer(pot - 18);
+    SPI.transfer(value);
+    delayMicroseconds(spiDelay);
+    digitalWrite(cs3_pin, HIGH);
+  }
+  if(pot >= 24 || pot <= 29){
+    digitalWrite(cs4_pin, LOW);
+    delayMicroseconds(spiDelay);
+    SPI.transfer(pot - 24);
+    SPI.transfer(value);
+    delayMicroseconds(spiDelay);
+    digitalWrite(cs4_pin, HIGH);
+  }
+  if(pot >= 30 || pot <= 35){
+    digitalWrite(cs5_pin, LOW);
+    delayMicroseconds(spiDelay);
+    SPI.transfer(pot - 30);
+    SPI.transfer(value);
+    delayMicroseconds(spiDelay);
+    digitalWrite(cs5_pin, HIGH);
+  }
 }
 
 void setVolumesDefault(){
-
-pinMode(cs0_pin, OUTPUT);
-pinMode(cs1_pin, OUTPUT);
-pinMode(cs2_pin, OUTPUT);
-pinMode(cs3_pin, OUTPUT);
-pinMode(cs4_pin, OUTPUT);
-pinMode(cs5_pin, OUTPUT);
-
 for(int i = 0; i<36; i++){
-  digitalPotWrite(i, DEFAULT_VOLUME);
+  digitalPotWrite(i, 255);
 }
 }
 
