@@ -61,13 +61,7 @@ AGD2188::AGD2188()
 // Overloaded constructor for addressing multiple chips //
 AGD2188::AGD2188(byte address)
 {
-  if(address <0x70 || address > 0x77){
-    //Serial.println("ERROR: only 70-77 are valid AGD2188 addresses");
-  } else {
-    matrix_address = address;
-    //Serial.print("Matrix initiated at: ");
-    //Serial.println( matrix_address, HEX);
-  }
+  matrix_address = address;
   Wire.begin(); 
 }
 //--------------------------------------------------------------------------
@@ -113,8 +107,6 @@ void AGD2188::readData(int x){
 
 
  void AGD2188::writeData(bool OnOrOff, int x, int y){ 
-  String message = "x: " + String(x) + " connected to y: " +  String(y);
-  Serial.print(message);
   byte data_input = convert_to_byte(OnOrOff,x,y);
   byte data_array[2];  
   data_array[0] = data_input; //on off is 1st bit, next 4 is x adress last three is the y address
@@ -182,8 +174,7 @@ void AGD2188::writeArray(int input_array[8], int sizeOfArray){
   }
 
   //Step Three: iterate through and check for next value 
-  int preVal = minVal;
-  int curVal = minVal;
+  int preVal, curVal = minVal;
 
    for (int i = 0; i < sizeOfArray; i++){
     // 3.0 finds the next highest number in the array
@@ -192,7 +183,8 @@ void AGD2188::writeArray(int input_array[8], int sizeOfArray){
       if(input_array[p]==(preVal+interval)){
         curVal = preVal+interval;
       }
-      if(curVal == preVal && p == 7){
+      
+      if(curVal == preVal && p == 6){
         interval ++;
         if(interval <6){
           p=-1;
@@ -206,6 +198,7 @@ void AGD2188::writeArray(int input_array[8], int sizeOfArray){
         for(int l = 0; l<sizeOfArray; l++){
           if(input_array[l]==preVal){
           writeData(true,l,o);
+          Serial.println("connceting: " + String(l) + " to " + String(o));
           }
         }
       }
@@ -217,6 +210,7 @@ void AGD2188::writeArray(int input_array[8], int sizeOfArray){
    for(int m = 0; m <sizeOfArray; m++){
     if(input_array[m]==curVal){
       writeData(true,m,7);
+      Serial.println("connecting: " + String(m) + "to Output");
     }
   }
 } 

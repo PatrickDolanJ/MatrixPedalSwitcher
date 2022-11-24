@@ -5,6 +5,7 @@
 #include <NextionCommands.h>
 #include <SPI.h>
 #include <DeviceConfig.h>
+#include <I2Cscanner.h>
 
 
 //-----------------------------MATRIX----------------------------
@@ -70,6 +71,7 @@ void setup() {
   Serial.begin(115200);  //To Computer
   Serial2.begin(9600);  //To Nextion
   Serial.println(DEVICE_NAME + " booting");
+  i2CScan();
 
   initializeDisplay();
  
