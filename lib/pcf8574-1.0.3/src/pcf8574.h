@@ -69,7 +69,6 @@ class PCF8574 {
 	int read() {
 		int result = wire->requestFrom(address, 1);
 		if(result == 0) return -1;
-		Serial.println(address);
 		return wire->read();
 	}
 

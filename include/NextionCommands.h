@@ -137,3 +137,11 @@ const String PHASES_FOR_DISPLAY[7][2] = {
   };
 
 const String LOOPS_FOR_DISPLAY[7] = {A_LOOP_POS, B_LOOP_POS,C_LOOP_POS,D_LOOP_POS,E_LOOP_POS,F_LOOP_POS,G_LOOP_POS};
+
+const String FOOT_BANKS[5] = {"A","B","C","D","E"};
+
+ void sendEndCommand(){
+   Serial2.write(b_end_message);
+   Serial2.write(b_end_message);
+   Serial2.write(b_end_message);
+ }

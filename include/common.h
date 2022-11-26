@@ -8,3 +8,4 @@
 #include <SPI.h>
 #include <I2Cscanner.h>
 #include <DigitalPots.h>
+#include <RotaryEncoders.h>

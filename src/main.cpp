@@ -10,6 +10,7 @@ E_MenuState MenuState;
 unsigned long PreviousMillis = 0;
 unsigned long CurrentTime = 0;
 int PreviousRotaryButtonValue;
+int PreviousFootValue;
 int FirstFootButtonValue = 0;
 int SecondFootButtonValue = 0;
 
@@ -26,7 +27,6 @@ int TestArray[] = {0,1,0,3,0,0,0};
 void updateUI(bool isClockwise, int id);
 void changeLoopPositions(bool isClockwise, int id);
 void sendLoopPositions();
-void sendEndCommand();
 void cycleMenu();
 void changeVolume(int id, bool isClockwise, int volume_array[]);
 void changePhase(int id, bool isClockwise);
@@ -34,19 +34,20 @@ void highlightMenu(bool shouldHighlight);
 void changeReturn(int id);
 void startCounter();
 bool checkPress(int durationInSeconds, int id);
-int hexToId(byte hexVal);
 void sendReturn(int arrayId);
 void initializeDisplay();
 void doButton();
 void doFoot();
 void setVolumesDefault();
 void sendVolumeToDigitalPot(int id);
-
+void changeFootLED(int ledID, bool isOn);
+int footHextoID(byte hex);
 //----------------------------Buttons/RotaryEncoders---------------------------
 EasyRotary RotaryEncoders(ROTARY_ENCODER_INTERUPT_PIN); //for reading rotary encoder data **NOT BUTTONS**
 RotaryData RotaryDataStuct; // struct for holding rotary encoder data
-PCF8574 pcf21(ROTARY_BUTTONS_ADDRESS); // rotary encoder **BUTTONS**
-PCF8574 pcf22(FOOTSWITCH_ADDRESS); // foot switch buttons
+PCF8574 rotaryExpander(ROTARY_BUTTONS_ADDRESS); // rotary encoder **BUTTONS**
+PCF8574 footExpander(FOOTSWITCH_ADDRESS); // foot switch buttons
+PCF8574 ledExpander(FOOT_SWITCH_LIGHTS_ADDRESS);
 volatile bool RotaryFlag = false;
 volatile bool FootFlag = false;
 //Interupts
@@ -68,9 +69,8 @@ void setup() {
 
   initializeDisplay();
  
-
-	pinMode(pcf21, 0, INPUT_PULLUP);
-  pinMode(pcf22, 1, INPUT_PULLUP);
+	pinMode(rotaryExpander, 0, INPUT_PULLUP);
+  pinMode(footExpander, 1, INPUT_PULLUP);
   
   pinMode(ROTARY_INTERUPT_PIN, INPUT_PULLUP);
   pinMode(FOOT_INTERUPT_PIN,INPUT_PULLUP);
@@ -89,8 +89,6 @@ void setup() {
   pinMode(cs4_pin, OUTPUT);
   pinMode(cs5_pin, OUTPUT);
   setVolumesDefault();
-
-
 
   MatrixRight.wipeChip();
   MatrixLeft.wipeChip();
@@ -162,13 +160,6 @@ void updateUI(bool isClockwise, int id){
     sendEndCommand();
   }
   }
-
-
- void sendEndCommand(){
-   Serial2.write(b_end_message);
-   Serial2.write(b_end_message);
-   Serial2.write(b_end_message);
- }
 
 void cycleMenu(){
   highlightMenu(false);
@@ -335,36 +326,7 @@ bool checkPress(int durationInSeconds, int id){
   return (isLongPress);
   } 
 
-  int hexToId(byte hexVal){
-    int id = 8;
-    switch (hexVal){
-
-      case (0xFE):
-        id = 1;
-        break;
-      case (0xFD):
-        id = 2;
-        break;
-      case (0xFB):
-        id = 3;
-        break;
-      case (0xF7):
-        id = 4;
-        break;
-      case (0xEF):
-        id = 5;
-        break;
-      case (0xDF):
-        id = 6;
-        break;
-      case (0xBF):
-        id = 7;
-        break;
-    }
-    return id;
-  }
   
-
 void initializeDisplay(){
   //Phases
   for(int i = 0; i <7; i++){
@@ -397,6 +359,11 @@ void initializeDisplay(){
     MenuState = static_cast<E_MenuState>(i);
     highlightMenu(false);
   }
+
+  for(int i = 0; i < 5; i++){
+
+  }
+
   //Highlight Loops First and set MenuState
   MenuState = E_MenuState::LOOPS;
   highlightMenu(true); 
@@ -404,14 +371,14 @@ void initializeDisplay(){
 
 void doButton(){
     RotaryFlag = false;
-        int RotaryButtonValue = pcf21.read();
+        int RotaryButtonValue = rotaryExpander.read();
         if(RotaryButtonValue!=0xFF && RotaryButtonValue!=PreviousRotaryButtonValue){
           startCounter();
         }
         Serial.print("READ Knobs:\t");
         Serial.println(RotaryButtonValue, HEX);
         if(RotaryButtonValue == 0xFF && RotaryButtonValue!=PreviousRotaryButtonValue){
-          int id = hexToId(PreviousRotaryButtonValue);
+          int id = rotaryHexToId(PreviousRotaryButtonValue);
           checkPress(LONG_PRESS_INTERVAL_S,id) ? changeReturn(id) : cycleMenu();
         }
           PreviousRotaryButtonValue = RotaryButtonValue;
@@ -419,23 +386,27 @@ void doButton(){
 
 void doFoot(){   
         FootFlag = false;
-        int y = pcf22.read();
-        Serial.println("Read Foot: " + String(y, HEX));
-        if(y!= 0xFF){
-          FirstFootButtonValue = y;
-        }
+        int footID = footHextoID(footExpander.read());
 
-        if(y!= 0xFF && FirstFootButtonValue != 0){
-          SecondFootButtonValue = y;
-        }
         // when 2 are pressed and when released sends original hex again aka the other one pressed
 
-        if(y == 0xFF){
-          y = 0;
-          Serial.println("First Button: " + String(FirstFootButtonValue) + " Second Button: " + String(SecondFootButtonValue));
-          FirstFootButtonValue = 0;
-          FirstFootButtonValue = 0;
+        if(footID != PreviousFootValue){
+  
+          // if(footID != -1 && FirstFootButtonValue == -2){
+          //   FirstFootButtonValue = footID;
+          // }
+
+          // if(footID != -1 && footID != FirstFootButtonValue && FirstFootButtonValue != -2){
+          //   SecondFootButtonValue = footID;
+          // }
+
+          // if(footID == -1){
+          //   Serial.println("First Button: " + String(FirstFootButtonValue) + " Second Button: " + String(SecondFootButtonValue)); 
+          //   FirstFootButtonValue = -2;
+          //   SecondFootButtonValue = -2;
+          // }
         }
+        PreviousFootValue = footID;
 }
 
 
@@ -466,4 +437,42 @@ void sendVolumeToDigitalPot(int id){
 }
 
 
+int footHextoID(byte hex){
+  String currentBank = "none";
+  int footID = -1;
+  switch(hex)
+  {
+    case(0xfe):
+      currentBank = FOOT_BANKS[0];
+      footID = 0;
+      break;
+    case(0xfd):
+      currentBank = FOOT_BANKS[1];
+      footID = 1;
+      break;
+    case(0xfb):
+      currentBank = FOOT_BANKS[2];
+      footID = 2;
+      break;
+    case(0xf7):
+      currentBank = FOOT_BANKS[3];
+      footID = 3;
+      break;
+    case(0xef):
+      currentBank = FOOT_BANKS[4];
+      footID = 4;
+      break;
+  }
+  //Serial.println("FootID:" + String(footID));
+  return footID;
+}
+
+
+void changeFootLED(int ledID, bool isOn){
+  if(isOn){
+    digitalWrite(ledExpander,ledID, HIGH);
+  } else {
+    digitalWrite(ledExpander,ledID, LOW);
+  }
+}
 
