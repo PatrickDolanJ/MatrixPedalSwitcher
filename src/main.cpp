@@ -59,7 +59,7 @@ void ROTARY_INTERUPT()
 void FOOT_INTERUPT(){
   FootFlag = true;
 }
-//------------------------------Start------------------------------
+//------------------------------Setup------------------------------
 
 void setup() {
   Serial.begin(115200);  //To Computer
@@ -98,11 +98,15 @@ void setup() {
 }
 //-----------------------------------LOOP-------------------------------------
 void loop() {
+  // Check for rotary encoder data
     RotaryDataStuct = RotaryEncoders.checkInterrupt(); 
+
+  // Check for rotary encoder button press
     if (RotaryFlag)
       {
       doButton();
       }
+  // Check for foot button press
     if (FootFlag)
       {
       doFoot();  
@@ -254,7 +258,6 @@ void sendReturn(int arrayId){
     String returnToDisplay = CurrentReturns[arrayId] ? STEREO : MONO;
     Serial2.print(ADDRESS_FOR_DISPLAY[arrayId][2] + ".txt=" + '"' + returnToDisplay + '"');
     sendEndCommand();
-    Serial.println(ADDRESS_FOR_DISPLAY[arrayId][2] + ".txt=" + '"' + returnToDisplay + '"');
 }
 
 void changeReturn(int id){
@@ -369,6 +372,8 @@ void initializeDisplay(){
   highlightMenu(true); 
 }
 
+//-------------------------------When Rotary Encoder Button is pressed--------------------------
+//----------------------------------------------------------------------------------------------
 void doButton(){
     RotaryFlag = false;
         int RotaryButtonValue = rotaryExpander.read();
@@ -384,28 +389,18 @@ void doButton(){
           PreviousRotaryButtonValue = RotaryButtonValue;
 }
 
+//--------------------------------------When Foot Switch is pressed---------------------------------
+//----------------------------------------------------------------------------------------------
 void doFoot(){   
         FootFlag = false;
-        int footID = footHextoID(footExpander.read());
-
+        //int footID = footHextoID(footExpander.read());
+          int footID = footExpander.read();
         // when 2 are pressed and when released sends original hex again aka the other one pressed
 
         if(footID != PreviousFootValue){
-  
-          // if(footID != -1 && FirstFootButtonValue == -2){
-          //   FirstFootButtonValue = footID;
-          // }
-
-          // if(footID != -1 && footID != FirstFootButtonValue && FirstFootButtonValue != -2){
-          //   SecondFootButtonValue = footID;
-          // }
-
-          // if(footID == -1){
-          //   Serial.println("First Button: " + String(FirstFootButtonValue) + " Second Button: " + String(SecondFootButtonValue)); 
-          //   FirstFootButtonValue = -2;
-          //   SecondFootButtonValue = -2;
-          // }
-        }
+          Serial.print("Foot Pressed HEX: ");
+          Serial.println(footID, HEX);
+}
         PreviousFootValue = footID;
 }
 
@@ -461,6 +456,11 @@ int footHextoID(byte hex){
     case(0xef):
       currentBank = FOOT_BANKS[4];
       footID = 4;
+      break;
+      // Anything that isnt FF and isnt a single button returns -2 to indicate that multiple buttons are pressed
+    case(!0Xff):
+      currentBank = "Two Pressed"; 
+      footID = -2;
       break;
   }
   //Serial.println("FootID:" + String(footID));
