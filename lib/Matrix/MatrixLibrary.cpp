@@ -198,7 +198,6 @@ void AGD2188::writeArray(int input_array[8], int sizeOfArray){
         for(int l = 0; l<sizeOfArray; l++){
           if(input_array[l]==preVal){
           writeData(true,l,o);
-          Serial.println("connceting: " + String(l) + " to " + String(o));
           }
         }
       }
@@ -210,7 +209,6 @@ void AGD2188::writeArray(int input_array[8], int sizeOfArray){
    for(int m = 0; m <sizeOfArray; m++){
     if(input_array[m]==curVal){
       writeData(true,m,7);
-      Serial.println("connecting: " + String(m) + "to Output");
     }
   }
 } 

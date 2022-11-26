@@ -89,8 +89,6 @@ void EasyRotary::startup(void (*function)(bool clockwise,int id)){
 
 EasyRotary::EasyRotary(int InteruptPin){
     arduinoIntPin = InteruptPin;
-    Serial.println("MCP23017 Interrupt");
-
 }
 
 // The int handler will just signal that the int has happened

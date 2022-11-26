@@ -1,0 +1,11 @@
+#include <Arduino.h>
+#include <DeviceConfig.h>
+#include <SPI.h>
+#include <MatrixLibrary.h>
+#include <EasyRotaryMCP.h>
+#include <PCF8574.h>
+#include <NextionCommands.h>
+#include <SPI.h>
+#include <I2Cscanner.h>
+#include <DigitalPots.h>
+#include <RotaryEncoders.h>

@@ -1,12 +1,4 @@
-#include <Arduino.h>
-#include <MatrixLibrary.h>
-#include <EasyRotaryMCP.h>
-#include <PCF8574.h>
-#include <NextionCommands.h>
-#include <SPI.h>
-#include <DeviceConfig.h>
-#include <I2Cscanner.h>
-
+# include <common.h>
 
 //-----------------------------MATRIX----------------------------
 AGD2188 MatrixRight(RIGHT_MATRIX_ADDRESS); 
@@ -18,8 +10,8 @@ E_MenuState MenuState;
 unsigned long PreviousMillis = 0;
 unsigned long CurrentTime = 0;
 int PreviousRotaryButtonValue;
-int FirstFootButtonValue = 0;
-int SecondFootButtonValue = 0;
+int PreviousFootValue = -1;
+bool TwoFootButtonsPressed = false;
 
 //------------------------------DATA------------------------------ 
 int CurrentLoopPositions[7] = {0,0,0,0,0,0,0};
@@ -34,7 +26,6 @@ int TestArray[] = {0,1,0,3,0,0,0};
 void updateUI(bool isClockwise, int id);
 void changeLoopPositions(bool isClockwise, int id);
 void sendLoopPositions();
-void sendEndCommand();
 void cycleMenu();
 void changeVolume(int id, bool isClockwise, int volume_array[]);
 void changePhase(int id, bool isClockwise);
@@ -42,18 +33,21 @@ void highlightMenu(bool shouldHighlight);
 void changeReturn(int id);
 void startCounter();
 bool checkPress(int durationInSeconds, int id);
-int hexToId(byte hexVal);
 void sendReturn(int arrayId);
 void initializeDisplay();
 void doButton();
 void doFoot();
 void setVolumesDefault();
-
+void sendVolumeToDigitalPot(int id);
+void changeFootLED(int ledID, bool isOn);
+void turnOffAllFootLEDs();
+int footHextoID(byte hex);
 //----------------------------Buttons/RotaryEncoders---------------------------
 EasyRotary RotaryEncoders(ROTARY_ENCODER_INTERUPT_PIN); //for reading rotary encoder data **NOT BUTTONS**
 RotaryData RotaryDataStuct; // struct for holding rotary encoder data
-PCF8574 pcf21(ROTARY_BUTTONS_ADDRESS); // rotary encoder **BUTTONS**
-PCF8574 pcf22(FOOTSWITCH_ADDRESS); // foot switch buttons
+PCF8574 rotaryExpander(ROTARY_BUTTONS_ADDRESS); // rotary encoder **BUTTONS**
+PCF8574 footExpander(FOOTSWITCH_ADDRESS); // foot switch buttons
+PCF8574 ledExpander(FOOT_SWITCH_LIGHTS_ADDRESS);
 volatile bool RotaryFlag = false;
 volatile bool FootFlag = false;
 //Interupts
@@ -65,7 +59,7 @@ void ROTARY_INTERUPT()
 void FOOT_INTERUPT(){
   FootFlag = true;
 }
-//------------------------------Start------------------------------
+//------------------------------Setup------------------------------
 
 void setup() {
   Serial.begin(115200);  //To Computer
@@ -75,9 +69,8 @@ void setup() {
 
   initializeDisplay();
  
-
-	pinMode(pcf21, 0, INPUT_PULLUP);
-  pinMode(pcf22, 1, INPUT_PULLUP);
+	pinMode(rotaryExpander, 0, INPUT_PULLUP);
+  pinMode(footExpander, 1, INPUT_PULLUP);
   
   pinMode(ROTARY_INTERUPT_PIN, INPUT_PULLUP);
   pinMode(FOOT_INTERUPT_PIN,INPUT_PULLUP);
@@ -97,8 +90,6 @@ void setup() {
   pinMode(cs5_pin, OUTPUT);
   setVolumesDefault();
 
-
-
   MatrixRight.wipeChip();
   MatrixLeft.wipeChip();
 
@@ -107,11 +98,15 @@ void setup() {
 }
 //-----------------------------------LOOP-------------------------------------
 void loop() {
+  // Check for rotary encoder data
     RotaryDataStuct = RotaryEncoders.checkInterrupt(); 
+
+  // Check for rotary encoder button press
     if (RotaryFlag)
       {
       doButton();
       }
+  // Check for foot button press
     if (FootFlag)
       {
       doFoot();  
@@ -170,13 +165,6 @@ void updateUI(bool isClockwise, int id){
   }
   }
 
-
- void sendEndCommand(){
-   Serial2.write(b_end_message);
-   Serial2.write(b_end_message);
-   Serial2.write(b_end_message);
- }
-
 void cycleMenu(){
   highlightMenu(false);
   if(MenuState == NUM_MENU_OPTIONS-1){
@@ -214,10 +202,11 @@ void sendVolumeToDisplay(int idForArray, int volumeForDisplay){
 
 void changeVolume(int id, bool isClockwise, int volume[]){
     int idToArray = id -1;
-    isClockwise ? volume[idToArray]++ : volume[idToArray]--;
+    isClockwise ? volume[idToArray]+=10 : volume[idToArray]-=10;
     capVolume(volume, idToArray);
     int volumeForDisplay = volumeToDisplay(volume[idToArray]);
     sendVolumeToDisplay(idToArray, volumeForDisplay); 
+    sendVolumeToDigitalPot(idToArray);
 }
 
 void sendPhase(int arrayId){
@@ -269,7 +258,6 @@ void sendReturn(int arrayId){
     String returnToDisplay = CurrentReturns[arrayId] ? STEREO : MONO;
     Serial2.print(ADDRESS_FOR_DISPLAY[arrayId][2] + ".txt=" + '"' + returnToDisplay + '"');
     sendEndCommand();
-    Serial.println(ADDRESS_FOR_DISPLAY[arrayId][2] + ".txt=" + '"' + returnToDisplay + '"');
 }
 
 void changeReturn(int id){
@@ -341,36 +329,7 @@ bool checkPress(int durationInSeconds, int id){
   return (isLongPress);
   } 
 
-  int hexToId(byte hexVal){
-    int id = 8;
-    switch (hexVal){
-
-      case (0xFE):
-        id = 1;
-        break;
-      case (0xFD):
-        id = 2;
-        break;
-      case (0xFB):
-        id = 3;
-        break;
-      case (0xF7):
-        id = 4;
-        break;
-      case (0xEF):
-        id = 5;
-        break;
-      case (0xDF):
-        id = 6;
-        break;
-      case (0xBF):
-        id = 7;
-        break;
-    }
-    return id;
-  }
   
-
 void initializeDisplay(){
   //Phases
   for(int i = 0; i <7; i++){
@@ -406,101 +365,142 @@ void initializeDisplay(){
   //Highlight Loops First and set MenuState
   MenuState = E_MenuState::LOOPS;
   highlightMenu(true); 
+
+  turnOffAllFootLEDs();
+  changeFootLED(0,true);
 }
 
+//-------------------------------When Rotary Encoder Button is pressed--------------------------
+//----------------------------------------------------------------------------------------------
 void doButton(){
     RotaryFlag = false;
-        int RotaryButtonValue = pcf21.read();
+        int RotaryButtonValue = rotaryExpander.read();
         if(RotaryButtonValue!=0xFF && RotaryButtonValue!=PreviousRotaryButtonValue){
           startCounter();
         }
         Serial.print("READ Knobs:\t");
         Serial.println(RotaryButtonValue, HEX);
         if(RotaryButtonValue == 0xFF && RotaryButtonValue!=PreviousRotaryButtonValue){
-          int id = hexToId(PreviousRotaryButtonValue);
+          int id = rotaryHexToId(PreviousRotaryButtonValue);
           checkPress(LONG_PRESS_INTERVAL_S,id) ? changeReturn(id) : cycleMenu();
         }
           PreviousRotaryButtonValue = RotaryButtonValue;
 }
 
+//--------------------------------------When Foot Switch is pressed---------------------------------
+//----------------------------------------------------------------------------------------------
 void doFoot(){   
         FootFlag = false;
-        int y = pcf22.read();
-        Serial.println("Read Foot: " + String(y, HEX));
-        if(y!= 0xFF){
-          FirstFootButtonValue = y;
-        }
-
-        if(y!= 0xFF && FirstFootButtonValue != 0){
-          SecondFootButtonValue = y;
-        }
+        int footID = footHextoID(footExpander.read());
         // when 2 are pressed and when released sends original hex again aka the other one pressed
 
-        if(y == 0xFF){
-          y = 0;
-          Serial.println("First Button: " + String(FirstFootButtonValue) + " Second Button: " + String(SecondFootButtonValue));
-          FirstFootButtonValue = 0;
-          FirstFootButtonValue = 0;
-        }
+        if(footID != PreviousFootValue){
+          if(footID == -2){
+            TwoFootButtonsPressed = true;
+          }
+          if(footID == -1){
+            if(TwoFootButtonsPressed){
+            //DO DOUBLE PRESS
+            Serial.println("Two Buttons Pressed");
+            TwoFootButtonsPressed = false;
+            } else {
+            //DO SINGLE PRESS
+              Serial.println("One Button Pressed: " + String(PreviousFootValue));
+              turnOffAllFootLEDs();
+              changeFootLED(PreviousFootValue, true);
+
+            }
+          }
+
+          }
+        PreviousFootValue = footID;
 }
 
-
-void digitalPotWrite(int pot, int value){
-  if(pot <= 5){
-    digitalWrite(cs0_pin, LOW);
-    delayMicroseconds(spiDelay);
-    SPI.transfer(pot);
-    SPI.transfer(value);
-    delayMicroseconds(spiDelay);
-    digitalWrite(cs0_pin, HIGH);
-  }
-  if(pot >= 6 || pot <= 11){
-    digitalWrite(cs1_pin, LOW);
-    delayMicroseconds(spiDelay);
-    SPI.transfer(pot - 6);
-    SPI.transfer(value);
-    delayMicroseconds(spiDelay);
-    digitalWrite(cs1_pin, HIGH);
-  }
-  if(pot >= 12 || pot <= 17){
-    digitalWrite(cs2_pin, LOW);
-    delayMicroseconds(spiDelay);
-    SPI.transfer(pot - 12);
-    SPI.transfer(value);
-    delayMicroseconds(spiDelay);
-    digitalWrite(cs2_pin, HIGH);
-  }
-  if(pot >= 18 || pot <= 23){
-    digitalWrite(cs3_pin, LOW);
-    delayMicroseconds(spiDelay);
-    SPI.transfer(pot - 18);
-    SPI.transfer(value);
-    delayMicroseconds(spiDelay);
-    digitalWrite(cs3_pin, HIGH);
-  }
-  if(pot >= 24 || pot <= 29){
-    digitalWrite(cs4_pin, LOW);
-    delayMicroseconds(spiDelay);
-    SPI.transfer(pot - 24);
-    SPI.transfer(value);
-    delayMicroseconds(spiDelay);
-    digitalWrite(cs4_pin, HIGH);
-  }
-  if(pot >= 30 || pot <= 35){
-    digitalWrite(cs5_pin, LOW);
-    delayMicroseconds(spiDelay);
-    SPI.transfer(pot - 30);
-    SPI.transfer(value);
-    delayMicroseconds(spiDelay);
-    digitalWrite(cs5_pin, HIGH);
-  }
-}
 
 void setVolumesDefault(){
-for(int i = 0; i<36; i++){
-  digitalPotWrite(i, 255);
+  //FOR INPUT VOLUMES
+for(int i = 0; i<8; i++){
+  digitalPotWrite(potID[LEFT_INPUT_VOLUME_POTS_IDS[1][i]],LEFT_INPUT_VOLUME_POTS_IDS[0][i],DEFAULT_VOLUME);
+  digitalPotWrite(potID[RIGHT_INPUT_VOLUME_POTS_IDS[1][i]],RIGHT_INPUT_VOLUME_POTS_IDS[0][i],DEFAULT_VOLUME); 
+}
+
+//FOR LEFT OUTPUT
+for(int i = 0; i<8; i++){
+  digitalPotWrite(potID[LEFT_OUTPUT_VOLUME_POTS_IDS[1][i]],LEFT_OUTPUT_VOLUME_POTS_IDS[0][i],DEFAULT_VOLUME);
+}
+
+// FOR RIGHT OUTPUT
+for(int i = 0; i<8; i++){
+  digitalPotWrite(potID[RIGHT_OUTPUT_VOLUME_POTS_IDS[1][i]],RIGHT_OUTPUT_VOLUME_POTS_IDS[0][i],DEFAULT_VOLUME);
 }
 }
 
+void sendVolumeToDigitalPot(int id){
+  switch(MenuState)
+  {
+    case(E_MenuState::INPUT_VOLUMES):
+      digitalPotWrite(potID[LEFT_INPUT_VOLUME_POTS_IDS[1][id]],LEFT_INPUT_VOLUME_POTS_IDS[0][id],CurrentInputVolumes[id]);
+      digitalPotWrite(potID[RIGHT_INPUT_VOLUME_POTS_IDS[1][id]],RIGHT_INPUT_VOLUME_POTS_IDS[0][id],CurrentInputVolumes[id]);
+      break;
+  
+    case(E_MenuState::LEFT_OUTPUT_VOLUMES):
+      digitalPotWrite(potID[LEFT_OUTPUT_VOLUME_POTS_IDS[1][id]],LEFT_OUTPUT_VOLUME_POTS_IDS[0][id],CurrentLeftOutputVolumes[id]);
+      break;
 
+    case(E_MenuState::RIGHT_OUTPUT_VOLUMES):
+      digitalPotWrite(potID[RIGHT_OUTPUT_VOLUME_POTS_IDS[1][id]],RIGHT_OUTPUT_VOLUME_POTS_IDS[0][id],CurrentRightOutputVolumes[id]);
+      break;
+  }
+}
+
+
+int footHextoID(byte hex){
+  // Anything that isnt FF and isnt a single button returns -2 to indicate that multiple buttons are pressed
+  String currentBank = "Two Pressed";
+  int footID = -2;
+  switch(hex)
+  {
+    case(0xfe):
+      currentBank = FOOT_BANKS[0];
+      footID = 0;
+      break;
+    case(0xfd):
+      currentBank = FOOT_BANKS[1];
+      footID = 1;
+      break;
+    case(0xfb):
+      currentBank = FOOT_BANKS[2];
+      footID = 2;
+      break;
+    case(0xf7):
+      currentBank = FOOT_BANKS[3];
+      footID = 3;
+      break;
+    case(0xef):
+      currentBank = FOOT_BANKS[4];
+      footID = 4;
+      break;
+    case(0Xff):
+      currentBank = "none"; 
+      footID = -1;
+      break;
+  }
+  //Serial.print(currentBank) + "  ";
+  return footID;
+}
+
+
+void changeFootLED(int ledID, bool isOn){
+  if(isOn){
+    digitalWrite(ledExpander,ledID, HIGH);
+  } else {
+    digitalWrite(ledExpander,ledID, LOW);
+  }
+}
+
+void turnOffAllFootLEDs(){
+  for(int i = 0; i<5; i++){
+    changeFootLED(i,false);
+  }
+}
 
