@@ -1,4 +1,5 @@
-#include <Arduino.h> 
+# include <Arduino.h>
+
 
 //--------------Settings---------------
 const String DEVICE_NAME = "HeighLiner";
@@ -20,6 +21,7 @@ const int ROTARY_ENCODER_INTERUPT_PIN = 2;
 
 //-------------Digital Pots-------------
 const int spiDelay = 1;
+
 const int cs0_pin = 32;
 const int cs1_pin = 33;
 const int cs2_pin = 34;

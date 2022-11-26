@@ -1,12 +1,4 @@
-#include <Arduino.h>
-#include <MatrixLibrary.h>
-#include <EasyRotaryMCP.h>
-#include <PCF8574.h>
-#include <NextionCommands.h>
-#include <SPI.h>
-#include <DeviceConfig.h>
-#include <I2Cscanner.h>
-
+# include <common.h>
 
 //-----------------------------MATRIX----------------------------
 AGD2188 MatrixRight(RIGHT_MATRIX_ADDRESS); 
@@ -48,6 +40,7 @@ void initializeDisplay();
 void doButton();
 void doFoot();
 void setVolumesDefault();
+void sendVolumeToDigitalPot(int id);
 
 //----------------------------Buttons/RotaryEncoders---------------------------
 EasyRotary RotaryEncoders(ROTARY_ENCODER_INTERUPT_PIN); //for reading rotary encoder data **NOT BUTTONS**
@@ -218,6 +211,7 @@ void changeVolume(int id, bool isClockwise, int volume[]){
     capVolume(volume, idToArray);
     int volumeForDisplay = volumeToDisplay(volume[idToArray]);
     sendVolumeToDisplay(idToArray, volumeForDisplay); 
+    sendVolumeToDigitalPot(idToArray);
 }
 
 void sendPhase(int arrayId){
@@ -445,61 +439,30 @@ void doFoot(){
 }
 
 
-void digitalPotWrite(int pot, int value){
-  if(pot <= 5){
-    digitalWrite(cs0_pin, LOW);
-    delayMicroseconds(spiDelay);
-    SPI.transfer(pot);
-    SPI.transfer(value);
-    delayMicroseconds(spiDelay);
-    digitalWrite(cs0_pin, HIGH);
-  }
-  if(pot >= 6 || pot <= 11){
-    digitalWrite(cs1_pin, LOW);
-    delayMicroseconds(spiDelay);
-    SPI.transfer(pot - 6);
-    SPI.transfer(value);
-    delayMicroseconds(spiDelay);
-    digitalWrite(cs1_pin, HIGH);
-  }
-  if(pot >= 12 || pot <= 17){
-    digitalWrite(cs2_pin, LOW);
-    delayMicroseconds(spiDelay);
-    SPI.transfer(pot - 12);
-    SPI.transfer(value);
-    delayMicroseconds(spiDelay);
-    digitalWrite(cs2_pin, HIGH);
-  }
-  if(pot >= 18 || pot <= 23){
-    digitalWrite(cs3_pin, LOW);
-    delayMicroseconds(spiDelay);
-    SPI.transfer(pot - 18);
-    SPI.transfer(value);
-    delayMicroseconds(spiDelay);
-    digitalWrite(cs3_pin, HIGH);
-  }
-  if(pot >= 24 || pot <= 29){
-    digitalWrite(cs4_pin, LOW);
-    delayMicroseconds(spiDelay);
-    SPI.transfer(pot - 24);
-    SPI.transfer(value);
-    delayMicroseconds(spiDelay);
-    digitalWrite(cs4_pin, HIGH);
-  }
-  if(pot >= 30 || pot <= 35){
-    digitalWrite(cs5_pin, LOW);
-    delayMicroseconds(spiDelay);
-    SPI.transfer(pot - 30);
-    SPI.transfer(value);
-    delayMicroseconds(spiDelay);
-    digitalWrite(cs5_pin, HIGH);
-  }
-}
-
 void setVolumesDefault(){
 for(int i = 0; i<36; i++){
-  digitalPotWrite(i, 255);
+  digitalPotWrite(i, DEFAULT_VOLUME);
 }
+
+}
+
+void sendVolumeToDigitalPot(int id){
+
+  switch (MenuState)
+  {
+    case(E_MenuState::INPUT_VOLUMES):
+      digitalPotWrite(INPUT_VOLUMES_POTS_IDS[0][id], CurrentInputVolumes[id]);
+      digitalPotWrite(INPUT_VOLUMES_POTS_IDS[1][id], CurrentInputVolumes[id]);
+      break;
+  
+    case(E_MenuState::LEFT_OUTPUT_VOLUMES):
+      digitalPotWrite(LEFT_OUTPUT_VOLUMES_POTS_IDS[id], CurrentLeftOutputVolumes[id]);
+      break;
+
+    case(E_MenuState::RIGHT_OUTPUT_VOLUMES):
+      digitalPotWrite(RIGHT_OUTPUT_VOLUMES_POTS_IDS[id], CurrentRightOutputVolumes[id]);
+      break;
+  }
 }
 
 
