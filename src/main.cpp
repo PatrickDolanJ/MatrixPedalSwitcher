@@ -201,7 +201,7 @@ void sendVolumeToDisplay(int idForArray, int volumeForDisplay){
 
 void changeVolume(int id, bool isClockwise, int volume[]){
     int idToArray = id -1;
-    isClockwise ? volume[idToArray]++ : volume[idToArray]--;
+    isClockwise ? volume[idToArray]+=10 : volume[idToArray]-=10;
     capVolume(volume, idToArray);
     int volumeForDisplay = volumeToDisplay(volume[idToArray]);
     sendVolumeToDisplay(idToArray, volumeForDisplay); 
@@ -414,27 +414,37 @@ void doFoot(){
 
 
 void setVolumesDefault(){
-for(int i = 0; i<36; i++){
-  digitalPotWrite(i, DEFAULT_VOLUME);
+  //FOR INPUT VOLUMES
+for(int i = 0; i<8; i++){
+  digitalPotWrite(potID[LEFT_INPUT_VOLUME_POTS_IDS[1][i]],LEFT_INPUT_VOLUME_POTS_IDS[0][i],DEFAULT_VOLUME);
+  digitalPotWrite(potID[RIGHT_INPUT_VOLUME_POTS_IDS[1][i]],RIGHT_INPUT_VOLUME_POTS_IDS[0][i],DEFAULT_VOLUME); 
 }
 
+//FOR LEFT OUTPUT
+for(int i = 0; i<8; i++){
+  digitalPotWrite(potID[LEFT_OUTPUT_VOLUME_POTS_IDS[1][i]],LEFT_OUTPUT_VOLUME_POTS_IDS[0][i],DEFAULT_VOLUME);
+}
+
+// FOR RIGHT OUTPUT
+for(int i = 0; i<8; i++){
+  digitalPotWrite(potID[RIGHT_OUTPUT_VOLUME_POTS_IDS[1][i]],RIGHT_OUTPUT_VOLUME_POTS_IDS[0][i],DEFAULT_VOLUME);
+}
 }
 
 void sendVolumeToDigitalPot(int id){
-
-  switch (MenuState)
+  switch(MenuState)
   {
     case(E_MenuState::INPUT_VOLUMES):
-      digitalPotWrite(INPUT_VOLUMES_POTS_IDS[0][id], CurrentInputVolumes[id]);
-      digitalPotWrite(INPUT_VOLUMES_POTS_IDS[1][id], CurrentInputVolumes[id]);
+      digitalPotWrite(potID[LEFT_INPUT_VOLUME_POTS_IDS[1][id]],LEFT_INPUT_VOLUME_POTS_IDS[0][id],CurrentInputVolumes[id]);
+      digitalPotWrite(potID[RIGHT_INPUT_VOLUME_POTS_IDS[1][id]],RIGHT_INPUT_VOLUME_POTS_IDS[0][id],CurrentInputVolumes[id]);
       break;
   
     case(E_MenuState::LEFT_OUTPUT_VOLUMES):
-      digitalPotWrite(LEFT_OUTPUT_VOLUMES_POTS_IDS[id], CurrentLeftOutputVolumes[id]);
+      digitalPotWrite(potID[LEFT_OUTPUT_VOLUME_POTS_IDS[1][id]],LEFT_OUTPUT_VOLUME_POTS_IDS[0][id],CurrentLeftOutputVolumes[id]);
       break;
 
     case(E_MenuState::RIGHT_OUTPUT_VOLUMES):
-      digitalPotWrite(RIGHT_OUTPUT_VOLUMES_POTS_IDS[id], CurrentRightOutputVolumes[id]);
+      digitalPotWrite(potID[RIGHT_OUTPUT_VOLUME_POTS_IDS[1][id]],RIGHT_OUTPUT_VOLUME_POTS_IDS[0][id],CurrentRightOutputVolumes[id]);
       break;
   }
 }
