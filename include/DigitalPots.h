@@ -22,8 +22,7 @@ const int LEFT_OUTPUT_VOLUMES_POTS_IDS[8] = {
 
 const int RIGHT_OUTPUT_VOLUMES_POTS_IDS[8] = {
 //A, B,  C,  D,  E,  F,  G, MASTER
-4, 8, 12, 16, 20, 24, 28, 32
-};
+4, 8, 12, 16, 20, 24, 28, 32};
 
 
 void digitalPotWrite(int pot, int value){

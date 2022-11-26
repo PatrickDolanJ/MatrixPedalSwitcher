@@ -10,9 +10,8 @@ E_MenuState MenuState;
 unsigned long PreviousMillis = 0;
 unsigned long CurrentTime = 0;
 int PreviousRotaryButtonValue;
-int PreviousFootValue;
-int FirstFootButtonValue = 0;
-int SecondFootButtonValue = 0;
+int PreviousFootValue = -1;
+bool TwoFootButtonsPressed = false;
 
 //------------------------------DATA------------------------------ 
 int CurrentLoopPositions[7] = {0,0,0,0,0,0,0};
@@ -393,14 +392,23 @@ void doButton(){
 //----------------------------------------------------------------------------------------------
 void doFoot(){   
         FootFlag = false;
-        //int footID = footHextoID(footExpander.read());
-          int footID = footExpander.read();
+        int footID = footHextoID(footExpander.read());
         // when 2 are pressed and when released sends original hex again aka the other one pressed
 
         if(footID != PreviousFootValue){
-          Serial.print("Foot Pressed HEX: ");
-          Serial.println(footID, HEX);
-}
+          if(footID == -2){
+            TwoFootButtonsPressed = true;
+          }
+          if(footID == -1){
+            if(TwoFootButtonsPressed){
+            Serial.println("Two Buttons Pressed");
+            TwoFootButtonsPressed = false;
+            } else {
+              Serial.println("One Button Pressed: " + String(PreviousFootValue));
+            }
+          }
+
+          }
         PreviousFootValue = footID;
 }
 
@@ -433,8 +441,9 @@ void sendVolumeToDigitalPot(int id){
 
 
 int footHextoID(byte hex){
-  String currentBank = "none";
-  int footID = -1;
+  // Anything that isnt FF and isnt a single button returns -2 to indicate that multiple buttons are pressed
+  String currentBank = "Two Pressed";
+  int footID = -2;
   switch(hex)
   {
     case(0xfe):
@@ -457,13 +466,12 @@ int footHextoID(byte hex){
       currentBank = FOOT_BANKS[4];
       footID = 4;
       break;
-      // Anything that isnt FF and isnt a single button returns -2 to indicate that multiple buttons are pressed
-    case(!0Xff):
-      currentBank = "Two Pressed"; 
-      footID = -2;
+    case(0Xff):
+      currentBank = "none"; 
+      footID = -1;
       break;
   }
-  //Serial.println("FootID:" + String(footID));
+  //Serial.print(currentBank) + "  ";
   return footID;
 }
 
