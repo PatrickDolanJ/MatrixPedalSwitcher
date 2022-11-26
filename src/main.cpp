@@ -40,6 +40,7 @@ void doFoot();
 void setVolumesDefault();
 void sendVolumeToDigitalPot(int id);
 void changeFootLED(int ledID, bool isOn);
+void turnOffAllFootLEDs();
 int footHextoID(byte hex);
 //----------------------------Buttons/RotaryEncoders---------------------------
 EasyRotary RotaryEncoders(ROTARY_ENCODER_INTERUPT_PIN); //for reading rotary encoder data **NOT BUTTONS**
@@ -361,14 +362,12 @@ void initializeDisplay(){
     MenuState = static_cast<E_MenuState>(i);
     highlightMenu(false);
   }
-
-  for(int i = 0; i < 5; i++){
-
-  }
-
   //Highlight Loops First and set MenuState
   MenuState = E_MenuState::LOOPS;
   highlightMenu(true); 
+
+  turnOffAllFootLEDs();
+  changeFootLED(0,true);
 }
 
 //-------------------------------When Rotary Encoder Button is pressed--------------------------
@@ -401,10 +400,15 @@ void doFoot(){
           }
           if(footID == -1){
             if(TwoFootButtonsPressed){
+            //DO DOUBLE PRESS
             Serial.println("Two Buttons Pressed");
             TwoFootButtonsPressed = false;
             } else {
+            //DO SINGLE PRESS
               Serial.println("One Button Pressed: " + String(PreviousFootValue));
+              turnOffAllFootLEDs();
+              changeFootLED(PreviousFootValue, true);
+
             }
           }
 
@@ -491,6 +495,12 @@ void changeFootLED(int ledID, bool isOn){
     digitalWrite(ledExpander,ledID, HIGH);
   } else {
     digitalWrite(ledExpander,ledID, LOW);
+  }
+}
+
+void turnOffAllFootLEDs(){
+  for(int i = 0; i<5; i++){
+    changeFootLED(i,false);
   }
 }
 

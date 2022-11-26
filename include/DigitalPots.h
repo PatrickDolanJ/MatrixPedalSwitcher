@@ -1,5 +1,7 @@
 #include <Arduino.h>
 
+//CURRENTLY MASTER and LOOPS B AND C ARE CONFIRMED FOR WORKING
+
 const int potID[6] = {cs0_pin,cs1_pin,cs2_pin,cs3_pin,cs4_pin,cs5_pin};
 
 const String LOOP_NAMES[8] = {"A", "B", "C", "D", "E", "F", "G", "Master"};
