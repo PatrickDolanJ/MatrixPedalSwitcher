@@ -42,15 +42,19 @@ void sendVolumeToDigitalPot(int id);
 void changeFootLED(int ledID, bool isOn);
 void turnOffAllFootLEDs();
 int footHextoID(byte hex);
+void initializeRelays();
+void sendRelay(byte address, int internalPin, int value);
+void sendPhaseRelays(int loopID);
+
 //----------------------------Buttons/RotaryEncoders---------------------------
 EasyRotary RotaryEncoders(ROTARY_ENCODER_INTERUPT_PIN); //for reading rotary encoder data **NOT BUTTONS**
 RotaryData RotaryDataStuct; // struct for holding rotary encoder data
 PCF8574 rotaryExpander(ROTARY_BUTTONS_ADDRESS); // rotary encoder **BUTTONS**
 PCF8574 footExpander(FOOTSWITCH_ADDRESS); // foot switch buttons
-PCF8574 ledExpander(FOOT_SWITCH_LIGHTS_ADDRESS);
 volatile bool RotaryFlag = false;
 volatile bool FootFlag = false;
-//Interupts
+
+//----------------------------------Interupts-----------------------------------
 void ROTARY_INTERUPT()
 {
   RotaryFlag = true;
@@ -59,6 +63,17 @@ void ROTARY_INTERUPT()
 void FOOT_INTERUPT(){
   FootFlag = true;
 }
+
+//------------------------------LEDS------------------------------
+PCF8574 ledExpander(FOOT_SWITCH_LIGHTS_ADDRESS);
+
+
+//---------------------------RELAYS-----------------------
+
+PCF8574 LeftPhaseRelays(LEFT_PHASE_RELAYS_ADDRESS);
+PCF8574 RightPhaseRelays(RIGHT_PHASE_RELAY_ADDRESS);
+PCF8574 ReturnRelayExpander(RETURN_RELAYS_ADDRESS);
+
 //------------------------------Setup------------------------------
 
 void setup() {
@@ -68,12 +83,14 @@ void setup() {
   i2CScan();
 
   initializeDisplay();
+  initializeRelays();
  
 	pinMode(rotaryExpander, 0, INPUT_PULLUP);
   pinMode(footExpander, 1, INPUT_PULLUP);
   
   pinMode(ROTARY_INTERUPT_PIN, INPUT_PULLUP);
   pinMode(FOOT_INTERUPT_PIN,INPUT_PULLUP);
+ 
 
   RotaryEncoders.startup(*updateUI); //  if interupt occured calls UpdateUI()
 
@@ -215,9 +232,11 @@ void sendPhase(int arrayId){
   int PHASE = CurrentPhase[arrayId];
 
   if(PHASE == 0){
-    left_phase = PHASES_FOR_DISPLAY[arrayId][0];
+    //Both Normal
+    left_phase = PHASES_FOR_DISPLAY[arrayId][0]; 
     right_phase = PHASES_FOR_DISPLAY[arrayId][0];
   } else if (PHASE == 1){
+
     left_phase = PHASES_FOR_DISPLAY[arrayId][0];
     right_phase = PHASES_FOR_DISPLAY[arrayId][1];
   } else if (PHASE == 2){
@@ -251,7 +270,8 @@ void changePhase(int id, bool isClockwise){
       CurrentPhase[idToArray]--;
     }
   }
- sendPhase(idToArray);
+  sendPhase(idToArray);
+  sendPhaseRelays(idToArray);
 }
 
 void sendReturn(int arrayId){
@@ -503,4 +523,53 @@ void turnOffAllFootLEDs(){
     changeFootLED(i,false);
   }
 }
+
+void sendRelay(PCF8574 address, int internalPin, int value){
+  digitalWrite(address, internalPin, value);
+}
+
+void sendPhaseRelays(int loopID){
+  byte leftIsReversed = LOW;
+  byte rightIsReversed  = LOW;
+  switch(CurrentPhase[loopID]){
+
+    case(0):
+      leftIsReversed = LOW;
+      rightIsReversed = LOW;
+    break;
+
+    case(1):
+      leftIsReversed = LOW;
+      rightIsReversed = HIGH;
+    break;
+
+    case(2):
+      leftIsReversed = HIGH;
+      rightIsReversed = LOW;
+    break;
+
+    case(3):
+      leftIsReversed = HIGH;
+      rightIsReversed = HIGH;
+    break;
+  }
+    sendRelay(LeftPhaseRelays, loopID ,leftIsReversed);
+    sendRelay(RightPhaseRelays, loopID ,rightIsReversed);
+    Serial.println("Left Phase sent: " +String(leftIsReversed) + "Right Phase Sent: " +  String(rightIsReversed));
+}
+
+
+
+void initializeRelays(){
+  //Returns
+  for(int i = 0; i< 8; i++){
+    byte onOrOff = CurrentReturns[i] == 1 ? HIGH : LOW;
+    Serial.println("Relay Value: " + String(onOrOff));
+    sendRelay(ReturnRelayExpander, i,onOrOff);
+    
+  //Phase Relays
+    sendPhaseRelays(i);
+  }
+}
+
 
