@@ -9,9 +9,10 @@ enum E_MenuState {LOOPS = 1,INPUT_VOLUMES = 2, LEFT_OUTPUT_VOLUMES = 3,RIGHT_OUT
 E_MenuState MenuState;
 unsigned long PreviousMillis = 0;
 unsigned long CurrentTime = 0;
-int PreviousRotaryButtonValue;
+int PreviousRotaryButtonValue = 0xFF;
 int PreviousFootValue = -1;
 bool TwoFootButtonsPressed = false;
+
 
 //------------------------------DATA------------------------------ 
 int CurrentLoopPositions[7] = {0,0,0,0,0,0,0};
@@ -20,7 +21,6 @@ int CurrentLeftOutputVolumes[8] = {DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,
 int CurrentRightOutputVolumes[8] = {DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME};
 int CurrentPhase[8] = {0,0,0,0,0,0,0,0};
 bool CurrentReturns[8] = {1,1,1,1,1,1,1,1};
-int TestArray[] = {0,1,0,3,0,0,0};
 
 //----------------------Function prototypes------------------------
 void updateUI(bool isClockwise, int id);
@@ -32,7 +32,7 @@ void changePhase(int id, bool isClockwise);
 void highlightMenu(bool shouldHighlight);
 void changeReturn(int id);
 void startCounter();
-bool checkPress(int durationInSeconds, int id);
+bool checkPress(int durationInSeconds);
 void sendReturn(int arrayId);
 void initializeDisplay();
 void doButton();
@@ -45,6 +45,7 @@ int footHextoID(byte hex);
 void initializeRelays();
 void sendRelay(byte address, int internalPin, int value);
 void sendPhaseRelays(int loopID);
+void highLightReturn(int id, bool shouldHighlight);
 
 //----------------------------Buttons/RotaryEncoders---------------------------
 EasyRotary RotaryEncoders(ROTARY_ENCODER_INTERUPT_PIN); //for reading rotary encoder data **NOT BUTTONS**
@@ -112,7 +113,9 @@ void setup() {
 
   MatrixRight.writeArray(CurrentLoopPositions,7);
   MatrixLeft.writeArray(CurrentLoopPositions,7);
-}
+
+  }
+
 //-----------------------------------LOOP-------------------------------------
 void loop() {
   // Check for rotary encoder data
@@ -128,8 +131,60 @@ void loop() {
       {
       doFoot();  
       }
+        
+      if(PreviousRotaryButtonValue!=0xFF && checkPress(LONG_PRESS_INTERVAL_S)){
+        highLightReturn(rotaryHexToId(PreviousRotaryButtonValue)-1, true);
+        Serial.println("Long Press Detected: ");
+      }
 }
-//-----------------------------------------------------------------------------
+
+//-------------------------------When Rotary Encoder Button is pressed--------------------------
+//----------------------------------------------------------------------------------------------
+void doButton(){
+    RotaryFlag = false;
+        int RotaryButtonValue = rotaryExpander.read();
+        if(RotaryButtonValue!=0xFF && RotaryButtonValue!=PreviousRotaryButtonValue){
+          startCounter();
+        }
+
+        if(RotaryButtonValue == 0xFF && RotaryButtonValue!=PreviousRotaryButtonValue){
+          int id = rotaryHexToId(PreviousRotaryButtonValue);
+          checkPress(LONG_PRESS_INTERVAL_S) ? changeReturn(id) : cycleMenu();
+        }
+          PreviousRotaryButtonValue = RotaryButtonValue;
+}
+
+//--------------------------------------When Foot Switch is pressed---------------------------------
+//--------------------------------------------------------------------------------------------------
+void doFoot(){   
+        FootFlag = false;
+        int footID = footHextoID(footExpander.read());
+        // when 2 are pressed and when released sends original hex again aka the other one pressed
+
+        if(footID != PreviousFootValue){
+          if(footID == -2){
+            TwoFootButtonsPressed = true;
+          }
+          if(footID == -1){
+            if(TwoFootButtonsPressed){
+            //DO DOUBLE PRESS
+            Serial.println("Two Buttons Pressed");
+            TwoFootButtonsPressed = false;
+            } else {
+            //DO SINGLE PRESS
+              Serial.println("One Button Pressed: " + String(PreviousFootValue));
+              turnOffAllFootLEDs();
+              changeFootLED(PreviousFootValue, true);
+
+            }
+          }
+
+          }
+        PreviousFootValue = footID;
+}
+
+//---------------------------------------------------------------------------------------------------
+
 
 void updateUI(bool isClockwise, int id){
   
@@ -278,6 +333,7 @@ void sendReturn(int arrayId){
     String returnToDisplay = CurrentReturns[arrayId] ? STEREO : MONO;
     Serial2.print(ADDRESS_FOR_DISPLAY[arrayId][2] + ".txt=" + '"' + returnToDisplay + '"');
     sendEndCommand();
+    highLightReturn(arrayId, false);
 }
 
 void changeReturn(int id){
@@ -341,12 +397,12 @@ PreviousMillis = millis();
 }
 
 
-bool checkPress(int durationInSeconds, int id){
+bool checkPress(int durationInSeconds){
   long interval = durationInSeconds * 1000;
   unsigned long CurrentTime = millis();
   long intervalActual = CurrentTime - PreviousMillis;
   bool isLongPress = intervalActual >= interval;
-  return (isLongPress);
+  return isLongPress;
   } 
 
   
@@ -390,55 +446,11 @@ void initializeDisplay(){
   changeFootLED(0,true);
 }
 
-//-------------------------------When Rotary Encoder Button is pressed--------------------------
-//----------------------------------------------------------------------------------------------
-void doButton(){
-    RotaryFlag = false;
-        int RotaryButtonValue = rotaryExpander.read();
-        if(RotaryButtonValue!=0xFF && RotaryButtonValue!=PreviousRotaryButtonValue){
-          startCounter();
-        }
-        Serial.print("READ Knobs:\t");
-        Serial.println(RotaryButtonValue, HEX);
-        if(RotaryButtonValue == 0xFF && RotaryButtonValue!=PreviousRotaryButtonValue){
-          int id = rotaryHexToId(PreviousRotaryButtonValue);
-          checkPress(LONG_PRESS_INTERVAL_S,id) ? changeReturn(id) : cycleMenu();
-        }
-          PreviousRotaryButtonValue = RotaryButtonValue;
-}
 
-//--------------------------------------When Foot Switch is pressed---------------------------------
-//----------------------------------------------------------------------------------------------
-void doFoot(){   
-        FootFlag = false;
-        int footID = footHextoID(footExpander.read());
-        // when 2 are pressed and when released sends original hex again aka the other one pressed
-
-        if(footID != PreviousFootValue){
-          if(footID == -2){
-            TwoFootButtonsPressed = true;
-          }
-          if(footID == -1){
-            if(TwoFootButtonsPressed){
-            //DO DOUBLE PRESS
-            Serial.println("Two Buttons Pressed");
-            TwoFootButtonsPressed = false;
-            } else {
-            //DO SINGLE PRESS
-              Serial.println("One Button Pressed: " + String(PreviousFootValue));
-              turnOffAllFootLEDs();
-              changeFootLED(PreviousFootValue, true);
-
-            }
-          }
-
-          }
-        PreviousFootValue = footID;
-}
 
 
 void setVolumesDefault(){
-  //FOR INPUT VOLUMES
+//FOR INPUT VOLUMES
 for(int i = 0; i<8; i++){
   digitalPotWrite(potID[LEFT_INPUT_VOLUME_POTS_IDS[1][i]],LEFT_INPUT_VOLUME_POTS_IDS[0][i],DEFAULT_VOLUME);
   digitalPotWrite(potID[RIGHT_INPUT_VOLUME_POTS_IDS[1][i]],RIGHT_INPUT_VOLUME_POTS_IDS[0][i],DEFAULT_VOLUME); 
@@ -558,18 +570,21 @@ void sendPhaseRelays(int loopID){
     Serial.println("Left Phase sent: " +String(leftIsReversed) + "Right Phase Sent: " +  String(rightIsReversed));
 }
 
-
-
 void initializeRelays(){
   //Returns
   for(int i = 0; i< 8; i++){
     byte onOrOff = CurrentReturns[i] == 1 ? HIGH : LOW;
     Serial.println("Relay Value: " + String(onOrOff));
     sendRelay(ReturnRelayExpander, i,onOrOff);
-    
+
   //Phase Relays
     sendPhaseRelays(i);
   }
 }
 
+void highLightReturn(int id, bool shouldHighlight){
+  String color = shouldHighlight ? HIGHLIGHT_COLOR : DEFAULT_COLOR;
+  Serial2.print(ADDRESS_FOR_DISPLAY[id][2] + ".pco=" + color);
+  sendEndCommand();
+}
 
