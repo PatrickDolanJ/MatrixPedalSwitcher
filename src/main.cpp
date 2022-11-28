@@ -1,5 +1,8 @@
 # include <common.h>
 
+//Normaly Unenergized = Stereo
+//Normally unenergized = in Phase
+
 //-----------------------------MATRIX----------------------------
 AGD2188 MatrixRight(RIGHT_MATRIX_ADDRESS); 
 AGD2188 MatrixLeft(LEFT_MATRIX_ADDRESS);
@@ -26,14 +29,14 @@ bool CurrentReturns[8] = {1,1,1,1,1,1,1,1};
 void updateUI(bool isClockwise, int id);
 void changeLoopPositions(bool isClockwise, int id);
 void sendLoopPositions();
-void cycleMenu();
+void cycleMenu(int id);
 void changeVolume(int id, bool isClockwise, int volume_array[]);
 void changePhase(int id, bool isClockwise);
 void highlightMenu(bool shouldHighlight);
 void changeReturn(int id);
 void startCounter();
 bool checkPress(int durationInSeconds);
-void sendReturn(int arrayId);
+void sendReturnNextion(int arrayId);
 void initializeDisplay();
 void doButton();
 void doFoot();
@@ -46,6 +49,7 @@ void initializeRelays();
 void sendRelay(byte address, int internalPin, int value);
 void sendPhaseRelays(int loopID);
 void highLightReturn(int id, bool shouldHighlight);
+void sendReturnRelays(int id, bool onOrOff);
 
 //----------------------------Buttons/RotaryEncoders---------------------------
 EasyRotary RotaryEncoders(ROTARY_ENCODER_INTERUPT_PIN); //for reading rotary encoder data **NOT BUTTONS**
@@ -134,7 +138,6 @@ void loop() {
         
       if(PreviousRotaryButtonValue!=0xFF && checkPress(LONG_PRESS_INTERVAL_S)){
         highLightReturn(rotaryHexToId(PreviousRotaryButtonValue)-1, true);
-        Serial.println("Long Press Detected: ");
       }
 }
 
@@ -149,7 +152,7 @@ void doButton(){
 
         if(RotaryButtonValue == 0xFF && RotaryButtonValue!=PreviousRotaryButtonValue){
           int id = rotaryHexToId(PreviousRotaryButtonValue);
-          checkPress(LONG_PRESS_INTERVAL_S) ? changeReturn(id) : cycleMenu();
+          checkPress(LONG_PRESS_INTERVAL_S) ? changeReturn(id) : cycleMenu(id);
         }
           PreviousRotaryButtonValue = RotaryButtonValue;
 }
@@ -237,7 +240,9 @@ void updateUI(bool isClockwise, int id){
   }
   }
 
-void cycleMenu(){
+void cycleMenu(int id){
+
+  if(id ==1){
   highlightMenu(false);
   if(MenuState == NUM_MENU_OPTIONS-1){
     MenuState = static_cast<E_MenuState>(1);
@@ -246,6 +251,19 @@ void cycleMenu(){
   }
   Serial.println("MenuState = " + String(MenuState));
   highlightMenu(true);
+  
+  } else if(id ==2){
+
+  highlightMenu(false);
+  if(MenuState == 0){
+    MenuState = static_cast<E_MenuState>(NUM_MENU_OPTIONS-1);
+  } else {
+    MenuState = static_cast<E_MenuState>(MenuState-1);
+  }
+  Serial.println("MenuState = " + String(MenuState));
+  highlightMenu(true);
+}
+
 }
 
 int volumeToDisplay(int volume){
@@ -329,7 +347,7 @@ void changePhase(int id, bool isClockwise){
   sendPhaseRelays(idToArray);
 }
 
-void sendReturn(int arrayId){
+void sendReturnNextion(int arrayId){
     String returnToDisplay = CurrentReturns[arrayId] ? STEREO : MONO;
     Serial2.print(ADDRESS_FOR_DISPLAY[arrayId][2] + ".txt=" + '"' + returnToDisplay + '"');
     sendEndCommand();
@@ -340,7 +358,7 @@ void changeReturn(int id){
   int idToArray = id -1;
   if(idToArray!=7){
     CurrentReturns[idToArray] = !CurrentReturns[idToArray];
-    sendReturn(idToArray);
+    sendReturnNextion(idToArray);
   }
 }
 
@@ -421,7 +439,7 @@ void initializeDisplay(){
   }
   //Return
   for(int i = 0; i<7; i++){
-    sendReturn(i);
+    sendReturnNextion(i);
   }
   //Left Output
   MenuState = E_MenuState::LEFT_OUTPUT_VOLUMES;
@@ -586,5 +604,9 @@ void highLightReturn(int id, bool shouldHighlight){
   String color = shouldHighlight ? HIGHLIGHT_COLOR : DEFAULT_COLOR;
   Serial2.print(ADDRESS_FOR_DISPLAY[id][2] + ".pco=" + color);
   sendEndCommand();
+}
+
+void sendReturnRelays(int id, bool onOrOff){
+  
 }
 
