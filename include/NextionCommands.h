@@ -145,3 +145,5 @@ const String FOOT_BANKS[5] = {"A","B","C","D","E"};
    Serial2.write(b_end_message);
    Serial2.write(b_end_message);
  }
+
+ const String LOOP_TO_OUTPUT = "IN_LOOP_POS";
