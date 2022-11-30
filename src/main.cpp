@@ -588,3 +588,4 @@ void highLightReturn(int id, bool shouldHighlight){
   sendEndCommand();
 }
 
+ 
