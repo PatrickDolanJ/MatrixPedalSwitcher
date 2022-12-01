@@ -15,37 +15,59 @@ bool TwoFootButtonsPressed = false;
 
 
 //------------------------------DATA------------------------------ 
+int CurrentPresetID = 0;
+int CurrentBankID = 0;
 int CurrentLoopPositions[7] = {0,0,0,0,0,0,0};
 int CurrentInputVolumes[8] = {DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME};
 int CurrentLeftOutputVolumes[8] = {DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME};
 int CurrentRightOutputVolumes[8] = {DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME};
 int CurrentPhase[8] = {0,0,0,0,0,0,0,0};
 bool CurrentReturns[8] = {1,1,1,1,1,1,1,1};
+bool CurrentDelayTrails[7] = {0,0,0,0,0,0,0};
+int CurrentDelayTrailsTimeSeconds[7] = {0,0,0,0,0,0,0};
+
+//Hold 5 Presets at Once
+// 1
+// 2
+// 3
+// 4
+// 5
+//---------------------
+//-----------------------------------------------------------------
+
 
 //----------------------Function prototypes------------------------
+
+//Menu Things
 void updateUI(bool isClockwise, int id);
-void changeLoopPositions(bool isClockwise, int id);
-void sendLoopPositions();
 void cycleMenu();
+void highlightMenu(bool shouldHighlight);
+void highLightReturn(int id, bool shouldHighlight);
+void initializeDisplay();
+
+//Data Changes
+void changeLoopPositions(bool isClockwise, int id);
 void changeVolume(int id, bool isClockwise, int volume_array[]);
 void changePhase(int id, bool isClockwise);
-void highlightMenu(bool shouldHighlight);
 void changeReturn(int id);
-void startCounter();
-bool checkPress(int durationInSeconds);
-void sendReturn(int arrayId);
-void initializeDisplay();
-void doButton();
-void doFoot();
+void initializeRelays();
+
+//Sending Data
 void setVolumesDefault();
+void sendLoopPositions();
+void sendReturn(int arrayId);
 void sendVolumeToDigitalPot(int id);
 void changeFootLED(int ledID, bool isOn);
 void turnOffAllFootLEDs();
-int footHextoID(byte hex);
-void initializeRelays();
 void sendRelay(byte address, int internalPin, int value);
 void sendPhaseRelays(int loopID);
-void highLightReturn(int id, bool shouldHighlight);
+
+//Internal Functions
+void doButton();
+void doFoot();
+bool checkPress(int durationInSeconds);
+int footHextoID(byte hex);
+void doLongPress();
 
 //----------------------------Buttons/RotaryEncoders---------------------------
 EasyRotary RotaryEncoders(ROTARY_ENCODER_INTERUPT_PIN); //for reading rotary encoder data **NOT BUTTONS**
@@ -131,10 +153,9 @@ void loop() {
       {
       doFoot();  
       }
-        
+  // Check for Double Press
       if(PreviousRotaryButtonValue!=0xFF && checkPress(LONG_PRESS_INTERVAL_S)){
-        highLightReturn(rotaryHexToId(PreviousRotaryButtonValue)-1, true);
-        Serial.println("Long Press Detected: ");
+        doLongPress();
       }
 }
 
@@ -175,14 +196,20 @@ void doFoot(){
               Serial.println("One Button Pressed: " + String(PreviousFootValue));
               turnOffAllFootLEDs();
               changeFootLED(PreviousFootValue, true);
-
             }
           }
-
           }
         PreviousFootValue = footID;
 }
 
+//---------------------------------------------------------------------------------------------------
+
+//--------------------------------------When Long Press Happens-------------------------------------
+
+void doLongPress(){
+  highLightReturn(rotaryHexToId(PreviousRotaryButtonValue)-1, true);
+  Serial.println("Long Press Detected: ");
+}
 //---------------------------------------------------------------------------------------------------
 
 
