@@ -43,7 +43,7 @@ int CurrentDelayTrailsTimeSeconds[7] = {0,0,0,0,0,0,0};
 
 //Menu Things
 void updateUI(bool isClockwise, int id);
-void cycleMenu();
+void cycleMenu(int id);
 void highlightMenu(bool shouldHighlight);
 void highLightReturn(int id, bool shouldHighlight);
 void initializeDisplay();
@@ -281,9 +281,8 @@ void cycleMenu(int id){
   highlightMenu(true);
   
   } else if(id ==2){
-
   highlightMenu(false);
-  if(MenuState == 0){
+  if(MenuState == 1){
     MenuState = static_cast<E_MenuState>(NUM_MENU_OPTIONS-1);
   } else {
     MenuState = static_cast<E_MenuState>(MenuState-1);
