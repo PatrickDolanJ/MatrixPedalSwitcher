@@ -21,6 +21,7 @@ int CurrentLeftOutputVolumes[8] = {DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,
 int CurrentRightOutputVolumes[8] = {DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME};
 int CurrentPhase[8] = {0,0,0,0,0,0,0,0};
 bool CurrentReturns[8] = {1,1,1,1,1,1,1,1};
+bool CurrentDelayTrails[7] = {0,0,0,0,0,0,0};
 
 //----------------------Function prototypes------------------------
 void updateUI(bool isClockwise, int id);
@@ -46,6 +47,9 @@ void initializeRelays();
 void sendRelay(byte address, int internalPin, int value);
 void sendPhaseRelays(int loopID);
 void highLightReturn(int id, bool shouldHighlight);
+void connectDelayTrails();
+void volumeMuteStart();
+void volumeMuteEnd();
 
 //----------------------------Buttons/RotaryEncoders---------------------------
 EasyRotary RotaryEncoders(ROTARY_ENCODER_INTERUPT_PIN); //for reading rotary encoder data **NOT BUTTONS**
@@ -187,14 +191,15 @@ void doFoot(){
 
 
 void updateUI(bool isClockwise, int id){
-  
+  volumeMuteStart();
   switch (MenuState){
     case (E_MenuState::LOOPS):
       if(id!=8){
         changeLoopPositions(isClockwise, id);
         sendLoopPositions();
-        MatrixRight.writeArray(CurrentLoopPositions,7);
+        MatrixRight.writeArray(CurrentLoopPositions,7); // MOVE THESE TO A FUNCTION
         MatrixLeft.writeArray(CurrentLoopPositions,7);
+        connectDelayTrails();
         }
       break;
 
@@ -216,6 +221,7 @@ void updateUI(bool isClockwise, int id){
       }
       break;
     }
+    volumeMuteEnd();
   }
  
  void changeLoopPositions(bool isClockwise, int id){
@@ -485,6 +491,34 @@ void sendVolumeToDigitalPot(int id){
   }
 }
 
+void volumeMuteStart(){
+  for (int i = 1; i < 100; i++)
+  {
+    int leftVolume = float(CurrentLeftOutputVolumes[7]) * float((100-float(i))/100);
+    int rightVolume = float(CurrentRightOutputVolumes[7]) * float((100-float(i))/100);
+
+    digitalPotWrite(potID[LEFT_OUTPUT_VOLUME_POTS_IDS[1][7]],LEFT_OUTPUT_VOLUME_POTS_IDS[0][7],leftVolume); 
+    digitalPotWrite(potID[RIGHT_OUTPUT_VOLUME_POTS_IDS[1][7]],RIGHT_OUTPUT_VOLUME_POTS_IDS[0][7],rightVolume); 
+  }
+    digitalPotWrite(potID[LEFT_OUTPUT_VOLUME_POTS_IDS[1][7]],LEFT_OUTPUT_VOLUME_POTS_IDS[0][7],0); 
+    digitalPotWrite(potID[RIGHT_OUTPUT_VOLUME_POTS_IDS[1][7]],RIGHT_OUTPUT_VOLUME_POTS_IDS[0][7],0); 
+}
+
+void volumeMuteEnd(){
+  for (int i = 100; i > 0; i--)
+  {
+    int leftVolume = float(CurrentLeftOutputVolumes[7]) * float((100-float(i))/100);
+    int rightVolume = float(CurrentRightOutputVolumes[7]) * float((100-float(i))/100);
+
+    digitalPotWrite(potID[LEFT_OUTPUT_VOLUME_POTS_IDS[1][7]],LEFT_OUTPUT_VOLUME_POTS_IDS[0][7],leftVolume);
+    digitalPotWrite(potID[RIGHT_OUTPUT_VOLUME_POTS_IDS[1][7]],RIGHT_OUTPUT_VOLUME_POTS_IDS[0][7],rightVolume);
+    Serial.println("Volume sent: " + String(leftVolume));
+  }
+  
+  digitalPotWrite(potID[LEFT_OUTPUT_VOLUME_POTS_IDS[1][7]],LEFT_OUTPUT_VOLUME_POTS_IDS[0][7],CurrentLeftOutputVolumes[7]);
+  digitalPotWrite(potID[RIGHT_OUTPUT_VOLUME_POTS_IDS[1][7]],RIGHT_OUTPUT_VOLUME_POTS_IDS[0][7],CurrentRightOutputVolumes[7]);
+}
+
 
 int footHextoID(byte hex){
   // Anything that isnt FF and isnt a single button returns -2 to indicate that multiple buttons are pressed
@@ -586,6 +620,16 @@ void highLightReturn(int id, bool shouldHighlight){
   String color = shouldHighlight ? HIGHLIGHT_COLOR : DEFAULT_COLOR;
   Serial2.print(ADDRESS_FOR_DISPLAY[id][2] + ".pco=" + color);
   sendEndCommand();
+}
+
+
+void connectDelayTrails(){
+  for(int i = 0; i < 7; i++){
+    if(CurrentDelayTrails[i]){
+      MatrixLeft.writeData(true,i,7);
+      MatrixRight.writeData(true,i,7);
+    }
+  }
 }
 
  

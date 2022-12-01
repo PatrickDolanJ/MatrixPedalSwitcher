@@ -3,7 +3,7 @@
 
 //--------------Settings---------------
 const String DEVICE_NAME = "HeighLiner";
-const int DEFAULT_VOLUME = 125;
+const int DEFAULT_VOLUME = 127;
 const String DEFAULT_COLOR = "19703";
 const String HIGHLIGHT_COLOR = "65535"; 
 const float LONG_PRESS_INTERVAL_S = 1.75;
