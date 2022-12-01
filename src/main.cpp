@@ -14,17 +14,16 @@ int PreviousRotaryButtonValue = 0xFF;
 int PreviousFootValue = -1;
 bool TwoFootButtonsPressed = false;
 
-
 //------------------------------DATA------------------------------ 
 int CurrentPresetID = 0;
 int CurrentBankID = 0;
-int CurrentLoopPositions[7] = {0,0,0,0,0,0,0};
+int CurrentLoopPositions[7] = {0,0,0,0,0,0,0}; // This may change ----> 8th position to allow for "Dry" loop to be sent to output
 int CurrentInputVolumes[8] = {DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME};
 int CurrentLeftOutputVolumes[8] = {DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME};
 int CurrentRightOutputVolumes[8] = {DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME};
 int CurrentPhase[8] = {0,0,0,0,0,0,0,0};
-bool CurrentReturns[8] = {0,0,0,0,0,0,0,0};
-bool CurrentDelayTrails[7] = {0,0,0,0,0,0,0};
+bool CurrentReturns[8] = {0,0,0,0,0,0,0,0}; // 0=Stereo, 1=Mono
+bool CurrentDelayTrails[7] = {0,0,0,0,0,0,0}; // 0=No trail, 1=Delay Trail 
 int CurrentDelayTrailsTimeSeconds[7] = {0,0,0,0,0,0,0};
 
 //Hold 5 Presets at Once
