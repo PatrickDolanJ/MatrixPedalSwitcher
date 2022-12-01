@@ -63,6 +63,7 @@ void sendRelay(byte address, int internalPin, int value);
 void sendPhaseRelays(int loopID);
 
 //Internal Functions
+void startCounter();
 void doButton();
 void doFoot();
 bool checkPress(int durationInSeconds);
