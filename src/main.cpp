@@ -8,11 +8,13 @@ AGD2188 MatrixLeft(LEFT_MATRIX_ADDRESS);
 //------------------------------MENU------------------------------
 enum E_MenuState {LOOPS = 1,INPUT_VOLUMES = 2, LEFT_OUTPUT_VOLUMES = 3,RIGHT_OUTPUT_VOLUMES = 4, PHASE = 5, NUM_MENU_OPTIONS = 6};
 E_MenuState MenuState;
-unsigned long PreviousMillis = 0;
+unsigned long LongPressPreviousMIllis = 0;
 unsigned long CurrentTime = 0;
 int PreviousRotaryButtonValue = 0xFF;
 int PreviousFootValue = -1;
 bool TwoFootButtonsPressed = false;
+unsigned long DelayTrailsPreviousMillis = 0;
+
 
 //------------------------------DATA------------------------------ 
 int CurrentPresetID = 0;
@@ -63,7 +65,8 @@ void sendRelay(byte address, int internalPin, int value);
 void sendPhaseRelays(int loopID);
 
 //Internal Functions
-void startCounter();
+void DelayTrailStartCounter();
+void LongPressStartCounter();
 void doButton();
 void doFoot();
 bool checkPress(int durationInSeconds);
@@ -169,7 +172,7 @@ void doButton(){
     RotaryFlag = false;
         int RotaryButtonValue = rotaryExpander.read();
         if(RotaryButtonValue!=0xFF && RotaryButtonValue!=PreviousRotaryButtonValue){
-          startCounter();
+          LongPressStartCounter();
         }
 
         if(RotaryButtonValue == 0xFF && RotaryButtonValue!=PreviousRotaryButtonValue){
@@ -435,15 +438,15 @@ void highlightMenu(bool shouldHighlightOR){
     }
 }
 
-void startCounter(){
-PreviousMillis = millis();
+void LongPressStartCounter(){
+LongPressPreviousMIllis = millis();
 }
 
 
 bool checkPress(int durationInSeconds){
   long interval = durationInSeconds * 1000;
   unsigned long CurrentTime = millis();
-  long intervalActual = CurrentTime - PreviousMillis;
+  long intervalActual = CurrentTime - LongPressPreviousMIllis;
   bool isLongPress = intervalActual >= interval;
   return isLongPress;
   } 
@@ -614,12 +617,9 @@ void sendPhaseRelays(int loopID){
 }
 
 void initializeRelays(){
-  //Returns
+  //Return Relays
   for(int i = 0; i< 8; i++){
-    byte onOrOff = CurrentReturns[i] == 1 ? HIGH : LOW;
-    Serial.println("Relay Value: " + String(onOrOff));
-    sendRelay(ReturnRelayExpander, i,onOrOff);
-
+    sendReturnRelays(i,CurrentReturns[i]);
   //Phase Relays
     sendPhaseRelays(i);
   }
@@ -632,6 +632,24 @@ void highLightReturn(int id, bool shouldHighlight){
 }
 
 void sendReturnRelays(int id, bool onOrOff){
+  Serial.println("Relay Value: " + String(onOrOff));
+  sendRelay(ReturnRelayExpander,id,onOrOff);
+}
+
+void sendDelayTrails(){
+  for(int i = 0; i < 7; i++){
+    if(CurrentDelayTrails[i]){
+      MatrixLeft.writeData(true,i,7);
+      MatrixRight.writeData(true,i,7);
+    }
+  }
+}
+
+void checkDelayTrails(int durationInSeconds){
   
+}
+
+void DelayTrailStartCounter(){
+  DelayTrailsPreviousMillis = millis();
 }
 
