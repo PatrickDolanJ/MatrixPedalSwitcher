@@ -1,7 +1,5 @@
 # include <common.h>
 
-//Normaly Unenergized = Stereo
-//Normally unenergized = in Phase
 
 //-----------------------------MATRIX----------------------------
 AGD2188 MatrixRight(RIGHT_MATRIX_ADDRESS); 
@@ -25,7 +23,7 @@ int CurrentInputVolumes[8] = {DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAU
 int CurrentLeftOutputVolumes[8] = {DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME};
 int CurrentRightOutputVolumes[8] = {DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME};
 int CurrentPhase[8] = {0,0,0,0,0,0,0,0};
-bool CurrentReturns[8] = {1,1,1,1,1,1,1,1};
+bool CurrentReturns[8] = {0,0,0,0,0,0,0,0};
 bool CurrentDelayTrails[7] = {0,0,0,0,0,0,0};
 int CurrentDelayTrailsTimeSeconds[7] = {0,0,0,0,0,0,0};
 
@@ -96,6 +94,9 @@ PCF8574 ledExpander(FOOT_SWITCH_LIGHTS_ADDRESS);
 
 
 //---------------------------RELAYS-----------------------
+
+//Normaly Unenergized = Stereo
+//Normally Unenergized = in Phase
 
 PCF8574 LeftPhaseRelays(LEFT_PHASE_RELAYS_ADDRESS);
 PCF8574 RightPhaseRelays(RIGHT_PHASE_RELAY_ADDRESS);
@@ -269,28 +270,26 @@ void updateUI(bool isClockwise, int id){
   }
 
 void cycleMenu(int id){
-
   if(id ==1){
   highlightMenu(false);
-  if(MenuState == NUM_MENU_OPTIONS-1){
-    MenuState = static_cast<E_MenuState>(1);
-  } else {
-    MenuState = static_cast<E_MenuState>(MenuState+1);
-  }
-  Serial.println("MenuState = " + String(MenuState));
-  highlightMenu(true);
-  
-  } else if(id ==2){
-  highlightMenu(false);
-  if(MenuState == 1){
+    if(MenuState == NUM_MENU_OPTIONS-1){
+      MenuState = static_cast<E_MenuState>(1);
+    } else {
+      MenuState = static_cast<E_MenuState>(MenuState+1);
+    }
+      Serial.println("MenuState = " + String(MenuState));
+      highlightMenu(true);
+  } else if(id ==2)
+  {
+    highlightMenu(false);
+    if(MenuState == 1){
     MenuState = static_cast<E_MenuState>(NUM_MENU_OPTIONS-1);
-  } else {
+    } else {
     MenuState = static_cast<E_MenuState>(MenuState-1);
+    }
+    Serial.println("MenuState = " + String(MenuState));
+    highlightMenu(true);
   }
-  Serial.println("MenuState = " + String(MenuState));
-  highlightMenu(true);
-}
-
 }
 
 int volumeToDisplay(int volume){
@@ -375,7 +374,7 @@ void changePhase(int id, bool isClockwise){
 }
 
 void sendReturnNextion(int arrayId){
-    String returnToDisplay = CurrentReturns[arrayId] ? STEREO : MONO;
+    String returnToDisplay = CurrentReturns[arrayId] ? MONO : STEREO;
     Serial2.print(ADDRESS_FOR_DISPLAY[arrayId][2] + ".txt=" + '"' + returnToDisplay + '"');
     sendEndCommand();
     highLightReturn(arrayId, false);
