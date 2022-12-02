@@ -26,7 +26,7 @@ int CurrentRightOutputVolumes[8] = {DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME
 int CurrentPhase[8] = {0,0,0,0,0,0,0,0};
 bool CurrentReturns[8] = {0,0,0,0,0,0,0,0}; // 0=Stereo, 1=Mono
 bool CurrentDelayTrails[7] = {0,0,0,0,0,0,0}; // 0=No trail, 1=Delay Trail 
-int CurrentDelayTrailsTimeSeconds[7] = {0,0,0,0,0,0,0};
+float CurrentDelayTrailsTimeSeconds[7] = {0,0,0,0,0,0,0};
 
 //Hold 5 Presets at Once
 // 1
@@ -40,19 +40,21 @@ int CurrentDelayTrailsTimeSeconds[7] = {0,0,0,0,0,0,0};
 
 //----------------------Function prototypes------------------------
 
-//Menu Things
+//Menu and Nextion
 void updateUI(bool isClockwise, int id);
 void cycleMenu(int id);
 void highlightMenu(bool shouldHighlight);
 void highLightReturn(int id, bool shouldHighlight);
 void initializeDisplay();
+void sendVolumeToNextion(int idForArray, int volumeForDisplay);
+void sendReturnNextion(int id);
+void sendPhaseToNextion(int arrayId);
 
 //Data Changes
 void changeLoopPositions(bool isClockwise, int id);
 void changeVolume(int id, bool isClockwise, int volume_array[]);
 void changePhase(int id, bool isClockwise);
 void changeReturn(int id);
-void initializeRelays();
 
 //Sending Data
 void setVolumesDefault();
@@ -62,7 +64,10 @@ void sendVolumeToDigitalPot(int id);
 void changeFootLED(int ledID, bool isOn);
 void turnOffAllFootLEDs();
 void sendRelay(byte address, int internalPin, int value);
-void sendPhaseRelays(int loopID);
+void sendPhaseRelay(int loopID);
+void sendReturnRelay(int id, bool onOrOff);
+void initializeRelays();
+
 
 //Internal Functions
 void DelayTrailStartCounter();
@@ -71,7 +76,8 @@ void doButton();
 void doFoot();
 bool checkPress(int durationInSeconds);
 int footHextoID(byte hex);
-void doLongPress();
+void duringLongPress();
+void doLongPress(int id);
 
 //----------------------------Buttons/RotaryEncoders---------------------------
 EasyRotary RotaryEncoders(ROTARY_ENCODER_INTERUPT_PIN); //for reading rotary encoder data **NOT BUTTONS**
@@ -97,8 +103,8 @@ PCF8574 ledExpander(FOOT_SWITCH_LIGHTS_ADDRESS);
 
 //---------------------------RELAYS-----------------------
 
-//Normaly Unenergized = Stereo
-//Normally Unenergized = in Phase
+//Normaly Unenergized(0) = Stereo
+//Normally Unenergized(0) = in Phase
 
 PCF8574 LeftPhaseRelays(LEFT_PHASE_RELAYS_ADDRESS);
 PCF8574 RightPhaseRelays(RIGHT_PHASE_RELAY_ADDRESS);
@@ -137,12 +143,12 @@ void setup() {
   pinMode(cs5_pin, OUTPUT);
   setVolumesDefault();
 
-  MatrixRight.wipeChip();
+  //This should happen anyway but just in case
+  MatrixRight.wipeChip(); 
   MatrixLeft.wipeChip();
 
   MatrixRight.writeArray(CurrentLoopPositions,7);
   MatrixLeft.writeArray(CurrentLoopPositions,7);
-
   }
 
 //-----------------------------------LOOP-------------------------------------
@@ -162,7 +168,7 @@ void loop() {
       }
   // Check for Double Press
       if(PreviousRotaryButtonValue!=0xFF && checkPress(LONG_PRESS_INTERVAL_S)){
-        doLongPress();
+       duringLongPress();
       }
 }
 
@@ -177,7 +183,7 @@ void doButton(){
 
         if(RotaryButtonValue == 0xFF && RotaryButtonValue!=PreviousRotaryButtonValue){
           int id = rotaryHexToId(PreviousRotaryButtonValue);
-          checkPress(LONG_PRESS_INTERVAL_S) ? changeReturn(id) : cycleMenu(id);
+          checkPress(LONG_PRESS_INTERVAL_S) ? doLongPress(id) : cycleMenu(id);
         }
           PreviousRotaryButtonValue = RotaryButtonValue;
 }
@@ -211,15 +217,22 @@ void doFoot(){
 
 //---------------------------------------------------------------------------------------------------
 
-//--------------------------------------When Long Press Happens-------------------------------------
+//--------------------------------------=Long Press=-------------------------------------
 
-void doLongPress(){
-  highLightReturn(rotaryHexToId(PreviousRotaryButtonValue)-1, true);
-  Serial.println("Long Press Detected: ");
+void duringLongPress(){
+  int idToArray = rotaryHexToId(PreviousRotaryButtonValue)-1;
+  highLightReturn(idToArray, true);
+}
+
+void doLongPress(int id){
+  int idToArray = id-1;
+  changeReturn(idToArray);
+  sendReturnNextion(idToArray);
+  sendReturnRelay(idToArray, CurrentReturns[idToArray]);
 }
 //---------------------------------------------------------------------------------------------------
 
-
+//----------------------------------Rotary Spin------------------------------------------------------
 void updateUI(bool isClockwise, int id){
   
   switch (MenuState){
@@ -251,7 +264,8 @@ void updateUI(bool isClockwise, int id){
       break;
     }
   }
- 
+ //---------------------------------------------------------------------------------------------------
+
  void changeLoopPositions(bool isClockwise, int id){
    int loopArrayPosition = id-1;
    int loopArrayValue = CurrentLoopPositions[loopArrayPosition];
@@ -303,7 +317,7 @@ void capVolume(int volume[], int arrayPosition){
   volume[arrayPosition] = max(volume[arrayPosition],0);
 } 
 
-void sendVolumeToDisplay(int idForArray, int volumeForDisplay){ 
+void sendVolumeToNextion(int idForArray, int volumeForDisplay){ 
   if (MenuState == E_MenuState::INPUT_VOLUMES){
     Serial2.print(ADDRESS_FOR_DISPLAY[idForArray][0] + ".val=" +String(volumeForDisplay));
     sendEndCommand();
@@ -323,11 +337,11 @@ void changeVolume(int id, bool isClockwise, int volume[]){
     isClockwise ? volume[idToArray]+=10 : volume[idToArray]-=10;
     capVolume(volume, idToArray);
     int volumeForDisplay = volumeToDisplay(volume[idToArray]);
-    sendVolumeToDisplay(idToArray, volumeForDisplay); 
+    sendVolumeToNextion(idToArray, volumeForDisplay); 
     sendVolumeToDigitalPot(idToArray);
 }
 
-void sendPhase(int arrayId){
+void sendPhaseToNextion(int arrayId){
   String left_phase = "";
   String right_phase = "";
   int PHASE = CurrentPhase[arrayId];
@@ -371,8 +385,8 @@ void changePhase(int id, bool isClockwise){
       CurrentPhase[idToArray]--;
     }
   }
-  sendPhase(idToArray);
-  sendPhaseRelays(idToArray);
+  sendPhaseToNextion(idToArray);
+  sendPhaseRelay(idToArray);
 }
 
 void sendReturnNextion(int arrayId){
@@ -383,10 +397,8 @@ void sendReturnNextion(int arrayId){
 }
 
 void changeReturn(int id){
-  int idToArray = id -1;
-  if(idToArray!=7){
-    CurrentReturns[idToArray] = !CurrentReturns[idToArray];
-    sendReturnNextion(idToArray);
+  if(id!=7){
+    CurrentReturns[id] = !CurrentReturns[id];
   }
 }
 
@@ -455,7 +467,7 @@ bool checkPress(int durationInSeconds){
 void initializeDisplay(){
   //Phases
   for(int i = 0; i <7; i++){
-      sendPhase(i);
+      sendPhaseToNextion(i);
   }
   //Loops
     sendLoopPositions();
@@ -463,7 +475,7 @@ void initializeDisplay(){
     MenuState = E_MenuState::INPUT_VOLUMES;
   //Input Volumes
   for(int i = 0; i <8; i++){
-    sendVolumeToDisplay(i, volumeToDisplay(CurrentInputVolumes[i])); 
+    sendVolumeToNextion(i, volumeToDisplay(CurrentInputVolumes[i])); 
   }
   //Return
   for(int i = 0; i<7; i++){
@@ -472,12 +484,12 @@ void initializeDisplay(){
   //Left Output
   MenuState = E_MenuState::LEFT_OUTPUT_VOLUMES;
   for(int i = 0; i <8; i++){
-    sendVolumeToDisplay(i, volumeToDisplay(CurrentLeftOutputVolumes[i])); 
+    sendVolumeToNextion(i, volumeToDisplay(CurrentLeftOutputVolumes[i])); 
   }
   //Right Output
   MenuState = E_MenuState::RIGHT_OUTPUT_VOLUMES;
   for(int i = 0; i <8; i++){
-    sendVolumeToDisplay(i, volumeToDisplay(CurrentRightOutputVolumes[i])); 
+    sendVolumeToNextion(i, volumeToDisplay(CurrentRightOutputVolumes[i])); 
   }
   //Unhighlight
   for(int i = 1; i <6; i++){
@@ -586,7 +598,7 @@ void sendRelay(PCF8574 address, int internalPin, int value){
   digitalWrite(address, internalPin, value);
 }
 
-void sendPhaseRelays(int loopID){
+void sendPhaseRelay(int loopID){
   byte leftIsReversed = LOW;
   byte rightIsReversed  = LOW;
   switch(CurrentPhase[loopID]){
@@ -619,9 +631,9 @@ void sendPhaseRelays(int loopID){
 void initializeRelays(){
   //Return Relays
   for(int i = 0; i< 8; i++){
-    sendReturnRelays(i,CurrentReturns[i]);
+    sendReturnRelay(i,CurrentReturns[i]);
   //Phase Relays
-    sendPhaseRelays(i);
+    sendPhaseRelay(i);
   }
 }
 
@@ -631,7 +643,7 @@ void highLightReturn(int id, bool shouldHighlight){
   sendEndCommand();
 }
 
-void sendReturnRelays(int id, bool onOrOff){
+void sendReturnRelay(int id, bool onOrOff){
   Serial.println("Relay Value: " + String(onOrOff));
   sendRelay(ReturnRelayExpander,id,onOrOff);
 }
