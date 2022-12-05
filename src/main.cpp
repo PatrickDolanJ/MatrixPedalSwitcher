@@ -17,27 +17,7 @@ unsigned long DelayTrailsPreviousMillis = 0;
 
 
 //------------------------------DATA------------------------------
-PresetStruct current;
-
-int CurrentPresetID = 0;
-int CurrentBankID = 0;
-int CurrentLoopPositions[7] = {0,0,0,0,0,0,0}; // This may change ----> 8th position to allow for "Dry" loop to be sent to output
-int CurrentInputVolumes[8] = {DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME};
-int CurrentLeftOutputVolumes[8] = {DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME};
-int CurrentRightOutputVolumes[8] = {DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME};
-int CurrentPhase[8] = {0,0,0,0,0,0,0,0};
-bool CurrentReturns[8] = {0,0,0,0,0,0,0,0}; // 0=Stereo, 1=Mono
-bool CurrentDelayTrails[7] = {0,0,0,0,0,0,0}; // 0=No trail, 1=Delay Trail 
-float CurrentDelayTrailsTimeSeconds[7] = {0,0,0,0,0,0,0};
-
-//Hold 5 Presets at Once
-// 1
-// 2
-// 3
-// 4
-// 5
-//---------------------
-//-----------------------------------------------------------------
+PresetStruct current, presetA, presetB, presetC, presetD, presetE;
 
 
 //----------------------Function prototypes------------------------
@@ -121,6 +101,7 @@ void setup() {
   Serial.println(DEVICE_NAME + " booting");
   i2CScan();
 
+  setCurrentPresetTEST();
 
   initializeDisplay();
   initializeRelays();
@@ -152,12 +133,8 @@ void setup() {
   MatrixRight.wipeChip(); 
   MatrixLeft.wipeChip();
 
-  MatrixRight.writeArray(CurrentLoopPositions,7);
-  MatrixLeft.writeArray(CurrentLoopPositions,7);
-
-  setCurrentPresetTEST();
-  current.presetID = 1;
-  Serial.println("Current Preset Struct ID: " + String(current.presetID));
+  MatrixRight.writeArray(current.loopPositions,7);
+  MatrixLeft.writeArray(current.loopPositions,7);
   }
 
 //-----------------------------------LOOP-------------------------------------
@@ -237,7 +214,7 @@ void doLongPress(int id){
   int idToArray = id-1;
   changeReturn(idToArray);
   sendReturnNextion(idToArray);
-  sendReturnRelay(idToArray, CurrentReturns[idToArray]);
+  sendReturnRelay(idToArray, current.returns[idToArray]); //CurrentReturns[idToArray]);
 }
 //---------------------------------------------------------------------------------------------------
 
@@ -249,21 +226,21 @@ void updateUI(bool isClockwise, int id){
       if(id!=8){
         changeLoopPositions(isClockwise, id);
         sendLoopPositions();
-        MatrixRight.writeArray(CurrentLoopPositions,7);
-        MatrixLeft.writeArray(CurrentLoopPositions,7);
+        MatrixRight.writeArray(current.loopPositions,7);
+        MatrixLeft.writeArray(current.loopPositions,7);
         }
       break;
 
     case(E_MenuState::INPUT_VOLUMES):
-      changeVolume(id, isClockwise, CurrentInputVolumes);
+      changeVolume(id, isClockwise, current.inputVolumes);       //CurrentInputVolumes);
       break;
 
     case(E_MenuState::LEFT_OUTPUT_VOLUMES):
-      changeVolume(id, isClockwise, CurrentLeftOutputVolumes);
+      changeVolume(id, isClockwise, current.leftOutputVolumes);  //CurrentLeftOutputVolumes
       break;
     
     case(E_MenuState::RIGHT_OUTPUT_VOLUMES):
-      changeVolume(id, isClockwise, CurrentRightOutputVolumes);
+      changeVolume(id, isClockwise, current.rightOutputVolumes); //CurrentRightOutputVolumes
       break;
     
     case(E_MenuState::PHASE):
@@ -277,19 +254,19 @@ void updateUI(bool isClockwise, int id){
 
  void changeLoopPositions(bool isClockwise, int id){
    int loopArrayPosition = id-1;
-   int loopArrayValue = CurrentLoopPositions[loopArrayPosition];
+   int loopArrayValue = current.loopPositions[loopArrayPosition];  //CurrentLoopPositions[loopArrayPosition]
    if(loopArrayPosition!=7){
    if(isClockwise){
-      loopArrayValue==7 ? CurrentLoopPositions[loopArrayPosition] = 0 : CurrentLoopPositions[loopArrayPosition]++;
+      loopArrayValue==7 ? current.loopPositions[loopArrayPosition] = 0 : current.loopPositions[loopArrayPosition]++; //CurrentLoopPositions[loopArrayPosition]
    } else {
-      loopArrayValue==0 ? CurrentLoopPositions[loopArrayPosition] = 7 : CurrentLoopPositions[loopArrayPosition]--;
+      loopArrayValue==0 ? current.loopPositions[loopArrayPosition] = 7 : current.loopPositions[loopArrayPosition]--;
    }
    }
  }
 
   void sendLoopPositions(){
     for(int i = 0; i < 8; i++){
-    Serial2.print(LOOPS_FOR_DISPLAY[i] + ".val=" + String(CurrentLoopPositions[i]));
+    Serial2.print(LOOPS_FOR_DISPLAY[i] + ".val=" + String(current.loopPositions[i])); //CurrentLoopPositions[i]
     sendEndCommand();
   }
   }
@@ -353,7 +330,7 @@ void changeVolume(int id, bool isClockwise, int volume[]){
 void sendPhaseToNextion(int arrayId){
   String left_phase = "";
   String right_phase = "";
-  int PHASE = CurrentPhase[arrayId];
+  int PHASE = current.phase[arrayId]; //CurrentPhase[arrayId] 
 
   if(PHASE == 0){
     //Both Normal
@@ -382,16 +359,16 @@ void changePhase(int id, bool isClockwise){
 
   int idToArray = id -1;
   if(isClockwise){
-    if(CurrentPhase[idToArray] == 3){
-      CurrentPhase[idToArray] = 0;
+    if(current.phase[idToArray] == 3){ //CurrentPhase[idToArray]
+      current.phase[idToArray] = 0;
     } else {
-      CurrentPhase[idToArray]++;
+      current.phase[idToArray]++;
     }
   } else {
-    if(CurrentPhase[idToArray]==0){
-      CurrentPhase[idToArray] = 3;
+    if(current.phase[idToArray]==0){
+      current.phase[idToArray] = 3;
     } else {
-      CurrentPhase[idToArray]--;
+      current.phase[idToArray]--;
     }
   }
   sendPhaseToNextion(idToArray);
@@ -399,7 +376,7 @@ void changePhase(int id, bool isClockwise){
 }
 
 void sendReturnNextion(int arrayId){
-    String returnToDisplay = CurrentReturns[arrayId] ? MONO : STEREO;
+    String returnToDisplay = current.returns[arrayId] ? MONO : STEREO;  //CurrentReturns[arrayId] 
     Serial2.print(ADDRESS_FOR_DISPLAY[arrayId][2] + ".txt=" + '"' + returnToDisplay + '"');
     sendEndCommand();
     highLightReturn(arrayId, false);
@@ -407,7 +384,7 @@ void sendReturnNextion(int arrayId){
 
 void changeReturn(int id){
   if(id!=7){
-    CurrentReturns[id] = !CurrentReturns[id];
+    current.returns[id] = !current.returns[id]; //CurrentReturns[arrayId] 
   }
 }
 
@@ -484,7 +461,7 @@ void initializeDisplay(){
     MenuState = E_MenuState::INPUT_VOLUMES;
   //Input Volumes
   for(int i = 0; i <8; i++){
-    sendVolumeToNextion(i, volumeToDisplay(CurrentInputVolumes[i])); 
+    sendVolumeToNextion(i, volumeToDisplay(current.inputVolumes[i]));  //CurrentInputVolumes[i]
   }
   //Return
   for(int i = 0; i<7; i++){
@@ -493,12 +470,12 @@ void initializeDisplay(){
   //Left Output
   MenuState = E_MenuState::LEFT_OUTPUT_VOLUMES;
   for(int i = 0; i <8; i++){
-    sendVolumeToNextion(i, volumeToDisplay(CurrentLeftOutputVolumes[i])); 
+    sendVolumeToNextion(i, volumeToDisplay(current.leftOutputVolumes[i])); //CurrentLeftOutputVolumes[i]
   }
   //Right Output
   MenuState = E_MenuState::RIGHT_OUTPUT_VOLUMES;
   for(int i = 0; i <8; i++){
-    sendVolumeToNextion(i, volumeToDisplay(CurrentRightOutputVolumes[i])); 
+    sendVolumeToNextion(i, volumeToDisplay(current.rightOutputVolumes[i])); //CurrentRightOutputVolumes[i]
   }
   //Unhighlight
   for(int i = 1; i <6; i++){
@@ -538,16 +515,16 @@ void sendVolumeToDigitalPot(int id){
   switch(MenuState)
   {
     case(E_MenuState::INPUT_VOLUMES):
-      digitalPotWrite(potID[LEFT_INPUT_VOLUME_POTS_IDS[1][id]],LEFT_INPUT_VOLUME_POTS_IDS[0][id],CurrentInputVolumes[id]);
-      digitalPotWrite(potID[RIGHT_INPUT_VOLUME_POTS_IDS[1][id]],RIGHT_INPUT_VOLUME_POTS_IDS[0][id],CurrentInputVolumes[id]);
+      digitalPotWrite(potID[LEFT_INPUT_VOLUME_POTS_IDS[1][id]],LEFT_INPUT_VOLUME_POTS_IDS[0][id],current.inputVolumes[id]); //CurrentInputVolumes[id]
+      digitalPotWrite(potID[RIGHT_INPUT_VOLUME_POTS_IDS[1][id]],RIGHT_INPUT_VOLUME_POTS_IDS[0][id],current.inputVolumes[id]);
       break;
   
     case(E_MenuState::LEFT_OUTPUT_VOLUMES):
-      digitalPotWrite(potID[LEFT_OUTPUT_VOLUME_POTS_IDS[1][id]],LEFT_OUTPUT_VOLUME_POTS_IDS[0][id],CurrentLeftOutputVolumes[id]);
+      digitalPotWrite(potID[LEFT_OUTPUT_VOLUME_POTS_IDS[1][id]],LEFT_OUTPUT_VOLUME_POTS_IDS[0][id],current.leftOutputVolumes[id]); //CurrentLeftOutputVolumes[id]
       break;
 
     case(E_MenuState::RIGHT_OUTPUT_VOLUMES):
-      digitalPotWrite(potID[RIGHT_OUTPUT_VOLUME_POTS_IDS[1][id]],RIGHT_OUTPUT_VOLUME_POTS_IDS[0][id],CurrentRightOutputVolumes[id]);
+      digitalPotWrite(potID[RIGHT_OUTPUT_VOLUME_POTS_IDS[1][id]],RIGHT_OUTPUT_VOLUME_POTS_IDS[0][id],current.rightOutputVolumes[id]); //CurrentRightOutputVolumes[id]
       break;
   }
 }
@@ -640,7 +617,7 @@ void sendPhaseRelay(int loopID){
 void initializeRelays(){
   //Return Relays
   for(int i = 0; i< 8; i++){
-    sendReturnRelay(i,CurrentReturns[i]);
+    sendReturnRelay(i,current.returns[i]); //CurrentReturns[i]
   //Phase Relays
     sendPhaseRelay(i);
   }
@@ -659,7 +636,7 @@ void sendReturnRelay(int id, bool onOrOff){
 
 void sendDelayTrails(){
   for(int i = 0; i < 7; i++){
-    if(CurrentDelayTrails[i]){
+    if(current.delayTrails[i]){ //CurrentDelayTrails[i]
       MatrixLeft.writeData(true,i,7);
       MatrixRight.writeData(true,i,7);
     }
@@ -675,9 +652,13 @@ void DelayTrailStartCounter(){
 }
 
 void setCurrentPresetTEST(){
+  
   current.presetID = CurrentPresetID;
   current.bankID = CurrentBankID;
-  *current.loopPositions = *CurrentLoopPositions;
+  memmove(current.loopPositions,CurrentLoopPositions, sizeof(current.loopPositions));
+  //memmove();
+
+ 
   *current.inputVolumes = *CurrentInputVolumes;
   *current.leftOutputVolumes = *CurrentLeftOutputVolumes;
   *current.rightOutputVolumes = *CurrentRightOutputVolumes;
