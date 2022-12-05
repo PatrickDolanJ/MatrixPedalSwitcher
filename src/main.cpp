@@ -1,5 +1,5 @@
-# include <common.h>
-
+#include <common.h>
+#include <Arduino.h>
 
 //-----------------------------MATRIX----------------------------
 AGD2188 MatrixRight(RIGHT_MATRIX_ADDRESS); 
@@ -16,7 +16,9 @@ bool TwoFootButtonsPressed = false;
 unsigned long DelayTrailsPreviousMillis = 0;
 
 
-//------------------------------DATA------------------------------ 
+//------------------------------DATA------------------------------
+PresetStruct current;
+
 int CurrentPresetID = 0;
 int CurrentBankID = 0;
 int CurrentLoopPositions[7] = {0,0,0,0,0,0,0}; // This may change ----> 8th position to allow for "Dry" loop to be sent to output
@@ -78,6 +80,7 @@ bool checkPress(int durationInSeconds);
 int footHextoID(byte hex);
 void duringLongPress();
 void doLongPress(int id);
+void setCurrentPresetTEST();
 
 //----------------------------Buttons/RotaryEncoders---------------------------
 EasyRotary RotaryEncoders(ROTARY_ENCODER_INTERUPT_PIN); //for reading rotary encoder data **NOT BUTTONS**
@@ -118,20 +121,22 @@ void setup() {
   Serial.println(DEVICE_NAME + " booting");
   i2CScan();
 
+
   initializeDisplay();
   initializeRelays();
  
+  
 	pinMode(rotaryExpander, 0, INPUT_PULLUP);
   pinMode(footExpander, 1, INPUT_PULLUP);
   
+  //Setting up Interupts for Foot Switches and 
   pinMode(ROTARY_INTERUPT_PIN, INPUT_PULLUP);
   pinMode(FOOT_INTERUPT_PIN,INPUT_PULLUP);
- 
+  attachInterrupt(digitalPinToInterrupt(ROTARY_INTERUPT_PIN), ROTARY_INTERUPT, FALLING);
+  attachInterrupt(digitalPinToInterrupt(FOOT_INTERUPT_PIN),FOOT_INTERUPT,FALLING);
 
   RotaryEncoders.startup(*updateUI); //  if interupt occured calls UpdateUI()
 
-  attachInterrupt(digitalPinToInterrupt(ROTARY_INTERUPT_PIN), ROTARY_INTERUPT, FALLING);
-  attachInterrupt(digitalPinToInterrupt(FOOT_INTERUPT_PIN),FOOT_INTERUPT,FALLING);
 
   SPI.begin();
   
@@ -149,6 +154,10 @@ void setup() {
 
   MatrixRight.writeArray(CurrentLoopPositions,7);
   MatrixLeft.writeArray(CurrentLoopPositions,7);
+
+  setCurrentPresetTEST();
+  current.presetID = 1;
+  Serial.println("Current Preset Struct ID: " + String(current.presetID));
   }
 
 //-----------------------------------LOOP-------------------------------------
@@ -166,7 +175,7 @@ void loop() {
       {
       doFoot();  
       }
-  // Check for Double Press
+  // Check for Double Foot Press but not Release
       if(PreviousRotaryButtonValue!=0xFF && checkPress(LONG_PRESS_INTERVAL_S)){
        duringLongPress();
       }
@@ -217,7 +226,7 @@ void doFoot(){
 
 //---------------------------------------------------------------------------------------------------
 
-//--------------------------------------=Long Press=-------------------------------------
+//--------------------------------------Long Press=-------------------------------------
 
 void duringLongPress(){
   int idToArray = rotaryHexToId(PreviousRotaryButtonValue)-1;
@@ -232,7 +241,7 @@ void doLongPress(int id){
 }
 //---------------------------------------------------------------------------------------------------
 
-//----------------------------------Rotary Spin------------------------------------------------------
+//-----------------------------------------Rotary Spin-----------------------------------------------
 void updateUI(bool isClockwise, int id){
   
   switch (MenuState){
@@ -665,3 +674,15 @@ void DelayTrailStartCounter(){
   DelayTrailsPreviousMillis = millis();
 }
 
+void setCurrentPresetTEST(){
+  current.presetID = CurrentPresetID;
+  current.bankID = CurrentBankID;
+  *current.loopPositions = *CurrentLoopPositions;
+  *current.inputVolumes = *CurrentInputVolumes;
+  *current.leftOutputVolumes = *CurrentLeftOutputVolumes;
+  *current.rightOutputVolumes = *CurrentRightOutputVolumes;
+  *current.phase = *CurrentPhase;
+  *current.returns = *CurrentReturns;
+  *current.delayTrails = *CurrentDelayTrails;
+  *current.delayTrailsTimeSeconds = *CurrentDelayTrailsTimeSeconds;
+}

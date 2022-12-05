@@ -1,3 +1,6 @@
+#ifndef NEXTION_COMMANDS
+#define NEXTION_COMMANDS
+
 #include <Arduino.h>
 
 //---------For Nextion Display -----------
@@ -145,3 +148,5 @@ const String FOOT_BANKS[5] = {"A","B","C","D","E"};
    Serial2.write(b_end_message);
    Serial2.write(b_end_message);
  }
+ 
+ #endif //!NEXTION_COMMANDS

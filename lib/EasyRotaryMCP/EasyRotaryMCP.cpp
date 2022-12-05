@@ -19,7 +19,7 @@
 /* Our I2C MCP23017 GPIO expanders */
 Adafruit_MCP23017 mcp;
 
-typedef struct RotaryData Struct;
+typedef struct RotaryData Struct; // not sure if needed??
 
 RotaryData data;
 
