@@ -4,6 +4,7 @@
 #include <Arduino.h>
 
 struct PresetData{
+    
         int presetID = 0;
         int bankID = 0;
         int loopPositions[7] = {0,2,5,0,0,0,0}; // This may change ----> 8th position to allow for "Dry" loop to be sent to output

@@ -131,31 +131,47 @@ void setup() {
   MatrixRight.wipeChip(); 
   MatrixLeft.wipeChip();
 
-  current.bankID = 1;
+  //current.bankID = 1;
 
-  MatrixRight.writeArray(current.loopPositions,7);
-  MatrixLeft.writeArray(current.loopPositions,7);
+  //MatrixRight.writeArray(current.loopPositions,7);
+  //MatrixLeft.writeArray(current.loopPositions,7);
   }
 
 //-----------------------------------LOOP-------------------------------------
 void loop() {
-  // Check for rotary encoder data
-    RotaryDataStuct = RotaryEncoders.checkInterrupt(); 
 
-  // Check for rotary encoder button press
-    if (RotaryFlag)
-      {
-      doButton();
-      }
-  // Check for foot button press
-    if (FootFlag)
-      {
-      doFoot();  
-      }
-  // Check for Double Foot Press but not Release
-      if(PreviousRotaryButtonValue!=0xFF && checkPress(LONG_PRESS_INTERVAL_S)){
-       duringLongPress();
-      }
+  for (size_t i = 0; i < 7; i++)
+  {
+    MatrixLeft.writeData(i,7,true);
+    MatrixRight.writeData(i,7,true);
+    Serial.println("Connecting: " + String(i) + " to 7");
+    delay(3000);
+  }
+
+  delay(10000);
+  MatrixLeft.wipeChip();
+  MatrixRight.wipeChip();
+  Serial.println("Chips Wiped!");
+  delay(3000);
+
+
+  // // Check for rotary encoder data
+  //   RotaryDataStuct = RotaryEncoders.checkInterrupt(); 
+
+  // // Check for rotary encoder button press
+  //   if (RotaryFlag)
+  //     {
+  //     doButton();
+  //     }
+  // // Check for foot button press
+  //   if (FootFlag)
+  //     {
+  //     doFoot();  
+  //     }
+  // // Check for Double Foot Press but not Release
+  //     if(PreviousRotaryButtonValue!=0xFF && checkPress(LONG_PRESS_INTERVAL_S)){
+  //      duringLongPress();
+  //     }
 }
 
 //-------------------------------When Rotary Encoder Button is pressed--------------------------
