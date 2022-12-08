@@ -59,7 +59,7 @@ bool checkPress(int durationInSeconds);
 int footHextoID(byte hex);
 void duringLongPress();
 void doLongPress(int id);
-void setCurrentPreset(PresetData &current, PresetData &newPreset);
+void copyPreset(PresetData &current, PresetData &newPreset);
 void changePreset(int id); //updates Nextion and Sends Data
 
 //----------------------------Buttons/RotaryEncoders---------------------------
@@ -98,6 +98,7 @@ PCF8574 ReturnRelayExpander(RETURN_RELAYS_ADDRESS);
 void setup() {
   Serial.begin(115200);  //To Computer
   Serial2.begin(9600);  //To Nextion
+  while(!Serial){};
   Serial.println(DEVICE_NAME + " booting");
   i2CScan();
 
@@ -127,16 +128,17 @@ void setup() {
   pinMode(cs5_pin, OUTPUT);
   setVolumesDefault();
 
+  presetA.presetID = 0;
+  presetB.presetID = 1;
+  presetC.presetID = 2;
+  presetD.presetID = 3;
+  presetE.presetID = 4;
+
+  changePreset(0);
+
   //This should happen anyway but just in case
   MatrixRight.wipeChip(); 
   MatrixLeft.wipeChip();
-
-  current.bankID = 1;
-  Serial.println("Current before: " + String(current.bankID));
-  Serial.println("presetA before: " + String(presetA.bankID));
-  setCurrentPreset(current, presetA);
-  Serial.println("Current after: " + String(current.bankID));
-  Serial.println("presetA after: " + String(presetA.bankID));
 
   MatrixRight.writeArray(current.loopPositions,7);
   MatrixLeft.writeArray(current.loopPositions,7);
@@ -144,23 +146,23 @@ void setup() {
 
 //-----------------------------------LOOP-------------------------------------
 void loop() {
-  // // Check for rotary encoder data
-  //   RotaryDataStuct = RotaryEncoders.checkInterrupt(); 
+  // Check for rotary encoder data
+    RotaryDataStuct = RotaryEncoders.checkInterrupt(); 
 
-  // // Check for rotary encoder button press
-  //   if (RotaryFlag)
-  //     {
-  //     doButton();
-  //     }
-  // // Check for foot button press
-  //   if (FootFlag)
-  //     {
-  //     doFoot();  
-  //     }
-  // // Check for Double Foot Press but not Release
-  //     if(PreviousRotaryButtonValue!=0xFF && checkPress(LONG_PRESS_INTERVAL_S)){
-  //      duringLongPress();
-  //     }
+  // Check for rotary encoder button press
+    if (RotaryFlag)
+      {
+      doButton();
+      }
+  // Check for foot button press
+    if (FootFlag)
+      {
+      doFoot();  
+      }
+  // Check for Double Foot Press but not Release
+      if(PreviousRotaryButtonValue!=0xFF && checkPress(LONG_PRESS_INTERVAL_S)){
+       duringLongPress();
+      }
 }
 
 //-------------------------------When Rotary Encoder Button is pressed--------------------------
@@ -657,9 +659,7 @@ void DelayTrailStartCounter(){
   DelayTrailsPreviousMillis = millis();
 }
 
-void setCurrentPreset(PresetData &current, PresetData &newPreset){
-  Serial.println("current in fucntion: " + String(current.bankID));
-  Serial.println("presetA in function: " + String(presetA.bankID));
+void copyPreset(PresetData &current, PresetData &newPreset){
   current.presetID = newPreset.presetID;
   current.bankID = newPreset.bankID;
   memmove(current.loopPositions,newPreset.loopPositions, sizeof(newPreset.loopPositions));
@@ -675,10 +675,9 @@ void setCurrentPreset(PresetData &current, PresetData &newPreset){
 
 
 void changePreset(int id){
-Serial.println("Before: " + String(current.bankID));
-Serial.println("new Preset id: " + String(presets[id].bankID));
-setCurrentPreset(current, presets[id]);
-Serial.println("After: " + String(current.bankID));
+Serial.println(String(current.presetID));
+copyPreset(presets[current.presetID],current);
+copyPreset(current, presets[id]);
 
 //send all data to hardware
 MatrixLeft.writeArray(current.loopPositions,7);
