@@ -15,7 +15,6 @@ struct PresetData{
         bool delayTrails[7] = {0,0,0,0,0,0,0}; // 0=No trail, 1=Delay Trail 
         float delayTrailsTimeSeconds[7] = {DEFAIUL_DELAY_TIME_S,DEFAIUL_DELAY_TIME_S,DEFAIUL_DELAY_TIME_S,DEFAIUL_DELAY_TIME_S,DEFAIUL_DELAY_TIME_S,DEFAIUL_DELAY_TIME_S,DEFAIUL_DELAY_TIME_S};
     };
-
 // Test Data
 // int CurrentPresetID = 0;
 // int CurrentBankID = 0;

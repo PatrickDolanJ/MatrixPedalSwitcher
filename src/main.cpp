@@ -16,7 +16,7 @@ bool TwoFootButtonsPressed = false;
 unsigned long DelayTrailsPreviousMillis = 0;
 
 //------------------------------DATA------------------------------
-PresetData current, presetA, presetB, presetC, presetD, presetE;
+PresetData current,presetA, presetB, presetC, presetD, presetE;
 PresetData presets[5] = {presetA,presetB,presetC,presetD,presetE};
 //----------------------Function prototypes------------------------
 
@@ -59,7 +59,7 @@ bool checkPress(int durationInSeconds);
 int footHextoID(byte hex);
 void duringLongPress();
 void doLongPress(int id);
-void setCurrentPreset(PresetData current, PresetData newPreset);
+void setCurrentPreset(PresetData &current, PresetData &newPreset);
 void changePreset(int id); //updates Nextion and Sends Data
 
 //----------------------------Buttons/RotaryEncoders---------------------------
@@ -133,8 +133,10 @@ void setup() {
 
   current.bankID = 1;
   Serial.println("Current before: " + String(current.bankID));
+  Serial.println("presetA before: " + String(presetA.bankID));
   setCurrentPreset(current, presetA);
   Serial.println("Current after: " + String(current.bankID));
+  Serial.println("presetA after: " + String(presetA.bankID));
 
   MatrixRight.writeArray(current.loopPositions,7);
   MatrixLeft.writeArray(current.loopPositions,7);
@@ -655,7 +657,9 @@ void DelayTrailStartCounter(){
   DelayTrailsPreviousMillis = millis();
 }
 
-void setCurrentPreset(PresetData current, PresetData newPreset){
+void setCurrentPreset(PresetData &current, PresetData &newPreset){
+  Serial.println("current in fucntion: " + String(current.bankID));
+  Serial.println("presetA in function: " + String(presetA.bankID));
   current.presetID = newPreset.presetID;
   current.bankID = newPreset.bankID;
   memmove(current.loopPositions,newPreset.loopPositions, sizeof(newPreset.loopPositions));
