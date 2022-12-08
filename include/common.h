@@ -16,6 +16,6 @@
 #include <Preset.h>
 #include <Bank.h>
 #include <RotaryEncoders.h>
-#include <SDCard.h>
+//#include <SDCard.h>
 
 #endif //COMMON_HEADER
