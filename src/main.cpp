@@ -59,7 +59,7 @@ bool checkPress(int durationInSeconds);
 int footHextoID(byte hex);
 void duringLongPress();
 void doLongPress(int id);
-void setCurrentPreset();
+void setCurrentPreset(PresetData current, PresetData newPreset);
 void changePreset(int id); //updates Nextion and Sends Data
 
 //----------------------------Buttons/RotaryEncoders---------------------------
@@ -132,6 +132,9 @@ void setup() {
   MatrixLeft.wipeChip();
 
   current.bankID = 1;
+  Serial.println("Current before: " + String(current.bankID));
+  setCurrentPreset(current, presetA);
+  Serial.println("Current after: " + String(current.bankID));
 
   MatrixRight.writeArray(current.loopPositions,7);
   MatrixLeft.writeArray(current.loopPositions,7);
@@ -139,23 +142,23 @@ void setup() {
 
 //-----------------------------------LOOP-------------------------------------
 void loop() {
-  // Check for rotary encoder data
-    RotaryDataStuct = RotaryEncoders.checkInterrupt(); 
+  // // Check for rotary encoder data
+  //   RotaryDataStuct = RotaryEncoders.checkInterrupt(); 
 
-  // Check for rotary encoder button press
-    if (RotaryFlag)
-      {
-      doButton();
-      }
-  // Check for foot button press
-    if (FootFlag)
-      {
-      doFoot();  
-      }
-  // Check for Double Foot Press but not Release
-      if(PreviousRotaryButtonValue!=0xFF && checkPress(LONG_PRESS_INTERVAL_S)){
-       duringLongPress();
-      }
+  // // Check for rotary encoder button press
+  //   if (RotaryFlag)
+  //     {
+  //     doButton();
+  //     }
+  // // Check for foot button press
+  //   if (FootFlag)
+  //     {
+  //     doFoot();  
+  //     }
+  // // Check for Double Foot Press but not Release
+  //     if(PreviousRotaryButtonValue!=0xFF && checkPress(LONG_PRESS_INTERVAL_S)){
+  //      duringLongPress();
+  //     }
 }
 
 //-------------------------------When Rotary Encoder Button is pressed--------------------------
