@@ -288,7 +288,7 @@ void updateUI(bool isClockwise, int id){
   }
 
 void cycleMenu(int id){
-  if(id ==1){
+  if(id ==2){
   highlightMenu(false);
     if(MenuState == NUM_MENU_OPTIONS-1){
       MenuState = static_cast<E_MenuState>(1);
@@ -297,7 +297,7 @@ void cycleMenu(int id){
     }
       Serial.println("MenuState = " + String(MenuState));
       highlightMenu(true);
-  } else if(id ==2)
+  } else if(id ==1)
   {
     highlightMenu(false);
     if(MenuState == 1){
