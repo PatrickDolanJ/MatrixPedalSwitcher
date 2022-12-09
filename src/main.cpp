@@ -2,8 +2,8 @@
 #include <Arduino.h>
 
 //-----------------------------MATRIX----------------------------
-AGD2188 MatrixRight(RIGHT_MATRIX_ADDRESS); 
-AGD2188 MatrixLeft(LEFT_MATRIX_ADDRESS);
+AGD2188 MatrixRight; 
+AGD2188 MatrixLeft;
 
 //------------------------------MENU------------------------------
 enum E_MenuState {LOOPS = 1,INPUT_VOLUMES = 2, LEFT_OUTPUT_VOLUMES = 3,RIGHT_OUTPUT_VOLUMES = 4, PHASE = 5, NUM_MENU_OPTIONS = 6};
@@ -81,7 +81,7 @@ void FOOT_INTERUPT(){
 }
 
 //------------------------------LEDS------------------------------
-PCF8574 ledExpander(FOOT_SWITCH_LIGHTS_ADDRESS);
+PCF8574 LEDExpander(FOOT_SWITCH_LIGHTS_ADDRESS);
 
 
 //---------------------------RELAYS-----------------------
@@ -96,6 +96,18 @@ PCF8574 ReturnRelayExpander(RETURN_RELAYS_ADDRESS);
 //------------------------------Setup------------------------------
 
 void setup() {
+  //Matrix
+  MatrixRight = AGD2188(RIGHT_MATRIX_ADDRESS); 
+  MatrixLeft = AGD2188(LEFT_MATRIX_ADDRESS);
+  //Expanders
+  rotaryExpander = PCF8574(ROTARY_BUTTONS_ADDRESS); // rotary encoder **BUTTONS**
+  footExpander = PCF8574(FOOTSWITCH_ADDRESS); // foot switch buttons
+  LEDExpander = PCF8574(FOOT_SWITCH_LIGHTS_ADDRESS);
+  LeftPhaseRelays = PCF8574(LEFT_PHASE_RELAYS_ADDRESS);
+  RightPhaseRelays = PCF8574(RIGHT_PHASE_RELAY_ADDRESS);
+  ReturnRelayExpander = PCF8574(RETURN_RELAYS_ADDRESS);
+
+
   Serial.begin(115200);  //To Computer
   Serial2.begin(9600);  //To Nextion
   Serial.println(DEVICE_NAME + " booting");
@@ -569,9 +581,9 @@ int footHextoID(byte hex){
 
 void changeFootLED(int ledID, bool isOn){
   if(isOn){
-    digitalWrite(ledExpander,ledID, HIGH);
+    digitalWrite(LEDExpander,ledID, HIGH);
   } else {
-    digitalWrite(ledExpander,ledID, LOW);
+    digitalWrite(LEDExpander,ledID, LOW);
   }
 }
 
