@@ -16,7 +16,7 @@ bool TwoFootButtonsPressed = false;
 unsigned long DelayTrailsPreviousMillis = 0;
 
 //------------------------------DATA------------------------------
-PresetData current,presetA, presetB, presetC, presetD, presetE;
+PresetData current, presetA, presetB, presetC, presetD, presetE; // dont touch presetsA...etc only use array
 PresetData presets[5] = {presetA,presetB,presetC,presetD,presetE};
 //----------------------Function prototypes------------------------
 
@@ -26,6 +26,7 @@ void cycleMenu(int id);
 void highlightMenu(bool shouldHighlight);
 void highLightReturn(int id, bool shouldHighlight);
 void initializeDisplay();
+void sendAllVolumesToNextion();
 
 void sendLoopPositionsNextion();
 void sendVolumeToNextion(int idForArray, int volumeForDisplay);
@@ -98,7 +99,9 @@ PCF8574 ReturnRelayExpander(RETURN_RELAYS_ADDRESS);
 void setup() {
   Serial.begin(115200);  //To Computer
   Serial2.begin(9600);  //To Nextion
+  while(!Serial){};
   Serial.println(DEVICE_NAME + " booting");
+
   i2CScan();
 
   initializeDisplay();
@@ -132,6 +135,13 @@ void setup() {
   MatrixLeft.wipeChip();
 
   current.bankID = 1;
+  for (size_t i = 0; i < 5; i++)
+  {
+    presets[i].presetID= i;
+  }
+  
+  Serial.println(String(presets[3].presetID));
+  
   Serial.println("Current before: " + String(current.bankID));
   Serial.println("presetA before: " + String(presetA.bankID));
   setCurrentPreset(current, presetA);
@@ -144,23 +154,23 @@ void setup() {
 
 //-----------------------------------LOOP-------------------------------------
 void loop() {
-  // // Check for rotary encoder data
-  //   RotaryDataStuct = RotaryEncoders.checkInterrupt(); 
+  // Check for rotary encoder data
+    RotaryDataStuct = RotaryEncoders.checkInterrupt(); 
 
-  // // Check for rotary encoder button press
-  //   if (RotaryFlag)
-  //     {
-  //     doButton();
-  //     }
-  // // Check for foot button press
-  //   if (FootFlag)
-  //     {
-  //     doFoot();  
-  //     }
-  // // Check for Double Foot Press but not Release
-  //     if(PreviousRotaryButtonValue!=0xFF && checkPress(LONG_PRESS_INTERVAL_S)){
-  //      duringLongPress();
-  //     }
+  // Check for rotary encoder button press
+    if (RotaryFlag)
+      {
+      doButton();
+      }
+  // Check for foot button press
+    if (FootFlag)
+      {
+      doFoot();  
+      }
+  // Check for Double Foot Press but not Release
+      if(PreviousRotaryButtonValue!=0xFF && checkPress(LONG_PRESS_INTERVAL_S)){
+       duringLongPress();
+      }
 }
 
 //-------------------------------When Rotary Encoder Button is pressed--------------------------
@@ -329,6 +339,7 @@ void changeVolume(int id, bool isClockwise, int volume[]){
     isClockwise ? volume[idToArray]+=10 : volume[idToArray]-=10;
     capVolume(volume, idToArray);
     int volumeForDisplay = volumeToDisplay(volume[idToArray]);
+    Serial.println("Volume: " + String(volume[idToArray]));
     sendVolumeToNextion(idToArray, volumeForDisplay); 
     sendVolumeToDigitalPots(idToArray);
 }
@@ -521,15 +532,18 @@ void sendVolumeToDigitalPots(int id){
   switch(MenuState)
   {
     case(E_MenuState::INPUT_VOLUMES):
+      Serial.println("Volume from current: " + String(current.inputVolumes[id]));
       digitalPotWrite(potID[LEFT_INPUT_VOLUME_POTS_IDS[1][id]],LEFT_INPUT_VOLUME_POTS_IDS[0][id],current.inputVolumes[id]); //CurrentInputVolumes[id]
       digitalPotWrite(potID[RIGHT_INPUT_VOLUME_POTS_IDS[1][id]],RIGHT_INPUT_VOLUME_POTS_IDS[0][id],current.inputVolumes[id]);
       break;
   
     case(E_MenuState::LEFT_OUTPUT_VOLUMES):
+      Serial.println("Volume from current: " + String(current.leftOutputVolumes[id]));
       digitalPotWrite(potID[LEFT_OUTPUT_VOLUME_POTS_IDS[1][id]],LEFT_OUTPUT_VOLUME_POTS_IDS[0][id],current.leftOutputVolumes[id]); //CurrentLeftOutputVolumes[id]
       break;
 
     case(E_MenuState::RIGHT_OUTPUT_VOLUMES):
+      Serial.println("Volume from current: " + String(current.rightOutputVolumes[id]));
       digitalPotWrite(potID[RIGHT_OUTPUT_VOLUME_POTS_IDS[1][id]],RIGHT_OUTPUT_VOLUME_POTS_IDS[0][id],current.rightOutputVolumes[id]); //CurrentRightOutputVolumes[id]
       break;
   }
@@ -675,10 +689,11 @@ void setCurrentPreset(PresetData &current, PresetData &newPreset){
 
 
 void changePreset(int id){
-Serial.println("Before: " + String(current.bankID));
-Serial.println("new Preset id: " + String(presets[id].bankID));
+
+Serial.println("Previous PresetID: " + String(current.presetID));
+setCurrentPreset(presets[current.presetID],current);
 setCurrentPreset(current, presets[id]);
-Serial.println("After: " + String(current.bankID));
+Serial.println("New PresetID: " + String(current.presetID));
 
 //send all data to hardware
 MatrixLeft.writeArray(current.loopPositions,7);
@@ -698,13 +713,28 @@ for (size_t i = 0; i < 8; i++)
 
 // send all data to Nextion
 sendLoopPositionsNextion();
+sendAllVolumesToNextion();
 for (size_t i = 0; i < 8; i++)
-{
-  sendPhaseToNextion(i);
-  sendVolumeToNextion(i,current.inputVolumes[i]);
-  sendVolumeToNextion(i,current.leftOutputVolumes[i]);
-  sendVolumeToNextion(i,current.rightOutputVolumes[i]);
-  sendReturnNextion(i);
-}
-
+  {
+    sendPhaseToNextion(i);
+    sendReturnNextion(i);
+  }
 } 
+
+void sendAllVolumesToNextion(){
+  for (int i = 0; i < 8; i++)
+  {
+    Serial2.print(ADDRESS_FOR_DISPLAY[i][0] + ".val=" +String(volumeToDisplay(current.inputVolumes[i])));
+    sendEndCommand();
+    Serial2.print(ADDRESS_FOR_DISPLAY[i][1] + ".val=" +String(volumeToDisplay(current.inputVolumes[i])));
+    sendEndCommand();
+    Serial2.print(ADDRESS_FOR_DISPLAY[i][3] + ".val=" +String(volumeToDisplay(current.leftOutputVolumes[i])));
+    sendEndCommand();
+    Serial2.print(ADDRESS_FOR_DISPLAY[i][4] + ".val=" +String(volumeToDisplay(current.rightOutputVolumes[i])));
+    sendEndCommand();
+
+    
+  }
+  
+   
+}
