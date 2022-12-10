@@ -7,6 +7,8 @@
 // This sketch tests the standard 7-bit addresses
 // Devices with higher bit address might not be seen properly.
 /// ---------------------------------------------------------------- /
+#ifndef I2C_SCANNER
+#define I2C_SCANNER
 
 #include <Arduino.h>
 #include <Wire.h> //include Wire.h library
@@ -58,3 +60,5 @@ void i2CScan()
   else
     Serial.println("done\n");
 }
+
+#endif // !I2C_SCANNER

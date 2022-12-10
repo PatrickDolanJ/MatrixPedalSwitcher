@@ -1,3 +1,6 @@
+#ifndef ROTARY_ENCODERS
+#define ROTARY_ENCODER
+
 #include <Arduino.h>
 
 int rotaryHexToId(byte hexVal){
@@ -29,5 +32,4 @@ int rotaryHexToId(byte hexVal){
     return id;
   }
 
-  
-
+  #endif // !ROTARY_ENCODERS
