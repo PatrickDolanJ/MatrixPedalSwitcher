@@ -6,7 +6,7 @@ AGD2188 MatrixRight(RIGHT_MATRIX_ADDRESS);
 AGD2188 MatrixLeft(LEFT_MATRIX_ADDRESS);
 
 //------------------------------MENU------------------------------
-enum E_MenuState {LOOPS = 1,INPUT_VOLUMES = 2, LEFT_OUTPUT_VOLUMES = 3,RIGHT_OUTPUT_VOLUMES = 4, PHASE = 5, NUM_MENU_OPTIONS = 6};
+enum E_MenuState {LOOPS = 1,PAN = 2, INPUT_VOLUMES = 3,OUTPUT_VOLUMES = 4, PHASE = 5, NUM_MENU_OPTIONS = 6};
 E_MenuState MenuState;
 unsigned long LongPressPreviousMIllis = 0;
 unsigned long CurrentTime = 0;
@@ -32,10 +32,12 @@ void sendLoopPositionsNextion();
 void sendVolumeToNextion(int idForArray, int volumeForDisplay);
 void sendReturnNextion(int id);
 void sendPhaseToNextion(int arrayId);
+void sendPan(int id);
 
 //Data Changes
 void changeLoopPositions(bool isClockwise, int id);
 void changeVolume(int id, bool isClockwise, int volume_array[]);
+void changePan(int id, bool isClockwise);
 void changePhase(int id, bool isClockwise);
 void changeReturn(int id);
 
@@ -62,6 +64,7 @@ void duringLongPress();
 void doLongPress(int id);
 void setCurrentPreset(PresetData &current, PresetData &newPreset);
 void changePreset(int id); //updates Nextion and Sends Data
+int leftOrRightVolumeforDisplay(int id);
 
 //----------------------------Buttons/RotaryEncoders---------------------------
 EasyRotary RotaryEncoders(ROTARY_ENCODER_INTERUPT_PIN); //for reading rotary encoder data **NOT BUTTONS**
@@ -251,12 +254,13 @@ void updateUI(bool isClockwise, int id){
       changeVolume(id, isClockwise, current.inputVolumes);       //CurrentInputVolumes);
       break;
 
-    case(E_MenuState::LEFT_OUTPUT_VOLUMES):
+    case(E_MenuState::OUTPUT_VOLUMES):
       changeVolume(id, isClockwise, current.leftOutputVolumes);  //CurrentLeftOutputVolumes
+      changeVolume(id, isClockwise, current.rightOutputVolumes); //CurrentRightOutputVolumes
       break;
     
-    case(E_MenuState::RIGHT_OUTPUT_VOLUMES):
-      changeVolume(id, isClockwise, current.rightOutputVolumes); //CurrentRightOutputVolumes
+    case(E_MenuState::PAN):
+      changePan(id,isClockwise);
       break;
     
     case(E_MenuState::PHASE):
@@ -321,17 +325,14 @@ void capVolume(int volume[], int arrayPosition){
 
 void sendVolumeToNextion(int idForArray, int volumeForDisplay){ 
   if (MenuState == E_MenuState::INPUT_VOLUMES){
+    //NEEDS INPUTVOLUME NAMES
     Serial2.print(ADDRESS_FOR_DISPLAY[idForArray][0] + ".val=" +String(volumeForDisplay));
     sendEndCommand();
+  } else if(MenuState == E_MenuState::OUTPUT_VOLUMES){
+    //NEEDS OUTPUT VOLUME NAMES
     Serial2.print(ADDRESS_FOR_DISPLAY[idForArray][1] + ".val=" +String(volumeForDisplay));
     sendEndCommand();
-  } else if(MenuState == E_MenuState::LEFT_OUTPUT_VOLUMES){
-    Serial2.print(ADDRESS_FOR_DISPLAY[idForArray][3] + ".val=" +String(volumeForDisplay));
-    sendEndCommand();
-  } else if(MenuState == E_MenuState::RIGHT_OUTPUT_VOLUMES){
-    Serial2.print(ADDRESS_FOR_DISPLAY[idForArray][4] + ".val=" +String(volumeForDisplay));
-    sendEndCommand();
-  }
+  } 
 }
 
 void changeVolume(int id, bool isClockwise, int volume[]){
@@ -366,9 +367,9 @@ void sendPhaseToNextion(int arrayId){
     right_phase = PHASES_FOR_DISPLAY[arrayId][1];
   }
 
-    Serial2.print(ADDRESS_FOR_DISPLAY[arrayId][5] + ".txt=" + '"' + left_phase + '"');
+    Serial2.print(ADDRESS_FOR_DISPLAY[arrayId][4] + ".txt=" + '"' + left_phase + '"');
     sendEndCommand();
-    Serial2.print(ADDRESS_FOR_DISPLAY[arrayId][6] + ".txt=" + '"' + right_phase + '"');
+    Serial2.print(ADDRESS_FOR_DISPLAY[arrayId][5] + ".txt=" + '"' + right_phase + '"');
     sendEndCommand();
 }
 
@@ -421,32 +422,31 @@ void highlightMenu(bool shouldHighlightOR){
       for(int i = 0; i <8; i++){
         Serial2.print(ADDRESS_FOR_DISPLAY[i][0] + ".pco=" + color);
         sendEndCommand();
+      }
+      break;
+
+    case(E_MenuState::OUTPUT_VOLUMES):
+      for (int i = 0; i <8; i++){
+
         Serial2.print(ADDRESS_FOR_DISPLAY[i][1] + ".pco=" + color);
         sendEndCommand();
       }
       break;
-
-    case(E_MenuState::LEFT_OUTPUT_VOLUMES):
+    
+    case(E_MenuState::PAN):
       for (int i = 0; i <8; i++){
         Serial2.print(ADDRESS_FOR_DISPLAY[i][3] + ".pco=" + color);
         sendEndCommand();
       }
       break;
     
-    case(E_MenuState::RIGHT_OUTPUT_VOLUMES):
+    case(E_MenuState::PHASE):
       for (int i = 0; i <8; i++){
         Serial2.print(ADDRESS_FOR_DISPLAY[i][4] + ".pco=" + color);
         sendEndCommand();
       }
-      break;
-    
-    case(E_MenuState::PHASE):
       for (int i = 0; i <8; i++){
         Serial2.print(ADDRESS_FOR_DISPLAY[i][5] + ".pco=" + color);
-        sendEndCommand();
-      }
-      for (int i = 0; i <8; i++){
-        Serial2.print(ADDRESS_FOR_DISPLAY[i][6] + ".pco=" + color);
         sendEndCommand();
       }
       break;
@@ -484,15 +484,15 @@ void initializeDisplay(){
   for(int i = 0; i<7; i++){
     sendReturnNextion(i);
   }
-  //Left Output
-  MenuState = E_MenuState::LEFT_OUTPUT_VOLUMES;
+  //Output
+  MenuState = E_MenuState::OUTPUT_VOLUMES;
   for(int i = 0; i <8; i++){
-    sendVolumeToNextion(i, volumeToDisplay(current.leftOutputVolumes[i])); //CurrentLeftOutputVolumes[i]
+    sendVolumeToNextion(i, volumeToDisplay(max(current.leftOutputVolumes[i],current.rightOutputVolumes[i]))); //CurrentLeftOutputVolumes[i]
   }
   //Right Output
-  MenuState = E_MenuState::RIGHT_OUTPUT_VOLUMES;
+  MenuState = E_MenuState::PAN;
   for(int i = 0; i <8; i++){
-    sendVolumeToNextion(i, volumeToDisplay(current.rightOutputVolumes[i])); //CurrentRightOutputVolumes[i]
+    sendPan(i);
   }
   //Unhighlight
   for(int i = 1; i <6; i++){
@@ -537,13 +537,9 @@ void sendVolumeToDigitalPots(int id){
       digitalPotWrite(potID[RIGHT_INPUT_VOLUME_POTS_IDS[1][id]],RIGHT_INPUT_VOLUME_POTS_IDS[0][id],current.inputVolumes[id]);
       break;
   
-    case(E_MenuState::LEFT_OUTPUT_VOLUMES):
+    case(E_MenuState::OUTPUT_VOLUMES):
       Serial.println("Volume from current: " + String(current.leftOutputVolumes[id]));
       digitalPotWrite(potID[LEFT_OUTPUT_VOLUME_POTS_IDS[1][id]],LEFT_OUTPUT_VOLUME_POTS_IDS[0][id],current.leftOutputVolumes[id]); //CurrentLeftOutputVolumes[id]
-      break;
-
-    case(E_MenuState::RIGHT_OUTPUT_VOLUMES):
-      Serial.println("Volume from current: " + String(current.rightOutputVolumes[id]));
       digitalPotWrite(potID[RIGHT_OUTPUT_VOLUME_POTS_IDS[1][id]],RIGHT_OUTPUT_VOLUME_POTS_IDS[0][id],current.rightOutputVolumes[id]); //CurrentRightOutputVolumes[id]
       break;
   }
@@ -680,16 +676,15 @@ void setCurrentPreset(PresetData &current, PresetData &newPreset){
   memmove(current.inputVolumes,newPreset.inputVolumes,sizeof(current.inputVolumes));
   memmove(current.leftOutputVolumes,newPreset.leftOutputVolumes,sizeof(current.leftOutputVolumes));
   memmove(current.rightOutputVolumes,newPreset.rightOutputVolumes,sizeof(current.rightOutputVolumes));
+  memmove(current.pan,newPreset.pan,sizeof(current.pan));
   memmove(current.phase,newPreset.phase,sizeof(current.phase));
   memmove(current.returns,newPreset.returns,sizeof(current.returns));
   memmove(current.delayTrails,newPreset.delayTrails,sizeof(current.delayTrails));
-  memmove(current.delayTrailsTimeSeconds,newPreset.delayTrailsTimeSeconds,sizeof(current.delayTrailsTimeSeconds));
 }
 
 
 
 void changePreset(int id){
-
 Serial.println("Previous PresetID: " + String(current.presetID));
 setCurrentPreset(presets[current.presetID],current);
 setCurrentPreset(current, presets[id]);
@@ -718,6 +713,7 @@ for (size_t i = 0; i < 8; i++)
   {
     sendPhaseToNextion(i);
     sendReturnNextion(i);
+    sendPan(i);
   }
 } 
 
@@ -726,15 +722,39 @@ void sendAllVolumesToNextion(){
   {
     Serial2.print(ADDRESS_FOR_DISPLAY[i][0] + ".val=" +String(volumeToDisplay(current.inputVolumes[i])));
     sendEndCommand();
-    Serial2.print(ADDRESS_FOR_DISPLAY[i][1] + ".val=" +String(volumeToDisplay(current.inputVolumes[i])));
+    Serial2.print(ADDRESS_FOR_DISPLAY[i][1] + ".val=" +String(volumeToDisplay(leftOrRightVolumeforDisplay(i))));
     sendEndCommand();
-    Serial2.print(ADDRESS_FOR_DISPLAY[i][3] + ".val=" +String(volumeToDisplay(current.leftOutputVolumes[i])));
-    sendEndCommand();
-    Serial2.print(ADDRESS_FOR_DISPLAY[i][4] + ".val=" +String(volumeToDisplay(current.rightOutputVolumes[i])));
-    sendEndCommand();
-
-    
   }
-  
-   
+}
+
+void changePan(int id, bool isClockwise){
+  int idToArray = id -1;
+  isClockwise ? current.pan[idToArray]+=5 : current.pan[idToArray]-=5;
+  current.pan[idToArray] = min(current.pan[idToArray],255);
+  current.pan[idToArray] = max(current.pan[idToArray],0);
+
+  Serial.println("Pan: " + String(current.pan[idToArray]));
+
+  if(current.pan[idToArray<50]){
+    current.rightOutputVolumes[idToArray] = (float(current.pan[idToArray])/50);
+    digitalPotWrite(potID[RIGHT_OUTPUT_VOLUME_POTS_IDS[1][idToArray]],RIGHT_OUTPUT_VOLUME_POTS_IDS[0][idToArray],current.rightOutputVolumes[idToArray]); //CurrentRightOutputVolumes[id]
+    Serial.println(current.rightOutputVolumes[idToArray]);
+
+  } else if (current.pan[idToArray]>50){
+    current.leftOutputVolumes[idToArray] *= float(100-current.pan[idToArray]/50);
+    digitalPotWrite(potID[LEFT_OUTPUT_VOLUME_POTS_IDS[1][idToArray]],LEFT_OUTPUT_VOLUME_POTS_IDS[0][idToArray],current.leftOutputVolumes[idToArray]);
+  }
+  sendPan(idToArray);
+
+}
+
+int leftOrRightVolumeforDisplay(int id){
+  int idToArray = id -1;
+  return max(current.leftOutputVolumes[idToArray],current.rightOutputVolumes[idToArray]);
+}
+
+void sendPan(int id){
+String command= ADDRESS_FOR_DISPLAY[id][3] + ".val=" + current.pan[id];
+Serial2.print(command);
+sendEndCommand();
 }

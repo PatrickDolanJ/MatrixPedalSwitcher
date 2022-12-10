@@ -6,6 +6,7 @@
 //--------------Settings---------------
 const String DEVICE_NAME = "HeighLiner";
 const int DEFAULT_VOLUME = 255;
+const int DEFAULT_PAN = 50; // 0(hard left) to 100 (hard right)
 const int DEFAIUL_DELAY_TIME_S = 2;
 const String DEFAULT_COLOR = "19703";
 const String HIGHLIGHT_COLOR = "65535"; 
