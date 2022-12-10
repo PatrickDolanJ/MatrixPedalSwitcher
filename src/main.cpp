@@ -16,8 +16,8 @@ bool TwoFootButtonsPressed = false;
 unsigned long DelayTrailsPreviousMillis = 0;
 
 //------------------------------DATA------------------------------
-PresetData current, presetA, presetB, presetC, presetD, presetE; // dont touch presetsA...etc only use array
-PresetData presets[5] = {presetA,presetB,presetC,presetD,presetE};
+PresetData current;
+PresetData presets[5] = {PresetData(0),PresetData(1),PresetData(2),PresetData(3),PresetData(4)};
 //----------------------Function prototypes------------------------
 
 //Menu and Nextion
@@ -27,6 +27,7 @@ void highlightMenu(bool shouldHighlight);
 void highLightReturn(int id, bool shouldHighlight);
 void initializeDisplay();
 void sendAllVolumesToNextion();
+
 
 void sendLoopPositionsNextion();
 void sendVolumeToNextion(int idForArray, int volumeForDisplay);
@@ -65,6 +66,11 @@ void doLongPress(int id);
 void setCurrentPreset(PresetData &current, PresetData &newPreset);
 void changePreset(int id); //updates Nextion and Sends Data
 int leftOrRightVolumeforDisplay(int id);
+void updatePan(int id, bool isClockwise);
+
+void changeOutputVolumesFromPan(int idToArray);
+void sendOutputVolumesToDigitalPots(int id);
+
 
 //----------------------------Buttons/RotaryEncoders---------------------------
 EasyRotary RotaryEncoders(ROTARY_ENCODER_INTERUPT_PIN); //for reading rotary encoder data **NOT BUTTONS**
@@ -109,8 +115,7 @@ void setup() {
 
   initializeDisplay();
   initializeRelays();
- 
-  
+
 	pinMode(rotaryExpander, 0, INPUT_PULLUP);
   pinMode(footExpander, 1, INPUT_PULLUP);
   
@@ -138,18 +143,13 @@ void setup() {
   MatrixLeft.wipeChip();
 
   current.bankID = 1;
+
   for (size_t i = 0; i < 5; i++)
   {
     presets[i].presetID= i;
   }
   
-  Serial.println(String(presets[3].presetID));
-  
-  Serial.println("Current before: " + String(current.bankID));
-  Serial.println("presetA before: " + String(presetA.bankID));
-  setCurrentPreset(current, presetA);
-  Serial.println("Current after: " + String(current.bankID));
-  Serial.println("presetA after: " + String(presetA.bankID));
+  setCurrentPreset(current, presets[0]);
 
   MatrixRight.writeArray(current.loopPositions,7);
   MatrixLeft.writeArray(current.loopPositions,7);
@@ -255,12 +255,13 @@ void updateUI(bool isClockwise, int id){
       break;
 
     case(E_MenuState::OUTPUT_VOLUMES):
-      changeVolume(id, isClockwise, current.leftOutputVolumes);  //CurrentLeftOutputVolumes
-      changeVolume(id, isClockwise, current.rightOutputVolumes); //CurrentRightOutputVolumes
+      changeVolume(id, isClockwise, current.outputVolumes);
+
       break;
     
     case(E_MenuState::PAN):
-      changePan(id,isClockwise);
+    //change pan number and update digital pots and nextion
+      updatePan(id, isClockwise);
       break;
     
     case(E_MenuState::PHASE):
@@ -342,7 +343,8 @@ void changeVolume(int id, bool isClockwise, int volume[]){
     int volumeForDisplay = volumeToDisplay(volume[idToArray]);
     Serial.println("Volume: " + String(volume[idToArray]));
     sendVolumeToNextion(idToArray, volumeForDisplay); 
-    sendVolumeToDigitalPots(idToArray);
+    changeOutputVolumesFromPan(idToArray);
+    sendOutputVolumesToDigitalPots(idToArray);
 }
 
 void sendPhaseToNextion(int arrayId){
@@ -489,7 +491,7 @@ void initializeDisplay(){
   for(int i = 0; i <8; i++){
     sendVolumeToNextion(i, volumeToDisplay(max(current.leftOutputVolumes[i],current.rightOutputVolumes[i]))); //CurrentLeftOutputVolumes[i]
   }
-  //Right Output
+  //PAM
   MenuState = E_MenuState::PAN;
   for(int i = 0; i <8; i++){
     sendPan(i);
@@ -668,14 +670,13 @@ void DelayTrailStartCounter(){
 }
 
 void setCurrentPreset(PresetData &current, PresetData &newPreset){
-  Serial.println("current in fucntion: " + String(current.bankID));
-  Serial.println("presetA in function: " + String(presetA.bankID));
   current.presetID = newPreset.presetID;
   current.bankID = newPreset.bankID;
   memmove(current.loopPositions,newPreset.loopPositions, sizeof(newPreset.loopPositions));
   memmove(current.inputVolumes,newPreset.inputVolumes,sizeof(current.inputVolumes));
   memmove(current.leftOutputVolumes,newPreset.leftOutputVolumes,sizeof(current.leftOutputVolumes));
   memmove(current.rightOutputVolumes,newPreset.rightOutputVolumes,sizeof(current.rightOutputVolumes));
+  memmove(current.outputVolumes, newPreset.outputVolumes,sizeof(current.outputVolumes));
   memmove(current.pan,newPreset.pan,sizeof(current.pan));
   memmove(current.phase,newPreset.phase,sizeof(current.phase));
   memmove(current.returns,newPreset.returns,sizeof(current.returns));
@@ -694,6 +695,8 @@ Serial.println("New PresetID: " + String(current.presetID));
 MatrixLeft.writeArray(current.loopPositions,7);
 MatrixLeft.writeArray(current.loopPositions,7);
 
+
+
 for (size_t i = 0; i < 8; i++)
 {
   sendPhaseRelay(i);
@@ -704,6 +707,10 @@ for (size_t i = 0; i < 8; i++)
   digitalPotWrite(potID[RIGHT_OUTPUT_VOLUME_POTS_IDS[1][i]],RIGHT_OUTPUT_VOLUME_POTS_IDS[0][i],current.rightOutputVolumes[i]); //CurrentRightOutputVolumes[id]
 
   sendReturnRelay(i, current.returns[i]); // not sure
+
+  //Pots
+  changeOutputVolumesFromPan(i);
+  sendOutputVolumesToDigitalPots(i);
 }
 
 // send all data to Nextion
@@ -728,24 +735,24 @@ void sendAllVolumesToNextion(){
 }
 
 void changePan(int id, bool isClockwise){
-  int idToArray = id -1;
-  isClockwise ? current.pan[idToArray]+=5 : current.pan[idToArray]-=5;
-  current.pan[idToArray] = min(current.pan[idToArray],255);
-  current.pan[idToArray] = max(current.pan[idToArray],0);
+  isClockwise ? current.pan[id]+=5 : current.pan[id]-=5;
+  current.pan[id] = min(current.pan[id],100);
+  current.pan[id] = max(current.pan[id],0);
+}
 
+void changeOutputVolumesFromPan(int idToArray){
   Serial.println("Pan: " + String(current.pan[idToArray]));
 
-  if(current.pan[idToArray<50]){
-    current.rightOutputVolumes[idToArray] = (float(current.pan[idToArray])/50);
-    digitalPotWrite(potID[RIGHT_OUTPUT_VOLUME_POTS_IDS[1][idToArray]],RIGHT_OUTPUT_VOLUME_POTS_IDS[0][idToArray],current.rightOutputVolumes[idToArray]); //CurrentRightOutputVolumes[id]
-    Serial.println(current.rightOutputVolumes[idToArray]);
+  float panValue = float(current.pan[idToArray]);
+  float outValue = current.outputVolumes[idToArray];
 
-  } else if (current.pan[idToArray]>50){
-    current.leftOutputVolumes[idToArray] *= float(100-current.pan[idToArray]/50);
-    digitalPotWrite(potID[LEFT_OUTPUT_VOLUME_POTS_IDS[1][idToArray]],LEFT_OUTPUT_VOLUME_POTS_IDS[0][idToArray],current.leftOutputVolumes[idToArray]);
-  }
-  sendPan(idToArray);
+  current.leftOutputVolumes[idToArray] = panValue > 50 ? outValue : outValue * panValue / 50.0;                // this seems to be backwards
+  current.rightOutputVolumes[idToArray] = panValue < 51 ? outValue : outValue * (100.0 - panValue) / 50.0;
+}
 
+void sendOutputVolumesToDigitalPots(int id){
+    digitalPotWrite(potID[RIGHT_OUTPUT_VOLUME_POTS_IDS[1][id]],RIGHT_OUTPUT_VOLUME_POTS_IDS[0][id],current.rightOutputVolumes[id]);
+    digitalPotWrite(potID[LEFT_OUTPUT_VOLUME_POTS_IDS[1][id]],LEFT_OUTPUT_VOLUME_POTS_IDS[0][id],current.leftOutputVolumes[id]);
 }
 
 int leftOrRightVolumeforDisplay(int id){
@@ -757,4 +764,16 @@ void sendPan(int id){
 String command= ADDRESS_FOR_DISPLAY[id][3] + ".val=" + current.pan[id];
 Serial2.print(command);
 sendEndCommand();
+}
+
+void updatePan(int id, bool isClockwise){
+int idToArray = id -1;
+//change the pan 
+changePan(idToArray, isClockwise);
+//update left right output volume values
+changeOutputVolumesFromPan(idToArray);
+//send to pots
+sendOutputVolumesToDigitalPots(idToArray);
+//send to nextion
+sendPan(idToArray);
 }

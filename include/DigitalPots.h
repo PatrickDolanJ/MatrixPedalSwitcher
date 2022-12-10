@@ -1,7 +1,6 @@
 #ifndef DIGITAL_POTS
 #define DIGITAL_POTS
 
-
 #include <Arduino.h>
 
 //CURRENTLY MASTER and LOOPS B AND C ARE CONFIRMED FOR WORKING
