@@ -108,7 +108,16 @@ PCF8574 ReturnRelayExpander(RETURN_RELAYS_ADDRESS);
 void setup() {
   Serial.begin(115200);  //To Computer
   Serial2.begin(9600);  //To Nextion
-  while(!Serial){};
+
+  ///To Ensure Change of Baud rate on Nextion
+  while(!Serial && !Serial2){};
+  Serial2.print("baud=250000");
+  sendEndCommand();
+  Serial2.end();
+  delay(500);
+  Serial2.begin(250000);
+  ///////////////////////////////////////
+
   Serial.println(DEVICE_NAME + " booting");
 
   i2CScan();
