@@ -1,20 +1,11 @@
-#ifndef COMMON_HEADER
-#define COMMON_HEADER
+#ifndef COMMON_H
+#define COMMON_H
 
 #include <Arduino.h>
-#include <Preset.h>
 #include <DeviceConfig.h>
-#include <I2Cscanner.h>
-#include <SPI.h>
-#include <NextionCommands.h>
-#include <DigitalPots.h>
+#include <Display.h>
+#include <Debugger.h>
+#include <RotaryButtons.h>
 
-#include <MatrixLibrary.h>
-#include <EasyRotaryMCP.h>
-#include <PCF8574.h>
 
-#include <Bank.h>
-#include <RotaryEncoders.h>
-#include <SDCard.h>
-
-#endif //COMMON_HEADER
+#endif // !COMMON_H

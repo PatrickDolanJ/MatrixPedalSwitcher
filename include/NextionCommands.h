@@ -4,7 +4,7 @@
 #include <Arduino.h>
 
 //---------For Nextion Display -----------
-const byte b_end_message = 0xff;
+const byte END_BYTE = 0xff;
 const String STEREO = "S";
 const String MONO = "M";
 const String HOME_PAGE = "page 0";
@@ -137,10 +137,4 @@ const String LOOPS_FOR_DISPLAY[7] = {A_LOOP_POS, B_LOOP_POS,C_LOOP_POS,D_LOOP_PO
 
 const String FOOT_BANKS[5] = {"A","B","C","D","E"};
 
- void sendEndCommand(){
-   Serial2.write(b_end_message);
-   Serial2.write(b_end_message);
-   Serial2.write(b_end_message);
- }
- 
  #endif //!NEXTION_COMMANDS
