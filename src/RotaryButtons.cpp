@@ -5,8 +5,6 @@
 
 PCF8574 rotaryExpander(0xFF);
 
-
-
 RotaryButtons::RotaryButtons(byte address){
     rotaryExpander = PCF8574(address);
 };

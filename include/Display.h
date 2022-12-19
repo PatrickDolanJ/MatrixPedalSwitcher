@@ -11,9 +11,10 @@ class Display{
         void updateAll();
         void sendEndCommand();
         void bootScreen();
+        void setHomeScreen();
 
     private:
-        unsigned long BAUD_RATE;
+        unsigned long baudRate;
     };
 
 #endif // ! DISPLAY_H

@@ -1,35 +1,43 @@
-#include <Arduino.h>
 #include <common.h>
 
+RotaryButtons rotaryButtons(ROTARY_BUTTONS_ADDRESS);
+FootSwitches footSwitches(FOOTSWITCH_ADDRESS);
+EasyRotary easyRotaryEncoders(ROTARY_ENCODER_INTERUPT_PIN);
+Debugger* debugger; //Computer
+Menu menu;
+
+//----------------Interupts--------------------
+//cannot use member functions here so is included in main
 volatile bool rotaryFlag = false;
 volatile bool footFlag = false;
 
-RotaryButtons rotaryButtons(ROTARY_BUTTONS_ADDRESS);
-void ROTARY_INTERUPT(){
+void ROTARY_BUTTON_INTERUPT(){
   rotaryFlag = true;
 };
-
 void FOOT_INTERUPT(){
   footFlag = true;
 }
 
-
-Display display; /// Nextion
-Debugger* debugger;
+void ROTARY_INTERUPT(bool clockwise, int id){
+};
+//----------------------------------------------
 
 void setup(){
   debugger = &debugger->Instance();
   debugger->setup(115200);
   Debugger::log(DEVICE_NAME + " is booting.");
 
-  display.setup(NEXTION_BAUD_RATE);
-  rotaryButtons.setup(0,ROTARY_ENCODER_INTERUPT_PIN,*ROTARY_INTERUPT);
+  rotaryButtons.setup(0,ROTARY_ENCODER_INTERUPT_PIN,*ROTARY_BUTTON_INTERUPT);
+  footSwitches.setup(1,FOOT_INTERUPT_PIN,*FOOT_INTERUPT);
+  easyRotaryEncoders.startup(*ROTARY_INTERUPT);
   
 
   Debugger::log(DEVICE_NAME + " ready.");
 };
 
 void loop(){
+  easyRotaryEncoders.checkInterrupt();
+
   if(rotaryFlag){
     //do buttons
   }
@@ -37,6 +45,4 @@ void loop(){
   if(footFlag){
     //doFoot
   }
-
-
 };
