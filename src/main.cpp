@@ -36,10 +36,9 @@ void setup(){
 };
 
 void loop(){
-  easyRotaryEncoders.checkInterrupt();
+  easyRotaryEncoders.checkInterrupt(); //
 
   if(rotaryFlag){
-    //do buttons
   }
 
   if(footFlag){
