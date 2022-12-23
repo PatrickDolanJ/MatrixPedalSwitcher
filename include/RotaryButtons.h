@@ -7,10 +7,15 @@ class RotaryButtons{
     public:
         RotaryButtons(byte address);
         void setup(int pin, int interuptPin,void (*userFunc)(void));
-        bool checkInterupt();
+        int getRotaryID();
+        void setPreviousRotaryButtonValue(int buttonValue);
+        int getPreviousRotaryButtonValue();
+        int getlongPressPreviousMillis();
+        void setLongPressPreviousMillis(long time);
     private: 
-        volatile bool flag = false;
+        int previousRotaryButtonValue;
+        long longPressPreviousMillis = 0;
+        int rotaryHexToID(byte hexValue);
 };
-
 
 #endif // !ROTARY_BUTTONS

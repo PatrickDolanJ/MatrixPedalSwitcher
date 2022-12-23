@@ -8,10 +8,11 @@ class FootSwitches{
         FootSwitches(byte address);
         void setup(int pin, int interuptPin,void (*userFunc)(void));
         bool checkInterupt();
+        int getFootID();
     private:
         volatile bool flag = false;
-
+        int footHextoID(byte hex);
+        
 };
-
 
 #endif //FOOT_SWITCHES
