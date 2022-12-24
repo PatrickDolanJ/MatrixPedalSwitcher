@@ -12,6 +12,7 @@ class FootSwitches{
     private:
         volatile bool flag = false;
         int footHextoID(byte hex);
+        int address;
         
 };
 

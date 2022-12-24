@@ -29,7 +29,7 @@ void Debugger::log(String message){
   Serial.println(message);
 }
 
-void Debugger::i2cScan(){
-  I2CScanner  scanner;
-  scanner.scan();
-}
+void Debugger::log(int number, int base){
+  Serial.println(number,HEX);
+};
+

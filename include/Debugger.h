@@ -8,8 +8,7 @@ class Debugger{
         static Debugger& Instance();
         void setup(unsigned long baudRate);
         static void log(String message);
-        void i2cScan();
-
+        static void log(int number, int base);
     private:
         Debugger();
         unsigned long BAUD_RATE;

@@ -7,7 +7,7 @@
 const byte END_BYTE = 0xff;
 const String STEREO = "S";
 const String MONO = "M";
-const String HOME_PAGE = "page main";
+const String HOME_PAGE = "page 0";
 const String SAVE_PRESET_PAGE = "page 1";
 const String FOOTSWITCH_PAGE = "page 2";
 

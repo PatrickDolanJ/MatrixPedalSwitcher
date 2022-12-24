@@ -11,6 +11,7 @@ void Menu::setup(){
     display.setup(NEXTION_BAUD_RATE);
     display.bootScreen();
     scanner.scan();
+    display.setHomeScreen();
   
 };
 
