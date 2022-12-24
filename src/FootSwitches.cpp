@@ -21,17 +21,12 @@ void FootSwitches::setup(int pin, int interuptPin, void (*userFunc)(void))
 
 int FootSwitches::getFootID()
 {
-  Debugger::log("hex from read: ");
-  int id = footExpander.read();
-  Debugger::log(id,HEX);
-  Debugger::log("from hex/ID converter: " + String(footHextoID(footExpander.read())));
   return footHextoID(footExpander.read());
 }
 
 int FootSwitches::footHextoID(byte hex)
 {
   // Anything that isnt FF and isnt a single button returns -2 to indicate that multiple buttons are pressed
-  String currentBank = "Two Pressed";
   int footID = -2;
   switch (hex)
   {

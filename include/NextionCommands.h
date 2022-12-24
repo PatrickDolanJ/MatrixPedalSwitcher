@@ -7,9 +7,7 @@
 const byte END_BYTE = 0xff;
 const String STEREO = "S";
 const String MONO = "M";
-const String HOME_PAGE = "page 0";
-const String SAVE_PRESET_PAGE = "page 1";
-const String FOOTSWITCH_PAGE = "page 2";
+
 
 //A
 const String A_LOOP_POS = "A_LOOP_POS";
@@ -137,24 +135,10 @@ const String LOOPS_FOR_DISPLAY[7] = {A_LOOP_POS, B_LOOP_POS,C_LOOP_POS,D_LOOP_PO
 
 const String FOOT_BANKS[5] = {"A","B","C","D","E"};
 
-//-----------------BOOT SCREEN-------------------
-const String BOOT_SCREEN_FRAME_0= "page 0";
-const String BOOT_SCREEN_FRAME_1= "page 1";
-const String BOOT_SCREEN_FRAME_2= "page 2";
-const String BOOT_SCREEN_FRAME_3= "page 3";
-const String BOOT_SCREEN_FRAME_4= "page 4";
-const String BOOT_SCREEN_FRAME_5= "page 5";
-const String BOOT_SCREEN_FRAME_6= "page 6";
-const String BOOT_SCREEN_FRAME_7= "page 7";
-
-const String BOOT_SCREEN_FRAMES[8] = {BOOT_SCREEN_FRAME_0,
-                                      BOOT_SCREEN_FRAME_1,
-                                      BOOT_SCREEN_FRAME_2,
-                                      BOOT_SCREEN_FRAME_3,
-                                      BOOT_SCREEN_FRAME_4,
-                                      BOOT_SCREEN_FRAME_5,
-                                      BOOT_SCREEN_FRAME_6,
-                                      BOOT_SCREEN_FRAME_7};
-
+//-----------------SCREENS-------------------
+const String HOME_PAGE = "page main";
+const String FOOTSWITCH_PAGE = "page switchBank";
+const String TITLE_PAGE = "page title";
+const String SPACE_BACKGROUND = "page space";
 
  #endif //!NEXTION_COMMANDS

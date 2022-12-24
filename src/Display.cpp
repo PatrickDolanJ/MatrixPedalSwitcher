@@ -5,17 +5,21 @@
 
 Display::Display(){};
 
-void Display::sendEndCommand(){
+void Display::sendEndCommand()
+{
     Serial2.write(END_BYTE);
     Serial2.write(END_BYTE);
     Serial2.write(END_BYTE);
 }
 
-void Display::setup(unsigned long baudRate){
+void Display::setup(unsigned long baudRate)
+{
     // This ensures that the baudrate is never lost which is a known issue with the Nextion
     Display::baudRate = baudRate;
     Serial2.begin(9600);
-    while(!Serial2){}
+    while (!Serial2)
+    {
+    }
     Serial2.print("baud=" + String(baudRate));
     sendEndCommand();
     Serial2.end();
@@ -23,16 +27,18 @@ void Display::setup(unsigned long baudRate){
     Serial2.begin(baudRate);
 }
 
-void Display::bootScreen(){
-    for (size_t i = 0; i < 8; i++)
-    {
-        Serial2.print(BOOT_SCREEN_FRAMES[i]);
-        sendEndCommand();
-        delay(20);
-    }
+void Display::bootScreen()
+{
+    Serial2.print(TITLE_PAGE);
+    sendEndCommand();
 }
 
-void Display::setHomeScreen(){
+void Display::setHomeScreen()
+{
     Serial2.print(HOME_PAGE);
     sendEndCommand();
 }
+
+void Display::highlight(bool onOrOff){
+
+};

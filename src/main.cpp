@@ -7,9 +7,12 @@ Debugger *debugger; // Computer
 Menu menu;
 
 const int NO_BUTTON_VALUE = 0;
+const int DOUBLE_BUTTON_PRESS_VALUE = -2;
+
 volatile bool rotaryFlag = false;
 volatile bool footFlag = false;
 bool areTwoButtonsPressed = false;
+
 int previousButtonValue = NO_BUTTON_VALUE;
 int previousFootValue = NO_BUTTON_VALUE;
 long previousMillis = 0;
@@ -55,14 +58,13 @@ void handleRotaryButtonPress()
 void handleFootButtonPress()
 {
   int footID = footSwitches.getFootID();
-  Debugger::log(String(footID));
   if (footID != previousFootValue)
   {
-    if (footID == -2)
+    if (footID == DOUBLE_BUTTON_PRESS_VALUE)
     {
       areTwoButtonsPressed = true;
     }
-    if (footID == 0)
+    if (footID == NO_BUTTON_VALUE)
     {
       if (areTwoButtonsPressed)
       {
@@ -78,6 +80,9 @@ void handleFootButtonPress()
   previousFootValue = footID;
 }
 
+
+//--------------------------------------MAIN------------------------------------------
+//------------------------------------------------------------------------------------
 void setup()
 {
   debugger = &debugger->Instance();

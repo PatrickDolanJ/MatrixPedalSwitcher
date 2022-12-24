@@ -12,6 +12,8 @@ class Display{
         void sendEndCommand();
         void bootScreen();
         void setHomeScreen();
+        void highlight(bool onOrOff);
+
 
     private:
         unsigned long baudRate;

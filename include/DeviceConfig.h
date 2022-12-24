@@ -12,7 +12,7 @@ const String DEFAULT_COLOR = "19703";
 const String HIGHLIGHT_COLOR = "65535"; 
 const float LONG_PRESS_INTERVAL_S = 1.75;
 const int spiDelay = 1;
-const unsigned long NEXTION_BAUD_RATE = 250000;
+const unsigned long NEXTION_BAUD_RATE = 512000;
 //------------I2C Addresses-------------
 const byte ROTARY_BUTTONS_ADDRESS = 0x21;
 const byte FOOTSWITCH_ADDRESS = 0x22;
