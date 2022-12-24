@@ -6,12 +6,13 @@ EasyRotary easyRotaryEncoders(ROTARY_ENCODER_INTERUPT_PIN);
 Debugger* debugger; //Computer
 Menu menu;
 
-const int NO_BUTTON_VALUE = 0xFF;
+const byte NO_BUTTON_VALUE = 0xFF;
 volatile bool rotaryFlag = false;
 volatile bool footFlag = false;
 bool areTwoButtonsPressed = false;
-int previousButtonValue;
-int previousFootValue;
+int previousButtonValue = NO_BUTTON_VALUE;
+int previousFootValue = NO_BUTTON_VALUE;
+long previousMillis = 0;
 
 void ROTARY_BUTTON_INTERUPT(){
   rotaryFlag = true;
@@ -27,19 +28,20 @@ void ROTARY_INTERUPT(bool isClockwise, int id){
 bool checkLongPress(int duration){
   long interval = duration * 1000;
   unsigned long currenTime = millis();
-  long intervalActual =currenTime - rotaryButtons.getlongPressPreviousMillis();
+  long intervalActual = currenTime - previousMillis;
   bool isLongPress = intervalActual >= interval;
   return isLongPress;
 }
 
 void handleRotaryButtonPress(){
   int rotaryButtonValue = rotaryButtons.getRotaryID();
-  if(rotaryButtonValue!=NO_BUTTON_VALUE && rotaryButtonValue!= rotaryButtons.getPreviousRotaryButtonValue()){
-    rotaryButtons.setLongPressPreviousMillis(millis());
+  Debugger::log(String(rotaryButtonValue));
+  if(rotaryButtonValue!=NO_BUTTON_VALUE && rotaryButtonValue!= previousButtonValue){
+    previousMillis = millis();
     }
 
   if(rotaryButtonValue == NO_BUTTON_VALUE && rotaryButtonValue!=previousButtonValue){
-    checkLongPress(LONG_PRESS_INTERVAL_S) ? menu.doLongPress(rotaryButtonValue) : menu.doButton(rotaryButtonValue);
+    checkLongPress(LONG_PRESS_INTERVAL_S) ? menu.doLongPress(previousButtonValue) : menu.doButton(previousButtonValue);
   }
   previousButtonValue = rotaryButtonValue;
 };
@@ -54,13 +56,13 @@ void handleFootButtonPress(){
       if(areTwoButtonsPressed){
         menu.doDoubleFootPress();
       } else {
-        menu.doFoot(footID);
+        menu.doFoot(previousFootValue);
         }
       }
     }
     previousFootValue = footID;
 }
-//----------------------------------------------
+
 
 void setup(){
   debugger = &debugger->Instance();
@@ -69,8 +71,8 @@ void setup(){
 
   menu.setup();
 
-  rotaryButtons.setup(0,ROTARY_ENCODER_INTERUPT_PIN,*ROTARY_BUTTON_INTERUPT);
-  footSwitches.setup(1,FOOT_INTERUPT_PIN,*FOOT_INTERUPT);
+  rotaryButtons.setup(0,ROTARY_INTERUPT_PIN,ROTARY_BUTTON_INTERUPT);
+  footSwitches.setup(1,FOOT_INTERUPT_PIN,FOOT_INTERUPT);
   easyRotaryEncoders.startup(*ROTARY_INTERUPT);
   
   Debugger::log(DEVICE_NAME + " ready.");
@@ -81,16 +83,18 @@ void loop(){
 
   if(rotaryFlag){
     rotaryFlag = false;
-    handleRotaryButtonPress();
+    Debugger::log("rotary pressed?");
+    handleRotaryButtonPress(); //value is read directly from expander
   }
 
   if(footFlag){
     footFlag = false;
-    handleFootButtonPress();
+    handleFootButtonPress(); //value is read directly from expander
   }
 
-  if(rotaryButtons.getPreviousRotaryButtonValue()!=NO_BUTTON_VALUE && checkLongPress(LONG_PRESS_INTERVAL_S)){
-    int previousButtonValue = rotaryButtons.getPreviousRotaryButtonValue();
+  if(previousButtonValue != NO_BUTTON_VALUE && checkLongPress(LONG_PRESS_INTERVAL_S)){
+    Debugger::log(String(previousButtonValue));
+    Debugger::log(String(NO_BUTTON_VALUE));
     menu.duringLongPress(previousButtonValue);
   }
 };

@@ -9,13 +9,11 @@ class RotaryButtons{
         void setup(int pin, int interuptPin,void (*userFunc)(void));
         int getRotaryID();
         void setPreviousRotaryButtonValue(int buttonValue);
-        int getPreviousRotaryButtonValue();
-        int getlongPressPreviousMillis();
         void setLongPressPreviousMillis(long time);
     private: 
-        int previousRotaryButtonValue;
         long longPressPreviousMillis = 0;
         int rotaryHexToID(byte hexValue);
+        byte address;
 };
 
 #endif // !ROTARY_BUTTONS

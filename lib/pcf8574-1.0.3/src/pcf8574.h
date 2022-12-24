@@ -43,6 +43,10 @@ class PCF8574 {
 		Wire.begin();
 		Wire.setClock(PCF8574_CLOCK);
 	}
+
+	int getAddress(){return address;};
+	void setAddress(byte address){this->address = address;};
+
 	PCF8574(int address) {
 		this->address = address;
 		this->wire = &Wire;

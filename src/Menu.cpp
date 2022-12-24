@@ -1,14 +1,17 @@
 #include <Arduino.h>
 #include <Menu.h>
 #include <Debugger.h>
+#include <I2Cscanner.h>
 
 Menu::Menu(){};
+I2CScanner scanner;
 
 
 void Menu::setup(){
     display.setup(NEXTION_BAUD_RATE);
     display.bootScreen();
-
+    scanner.scan();
+  
 };
 
 
@@ -19,11 +22,16 @@ void Menu::doButton(int id){
 
 void Menu::doFoot(int id){
     Debugger::log("Foot pressed: " + String(id));
-
+    // change preset
 };
 
+
+void Menu::doDoubleFootPress(){
+    Debugger::log("Double Foot Button detected.");
+}
+
 void Menu::duringLongPress(int id){
-    Debugger::log("Long press!" + String(id));
+    Debugger::log("Long press is currently happening!" + String(id));
 };
 
 void Menu::doLongPress(int id){

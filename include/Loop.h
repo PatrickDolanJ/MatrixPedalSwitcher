@@ -2,49 +2,55 @@
 #define CHANNEL
 
 #include <Arduino.h>
+enum LoopID {A = 1, B = 2, C = 3, D = 4, E = 5, F = 6, G = 7, Master = 8}; 
+
+
 
 class Channel{
     public:
         Channel();
         // Setters
-        void setPresetID(int id);
-        void setBankID(int id);
+        void setLoopID(LoopID id);
         void setLoopPosition(int position);
         void setInputVolume(int volume);
         void setOutputVolume(int volume);
         void setPan(int pan);
-        void setPhase(int phase);
         void setIsStereo(bool isStereo);
         // Getters
-        int getPresetID();
-        int getBankID();
+        LoopID getLoopID();
         int getLoopPosition();
         int getInputVolume();
         int getOutputVolume();
         int getPan();
-        int getPhase();
         bool getIsStereo();
         int getLeftOutputVolume();
         int getRightOutputVolume();
     private:
-        int presetID;
-        int bankID;
         int loopPosition;
         int inputVolume;
         int outputVolume;
         int leftOutputVolume;
         int rightOutputVolume;
         int pan;
-        int phase; //maybe make enumerator?
         bool isStereo;
+        LoopID loopID;
 };
 
-
+class Loop: public Channel{
+    public:
+        void setIsDelayTrail(bool isDelayTrail);
+        bool getIsDelayTrail();
+        void setPhase(int phase);
+        int getPhase();
+    private:
+        int phase;
+        bool isDelayTrail;
+};
 
 
 class Master: public Channel{
     public:
-        void setSendDry();
+        void setSendDry(int id);
         int getSendDry();
     private:
         int sendDry;
