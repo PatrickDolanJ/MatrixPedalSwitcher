@@ -2,7 +2,7 @@
 #define DISPLAY_H
 
 #include <Arduino.h>
-
+#include <MenuState.h>
 
 class Display{
     public:
@@ -12,7 +12,7 @@ class Display{
         void sendEndCommand();
         void bootScreen();
         void setHomeScreen();
-        void highlight(bool onOrOff);
+        void highlightMenu(bool onOrOff, MenuState state);
 
 
     private:

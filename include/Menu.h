@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include <Display.h>
 #include <DeviceConfig.h>
+#include <MenuState.h>
 
 class Menu{
     public:
@@ -18,7 +19,6 @@ class Menu{
         void doRotaryEnoderSpin(bool isClockwise, int id);
     private:
         Display display;
-        enum MenuState {LOOPS = 1,PAN = 2, INPUT_VOLUMES = 3,OUTPUT_VOLUMES = 4, PHASE = 5, NUM_MENU_OPTIONS = 6};
         MenuState menuState;
 };
 

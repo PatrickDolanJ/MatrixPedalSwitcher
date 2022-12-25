@@ -2,17 +2,20 @@
 #include <Menu.h>
 #include <Debugger.h>
 #include <I2Cscanner.h>
+#include <SPI.h>
+
 
 Menu::Menu(){};
 
 void Menu::setup()
 {
-  delay(1000);
-  Debugger::log(String(millis()));
   display.setup(NEXTION_BAUD_RATE);
   display.bootScreen();
+  menuState = LOOPS;
+  SPI.begin();
+
+
   delay(2000);
-  Debugger::log(String(millis()));
   display.setHomeScreen();
 };
 
@@ -52,7 +55,7 @@ void Menu::changeMenuState(int id)
 {
   if (id == 2)
   {
-    // highlightMenu(false);
+    display.highlightMenu(false,menuState);
 
     if (menuState == NUM_MENU_OPTIONS - 1)
     {
@@ -63,11 +66,11 @@ void Menu::changeMenuState(int id)
       menuState = static_cast<MenuState>(menuState + 1);
     }
     Serial.println("MenuState = " + String(menuState));
-    // highlightMenu(true);
+    display.highlightMenu(true,menuState);
   }
   else if (id == 1)
   {
-    // highlightMenu(false);
+     display.highlightMenu(false,menuState);
     if (menuState == 1)
     {
       menuState = static_cast<MenuState>(NUM_MENU_OPTIONS - 1);
@@ -77,6 +80,6 @@ void Menu::changeMenuState(int id)
       menuState = static_cast<MenuState>(menuState - 1);
     }
     Serial.println("MenuState = " + String(menuState));
-    // highlightMenu(true);
+    display.highlightMenu(true,menuState);
   }
 };

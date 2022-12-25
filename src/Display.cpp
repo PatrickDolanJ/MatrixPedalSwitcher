@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <Display.h>
 #include <NextionCommands.h>
+#include <DeviceConfig.h>
 #include <Debugger.h>
 
 Display::Display(){};
@@ -41,6 +42,57 @@ void Display::setHomeScreen()
     sendEndCommand();
 }
 
-void Display::highlight(bool onOrOff){
+void Display::highlightMenu(bool onOrOff, MenuState state)
+{
+    String color;
+    color = onOrOff ? HIGHLIGHT_COLOR : DEFAULT_COLOR;
 
+    switch (state)
+    {
+    case (MenuState::LOOPS):
+        for (int i = 0; i < 8; i++)
+        {
+            Serial2.print(LOOPS_FOR_DISPLAY[i] + ".pco=" + color);
+            sendEndCommand();
+        }
+        break;
+
+    case (MenuState::INPUT_VOLUMES):
+        for (int i = 0; i < 8; i++)
+        {
+            Serial2.print(ADDRESS_FOR_DISPLAY[i][0] + ".pco=" + color);
+            sendEndCommand();
+        }
+        break;
+
+    case (MenuState::OUTPUT_VOLUMES):
+        for (int i = 0; i < 8; i++)
+        {
+
+            Serial2.print(ADDRESS_FOR_DISPLAY[i][1] + ".pco=" + color);
+            sendEndCommand();
+        }
+        break;
+
+    case (MenuState::PAN):
+        for (int i = 0; i < 8; i++)
+        {
+            Serial2.print(ADDRESS_FOR_DISPLAY[i][3] + ".pco=" + color);
+            sendEndCommand();
+        }
+        break;
+
+    case (MenuState::PHASE):
+        for (int i = 0; i < 8; i++)
+        {
+            Serial2.print(ADDRESS_FOR_DISPLAY[i][4] + ".pco=" + color);
+            sendEndCommand();
+        }
+        for (int i = 0; i < 8; i++)
+        {
+            Serial2.print(ADDRESS_FOR_DISPLAY[i][5] + ".pco=" + color);
+            sendEndCommand();
+        }
+        break;
+    }
 };
