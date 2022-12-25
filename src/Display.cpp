@@ -29,6 +29,8 @@ void Display::setup(unsigned long baudRate)
 
 void Display::bootScreen()
 {
+    Serial2.print(SPACE_BACKGROUND);
+    sendEndCommand();
     Serial2.print(TITLE_PAGE);
     sendEndCommand();
 }

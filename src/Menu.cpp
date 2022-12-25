@@ -8,9 +8,11 @@ Menu::Menu(){};
 void Menu::setup()
 {
   delay(1000);
+  Debugger::log(String(millis()));
   display.setup(NEXTION_BAUD_RATE);
   display.bootScreen();
-  delay(1000);
+  delay(2000);
+  Debugger::log(String(millis()));
   display.setHomeScreen();
 };
 
