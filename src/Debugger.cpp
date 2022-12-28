@@ -16,7 +16,7 @@ Debugger& Debugger::Instance(){
 
 void Debugger::setup(unsigned long baudRate){
   if(!hasSetup){
-    BAUD_RATE = baudRate;
+    this->BAUD_RATE = baudRate;
     Serial.begin(BAUD_RATE);
     while(!Serial){};
     hasSetup = true;

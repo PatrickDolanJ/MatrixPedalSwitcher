@@ -30,6 +30,7 @@ void Display::setup(unsigned long baudRate)
 
 void Display::bootScreen()
 {
+    // Not entirely sure why, but only sending the Title page does not work, seems to needs two pages for some reason?
     Serial2.print(SPACE_BACKGROUND);
     sendEndCommand();
     Serial2.print(TITLE_PAGE);
