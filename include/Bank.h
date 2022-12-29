@@ -8,14 +8,17 @@ class Bank
 {
 public:
     Bank(int id);
+    Preset getPreset();
 
 private:
     int bankId;
-    Preset presetA(presetID_A),
-        presetB(presetID_B),
-        presetC(presetID_C),
-        presetD(presetID_D),
-        presetE(presetID_E);
-}
+    Preset presetA,
+        presetB,
+        presetC,
+        presetD,
+        presetE;
+    Preset presets[5] = {presetA, presetB, presetC, presetD, presetE};
+    int sizeOfPresets = sizeof(presets)/sizeof(presets[0]);
+};
 
 #endif // !BANK

@@ -3,14 +3,13 @@
 #include <Loop.h>
 #include <Debugger.h>
 
-Preset::Preset(PresetID id)
+Preset::Preset()
 {
     for (int i = 0; i < sizeOfLoops; i++)
     {
         loops[i].setChannelID(static_cast<ChannelID>(i));
     }
     master.setChannelID(channel_Master);
-    presetID = id;
 };
 
 //---------------------Setters-------------------------

@@ -13,6 +13,8 @@ const String HIGHLIGHT_COLOR = "65535";
 const float LONG_PRESS_INTERVAL_S = 1.75;
 const int spiDelay = 1;
 const unsigned long NEXTION_BAUD_RATE = 512000;
+const int DOWN_ARROW_ID = 2;
+const int UP_ARROW_ID = 1;
 
 //------------I2C Addresses-------------
 const byte ROTARY_BUTTONS_ADDRESS = 0x21;

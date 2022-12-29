@@ -3,6 +3,7 @@
 #include <Debugger.h>
 #include <I2Cscanner.h>
 #include <SPI.h>
+#include <DeviceConfig.h>
 
 Menu::Menu(){};
 
@@ -51,32 +52,17 @@ void Menu::doRotaryEnoderSpin(bool isClockwise, int id)
 
 void Menu::changeMenuState(int id)
 {
-  if (id == 2)
+  if (id == DOWN_ARROW_ID)
   {
     display.highlightMenu(false, menuState);
-
-    if (menuState == NUM_MENU_OPTIONS - 1)
-    {
-      menuState = static_cast<MenuState>(1);
-    }
-    else
-    {
-      menuState = static_cast<MenuState>(menuState + 1);
-    }
+    menuState = static_cast<MenuState>(menuState + 1 % NUM_MENU_OPTIONS - 1);
     Serial.println("MenuState = " + String(menuState));
     display.highlightMenu(true, menuState);
   }
-  else if (id == 1)
+  else if (id == UP_ARROW_ID)
   {
     display.highlightMenu(false, menuState);
-    if (menuState == 1)
-    {
-      menuState = static_cast<MenuState>(NUM_MENU_OPTIONS - 1);
-    }
-    else
-    {
-      menuState = static_cast<MenuState>(menuState - 1);
-    }
+    menuState = static_cast<MenuState>(menuState - 1 % NUM_MENU_OPTIONS - 1);
     Serial.println("MenuState = " + String(menuState));
     display.highlightMenu(true, menuState);
   }
