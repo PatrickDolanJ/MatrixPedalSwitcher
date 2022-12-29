@@ -6,17 +6,17 @@
 
 enum PresetID
 {
-    presetA = 0,
-    presetB = 1,
-    presetC = 2,
-    presetD = 3,
-    presetE = 4
+    presetID_A = 0,
+    presetID_B = 1,
+    presetID_C = 2,
+    presetID_D = 3,
+    presetID_E = 4
 };
 
 class Preset
 {
 public:
-    Preset();
+    Preset(PresetID id);
     // setters
     void setLoopPosition(int position, int id);
     void setInputVolume(int volume, int id);
@@ -38,7 +38,7 @@ public:
     int getIsDelayTrail(int id);
     int getDrySend(int id);
     ChannelID getLoopID(int arrayPosition) { return loops[arrayPosition].getChannelID(); };
-
+    PresetID getPresetID(){return presetID;};
 private:
     PresetID presetID;
     Loop loopA, loopB, loopC, loopD, loopE, loopF, loopG;
