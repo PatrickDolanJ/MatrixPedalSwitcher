@@ -26,6 +26,7 @@ public:
     void setIsDelayTrail(bool isDelayTrail, int id);
     void setPhase(int phase, int id);
     void setDrySend(int id);
+    void setPresetId(PresetID id);
 
     // getters
     int getLoopPosition(int id);
@@ -36,16 +37,16 @@ public:
     int getRightOutputVolume(int id);
     bool getIsStereo(int id);
     int getIsDelayTrail(int id);
-    int getDrySend(int id);
-    ChannelID getLoopID(int arrayPosition) { return loops[arrayPosition].getChannelID(); };
-    PresetID getPresetID(){return presetID;};
-    void setPrestId(PresetID id);
+    int getDrySend();
+    ChannelID getLoopID(int arrayPosition);
+    PresetID getPresetID() { return presetID; };
+
 private:
     PresetID presetID;
     Loop loopA, loopB, loopC, loopD, loopE, loopF, loopG;
     Master master;
     Loop loops[7] = {loopA, loopB, loopC, loopD, loopE, loopF, loopG};
-    int sizeOfLoops = sizeof(loops)/sizeof(loops[0]);
+    int sizeOfLoops = sizeof(loops) / sizeof(loops[0]);
     int idToArray(int id);
     bool checkIfMaster(int arrayId);
 };

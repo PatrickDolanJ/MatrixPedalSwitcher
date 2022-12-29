@@ -35,6 +35,7 @@ public:
     bool getIsStereo();
     int getLeftOutputVolume();
     int getRightOutputVolume();
+
     
 private:
     int channelPosition = 0;

@@ -7,12 +7,18 @@ Preset::Preset()
 {
     for (int i = 0; i < sizeOfLoops; i++)
     {
-        loops[i].setChannelID(static_cast<ChannelID>(i));
+        loops[i].setChannelID(static_cast<ChannelID>(i + 1));
     }
     master.setChannelID(channel_Master);
 };
 
 //---------------------Setters-------------------------
+
+void Preset::setPresetId(PresetID id)
+{
+    this->presetID = id;
+};
+
 void Preset::setLoopPosition(int position, int id)
 {
     int arrayPosition = idToArray(position);
@@ -113,13 +119,27 @@ void Preset::setDrySend(int id)
 
 //--------------------------Getters----------------------------
 
+ChannelID Preset::getLoopID(int id)
+{
+    int arrayId = idToArray(id);
+    if (!checkIfMaster(arrayId))
+    {
+        return loops[arrayId].getChannelID();
+    }
+    else
+    {
+        return master.getChannelID();
+    }
+}
+
 int Preset::getLoopPosition(int id)
 {
     int arrayId = idToArray(id);
     if (!checkIfMaster(arrayId))
     {
         return loops[arrayId].getChannelPosition();
-    } else 
+    }
+    else
     {
         return -1;
     }
@@ -173,7 +193,7 @@ int Preset::getLeftOutputVolume(int id)
     }
     else
     {
-       return master.getLeftOutputVolume();
+        return master.getLeftOutputVolume();
     }
 }
 
@@ -188,6 +208,11 @@ int Preset::getRightOutputVolume(int id)
     {
         return master.getRightOutputVolume();
     }
+}
+
+int Preset::getDrySend()
+{
+    return master.getSendDry();
 }
 
 bool Preset::checkIfMaster(int arrayId) { return arrayId == 7; }
