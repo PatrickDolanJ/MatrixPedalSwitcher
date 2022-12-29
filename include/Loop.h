@@ -4,14 +4,14 @@
 #include <Arduino.h>
 enum ChannelID
 {
-    A = 1,
-    B = 2,
-    C = 3,
-    D = 4,
-    E = 5,
-    F = 6,
-    G = 7,
-    Master = 8
+    channel_A = 1,
+    channel_B = 2,
+    channel_C = 3,
+    channel_D = 4,
+    channel_E = 5,
+    channel_F = 6,
+    channel_G = 7,
+    channel_Master = 8
 };
 
 class Channel
@@ -34,7 +34,7 @@ public:
     bool getIsStereo();
     int getLeftOutputVolume();
     int getRightOutputVolume();
-
+    
 private:
     int channelPosition;
     int inputVolume;
