@@ -14,18 +14,13 @@ Preset::Preset()
 
 //---------------------Setters-------------------------
 
-void Preset::setPresetId(PresetID id)
-{
-    this->presetID = id;
-};
+void Preset::setPresetId(PresetID id) { this->presetID = id; };
 
 void Preset::setLoopPosition(int position, int id)
 {
-    int arrayPosition = idToArray(position);
-    int arrayId = idToArray(id);
-    if (!checkIfMaster(arrayId))
+    if (!checkIfMaster(id))
     {
-        loops[arrayId].setChannelPosition(arrayPosition);
+        loops[id].setChannelPosition(position);
     }
     else
     {
@@ -35,10 +30,9 @@ void Preset::setLoopPosition(int position, int id)
 
 void Preset::setInputVolume(int volume, int id)
 {
-    int arrayId = idToArray(id);
-    if (!checkIfMaster(arrayId))
+    if (!checkIfMaster(id))
     {
-        loops[arrayId].setInputVolume(volume);
+        loops[id].setInputVolume(volume);
     }
     else
     {
@@ -48,10 +42,9 @@ void Preset::setInputVolume(int volume, int id)
 
 void Preset::setOutputVolume(int volume, int id)
 {
-    int arrayId = idToArray(id);
-    if (!checkIfMaster(arrayId))
+    if (!checkIfMaster(id))
     {
-        loops[arrayId].setOutputVolume(volume);
+        loops[id].setOutputVolume(volume);
     }
     else
     {
@@ -61,10 +54,9 @@ void Preset::setOutputVolume(int volume, int id)
 
 void Preset::setPan(int pan, int id)
 {
-    int arrayId = idToArray(id);
-    if (!checkIfMaster(arrayId))
+    if (!checkIfMaster(id))
     {
-        loops[arrayId].setPan(pan);
+        loops[id].setPan(pan);
     }
     else
     {
@@ -74,10 +66,9 @@ void Preset::setPan(int pan, int id)
 
 void Preset::setIsStereo(bool isStereo, int id)
 {
-    int arrayId = idToArray(id);
-    if (!checkIfMaster(arrayId))
+    if (!checkIfMaster(id))
     {
-        loops[arrayId].setIsStereo(isStereo);
+        loops[id].setIsStereo(isStereo);
     }
     else
     {
@@ -87,10 +78,9 @@ void Preset::setIsStereo(bool isStereo, int id)
 
 void Preset::setPhase(int phase, int id)
 {
-    int arrayId = idToArray(id);
-    if (!checkIfMaster(arrayId))
+    if (!checkIfMaster(id))
     {
-        loops[arrayId].setPhase(phase);
+        loops[id].setPhase(phase);
     }
     else
     {
@@ -100,10 +90,9 @@ void Preset::setPhase(int phase, int id)
 
 void Preset::setIsDelayTrail(bool isDelayTrail, int id)
 {
-    int arrayId = idToArray(id);
-    if (!checkIfMaster(arrayId))
+    if (!checkIfMaster(id))
     {
-        loops[arrayId].setIsDelayTrail(isDelayTrail);
+        loops[id].setIsDelayTrail(isDelayTrail);
     }
     else
     {
@@ -113,18 +102,16 @@ void Preset::setIsDelayTrail(bool isDelayTrail, int id)
 
 void Preset::setDrySend(int id)
 {
-    int arrayId = idToArray(id);
-    master.setSendDry(arrayId);
+    master.setSendDry(id);
 }
 
 //--------------------------Getters----------------------------
 
 ChannelID Preset::getLoopID(int id)
 {
-    int arrayId = idToArray(id);
-    if (!checkIfMaster(arrayId))
+    if (!checkIfMaster(id))
     {
-        return loops[arrayId].getChannelID();
+        return loops[id].getChannelID();
     }
     else
     {
@@ -134,10 +121,9 @@ ChannelID Preset::getLoopID(int id)
 
 int Preset::getLoopPosition(int id)
 {
-    int arrayId = idToArray(id);
-    if (!checkIfMaster(arrayId))
+    if (!checkIfMaster(id))
     {
-        return loops[arrayId].getChannelPosition();
+        return loops[id].getChannelPosition();
     }
     else
     {
@@ -147,10 +133,9 @@ int Preset::getLoopPosition(int id)
 
 int Preset::getInputVolume(int id)
 {
-    int arrayId = idToArray(id);
-    if (!checkIfMaster(arrayId))
+    if (!checkIfMaster(id))
     {
-        return loops[arrayId].getInputVolume();
+        return loops[id].getInputVolume();
     }
     else
     {
@@ -160,10 +145,9 @@ int Preset::getInputVolume(int id)
 
 int Preset::getOutputVolume(int id)
 {
-    int arrayId = idToArray(id);
-    if (!checkIfMaster(arrayId))
+    if (!checkIfMaster(id))
     {
-        return loops[arrayId].getOutputVolume();
+        return loops[id].getOutputVolume();
     }
     else
     {
@@ -173,10 +157,9 @@ int Preset::getOutputVolume(int id)
 
 int Preset::getPan(int id)
 {
-    int arrayId = idToArray(id);
-    if (!checkIfMaster(arrayId))
+    if (!checkIfMaster(id))
     {
-        return loops[arrayId].getPan();
+        return loops[id].getPan();
     }
     else
     {
@@ -186,10 +169,9 @@ int Preset::getPan(int id)
 
 int Preset::getLeftOutputVolume(int id)
 {
-    int arrayId = idToArray(id);
-    if (!checkIfMaster(arrayId))
+    if (!checkIfMaster(id))
     {
-        return loops[arrayId].getLeftOutputVolume();
+        return loops[id].getLeftOutputVolume();
     }
     else
     {
@@ -199,10 +181,9 @@ int Preset::getLeftOutputVolume(int id)
 
 int Preset::getRightOutputVolume(int id)
 {
-    int arrayId = idToArray(id);
-    if (!checkIfMaster(arrayId))
+    if (!checkIfMaster(id))
     {
-        return loops[arrayId].getRightOutputVolume();
+        return loops[id].getRightOutputVolume();
     }
     else
     {
@@ -215,6 +196,17 @@ int Preset::getDrySend()
     return master.getSendDry();
 }
 
-bool Preset::checkIfMaster(int arrayId) { return arrayId == 7; }
+bool Preset::getIsDelayTrail(int id)
+{
+    if (!checkIfMaster(id))
+    {
+        return loops[id].getIsDelayTrail();
+    }
+    else
+    {
+        return false;
+    }
+}
 
-int Preset::idToArray(int id) { return id - 1; };
+//----------------------------------Helpers--------------------------------------
+bool Preset::checkIfMaster(int id) { return id == channel_Master; }

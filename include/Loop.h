@@ -5,14 +5,14 @@
 #include <DeviceConfig.h>
 enum ChannelID
 {
-    channel_A = 1,
-    channel_B = 2,
-    channel_C = 3,
-    channel_D = 4,
-    channel_E = 5,
-    channel_F = 6,
-    channel_G = 7,
-    channel_Master = 8
+    channel_A = 0,
+    channel_B = 1,
+    channel_C = 2,
+    channel_D = 3,
+    channel_E = 4,
+    channel_F = 5,
+    channel_G = 6,
+    channel_Master = 7
 };
 
 class Channel

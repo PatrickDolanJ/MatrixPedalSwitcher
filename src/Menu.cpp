@@ -4,6 +4,8 @@
 #include <I2Cscanner.h>
 #include <SPI.h>
 #include <DeviceConfig.h>
+#include <Bank.h>
+#include <Preset.h>
 
 Menu::Menu(){};
 
@@ -15,6 +17,16 @@ void Menu::setup()
   menuState = LOOPS;
   SPI.begin();
   delay(4000);
+  Bank bankTest(0);
+
+  bankTest.setCurrentPreset(1);
+  bankTest.setCurrentDrySend(3);
+  Debugger::log("After setting first time: " + String(bankTest.getCurrentDrySend()));
+  bankTest.setCurrentPreset(2);
+  Debugger::log("After switching to Preset 2: " + String(bankTest.getCurrentDrySend()));
+  bankTest.setCurrentPreset(1);
+  Debugger::log("After switching back to Preset 1: " +String(bankTest.getCurrentDrySend()));
+
   display.setHomeScreen();
   display.highlightMenu(true, menuState);
 };

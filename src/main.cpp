@@ -31,6 +31,11 @@ void ROTARY_INTERUPT(bool isClockwise, int id)
   menu.doRotaryEnoderSpin(isClockwise, id);
 };
 
+int idToArray(int id)
+{
+  return id -1;
+}
+
 bool checkLongPress(int duration)
 {
   long interval = duration * 1000;

@@ -6,11 +6,11 @@
 
 enum PresetID
 {
-    presetID_A = 1,
-    presetID_B = 2,
-    presetID_C = 3,
-    presetID_D = 4,
-    presetID_E = 5
+    presetID_A = 0,
+    presetID_B = 1,
+    presetID_C = 2,
+    presetID_D = 3,
+    presetID_E = 4
 };
 
 class Preset
@@ -36,7 +36,7 @@ public:
     int getLeftOutputVolume(int id);
     int getRightOutputVolume(int id);
     bool getIsStereo(int id);
-    int getIsDelayTrail(int id);
+    bool getIsDelayTrail(int id);
     int getDrySend();
     ChannelID getLoopID(int arrayPosition);
     PresetID getPresetID() { return presetID; };
@@ -47,7 +47,6 @@ private:
     Master master;
     Loop loops[7] = {loopA, loopB, loopC, loopD, loopE, loopF, loopG};
     int sizeOfLoops = sizeof(loops) / sizeof(loops[0]);
-    int idToArray(int id);
     bool checkIfMaster(int arrayId);
 };
 #endif // PRESET!
