@@ -55,14 +55,16 @@ void Menu::changeMenuState(int id)
   if (id == DOWN_ARROW_ID)
   {
     display.highlightMenu(false, menuState);
-    menuState = static_cast<MenuState>(menuState + 1 % NUM_MENU_OPTIONS - 1);
+    int newMenuState = (menuState + 1) % (NUM_MENU_OPTIONS);
+    menuState = static_cast<MenuState>(newMenuState);
     Serial.println("MenuState = " + String(menuState));
     display.highlightMenu(true, menuState);
   }
   else if (id == UP_ARROW_ID)
   {
     display.highlightMenu(false, menuState);
-    menuState = static_cast<MenuState>(menuState - 1 % NUM_MENU_OPTIONS - 1);
+    int newMenuState = (menuState + NUM_MENU_OPTIONS -1) % (NUM_MENU_OPTIONS);
+    menuState = static_cast<MenuState>(newMenuState);
     Serial.println("MenuState = " + String(menuState));
     display.highlightMenu(true, menuState);
   }
