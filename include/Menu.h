@@ -5,6 +5,7 @@
 #include <Display.h>
 #include <DeviceConfig.h>
 #include <MenuState.h>
+#include <Bank.h>
 
 class Menu{
     public:
@@ -20,6 +21,7 @@ class Menu{
     private:
         Display display;
         MenuState menuState;
+        Bank bank;
 };
 
 #endif //MENU

@@ -5,7 +5,6 @@
 #include <SPI.h>
 #include <DeviceConfig.h>
 #include <Bank.h>
-#include <Preset.h>
 
 Menu::Menu(){};
 
@@ -14,18 +13,11 @@ void Menu::setup()
   // May want to switch back to custom animation(w/black background) to ensure this stays coherent
   display.setup(NEXTION_BAUD_RATE);
   display.bootScreen();
+  delay(4000);
   menuState = LOOPS;
   SPI.begin();
-  delay(4000);
-  Bank bankTest(0);
+  
 
-  bankTest.setCurrentPreset(1);
-  bankTest.setCurrentDrySend(3);
-  Debugger::log("After setting first time: " + String(bankTest.getCurrentDrySend()));
-  bankTest.setCurrentPreset(2);
-  Debugger::log("After switching to Preset 2: " + String(bankTest.getCurrentDrySend()));
-  bankTest.setCurrentPreset(1);
-  Debugger::log("After switching back to Preset 1: " +String(bankTest.getCurrentDrySend()));
 
   display.setHomeScreen();
   display.highlightMenu(true, menuState);
@@ -75,7 +67,7 @@ void Menu::changeMenuState(int id)
   else if (id == UP_ARROW_ID)
   {
     display.highlightMenu(false, menuState);
-    int newMenuState = (menuState + NUM_MENU_OPTIONS -1) % (NUM_MENU_OPTIONS);
+    int newMenuState = (menuState + NUM_MENU_OPTIONS - 1) % (NUM_MENU_OPTIONS);
     menuState = static_cast<MenuState>(newMenuState);
     Serial.println("MenuState = " + String(menuState));
     display.highlightMenu(true, menuState);

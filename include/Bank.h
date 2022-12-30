@@ -7,7 +7,7 @@
 class Bank
 {
 public:
-    Bank(int id);
+    Bank();
     // Getters
     Preset getCurrentPreset();
     int getBankID();
@@ -25,6 +25,7 @@ public:
     int getCurrentDrySend();
 
     // Setters
+    void setBankId(int id);
     void setCurrentPreset(int id);
     void setCurrentLoopPosition(int position, int channelId);
     void setCurrentInputVolume(int volume, int channelId);

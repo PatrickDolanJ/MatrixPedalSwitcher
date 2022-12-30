@@ -3,9 +3,8 @@
 #include <Loop.h>
 #include <Preset.h>
 
-Bank::Bank(int id)
+Bank::Bank()
 {
-    this->bankId = id;
     for (int i = 0; i < sizeOfPresets; i++)
     {
         presets[i].setPresetId(static_cast<PresetID>(i));
@@ -14,11 +13,13 @@ Bank::Bank(int id)
 }
 
 //--------------------------Setters------------------------------
+void Bank::setBankId(int id) { this->bankId = id; };
+
 void Bank::setCurrentPreset(int id)
 {
     presets[getCurrentPresetID()] = currentPreset;
     currentPreset = presets[id];
-}
+};
 
 void Bank::setCurrentLoopPosition(int position, int channelId) { currentPreset.setLoopPosition(position, channelId); };
 void Bank::setCurrentInputVolume(int volume, int channelId) { currentPreset.setInputVolume(volume, channelId); };
@@ -30,14 +31,13 @@ void Bank::setCurrentPhase(int phase, int channelId) { currentPreset.setPhase(ph
 void Bank::setCurrentDrySend(int id) { currentPreset.setDrySend(id); };
 
 //--------------------------Getters------------------------------
-int Bank::getBankID() { return bankId; };
-Preset Bank::getCurrentPreset() { return currentPreset; }
-
 ChannelID Bank::getLoopID(int presetId, int channelId)
 {
     return presets[presetId].getLoopID(channelId);
 };
 
+int Bank::getBankID() { return bankId; };
+Preset Bank::getCurrentPreset() { return currentPreset; };
 PresetID Bank::getCurrentPresetID() { return currentPreset.getPresetID(); };
 int Bank::getCurrentLoopPosition(int channelId) { return currentPreset.getLoopPosition(channelId); };
 int Bank::getCurrentInputVolume(int channelId) { return currentPreset.getInputVolume(channelId); };
