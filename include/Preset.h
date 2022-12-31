@@ -43,9 +43,8 @@ public:
 
 private:
     PresetID presetID;
-    Loop loopA, loopB, loopC, loopD, loopE, loopF, loopG;
     Master master;
-    Loop loops[7] = {loopA, loopB, loopC, loopD, loopE, loopF, loopG};
+    Loop loops[7] = {Loop(),Loop(),Loop(),Loop(),Loop(),Loop(),Loop()};
     int sizeOfLoops = sizeof(loops) / sizeof(loops[0]);
     bool checkIfMaster(int arrayId);
 };

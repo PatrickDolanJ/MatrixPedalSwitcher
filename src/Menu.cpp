@@ -16,9 +16,6 @@ void Menu::setup()
   delay(4000);
   menuState = LOOPS;
   SPI.begin();
-  
-
-
   display.setHomeScreen();
   display.highlightMenu(true, menuState);
 };

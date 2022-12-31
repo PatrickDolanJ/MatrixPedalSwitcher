@@ -9,5 +9,6 @@
 #include <FootSwitches.h>
 #include <EasyRotaryMCP.h>
 #include <Menu.h>
+#include <Bank.h>
 
 #endif // !COMMON_H

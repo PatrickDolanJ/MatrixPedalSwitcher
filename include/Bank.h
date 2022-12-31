@@ -38,14 +38,8 @@ public:
 
 private:
     int bankId;
-    Preset
-        currentPreset,
-        presetA,
-        presetB,
-        presetC,
-        presetD,
-        presetE;
-    Preset presets[5] = {presetA, presetB, presetC, presetD, presetE};
+    Preset currentPreset;
+    Preset presets[5] = {Preset(),Preset(),Preset(),Preset(),Preset()};
     int sizeOfPresets = sizeof(presets) / sizeof(presets[0]);
 };
 

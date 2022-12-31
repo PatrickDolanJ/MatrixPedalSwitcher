@@ -37,54 +37,61 @@ void Display::highlightMenu(bool onOrOff, MenuState state)
 {
     String color;
     color = onOrOff ? HIGHLIGHT_COLOR : DEFAULT_COLOR;
+    String menuStateString;
 
     switch (state)
     {
     case (MenuState::LOOPS):
         for (int i = 0; i < 8; i++)
         {
-            updatePBackgroundColorValue(LOOPS_FOR_DISPLAY[i], color);
+            updatePBackgroundColorValue(LOOP_NAMES[i]+_LOOP_POS , color);
+            menuStateString = MENU_STATE_LOOPS;
         }
         break;
 
     case (MenuState::INPUT_VOLUMES):
         for (int i = 0; i < 8; i++)
         {
-            updatePBackgroundColorValue(INPUT_VOLUMES_FOR_DISPLAY[i], color);
+            updatePBackgroundColorValue(LOOP_NAMES[i] + _INPUT_VOLUME, color);
+            menuStateString = MENU_STATE_INPUT_VOLUMES;
         }
         break;
 
     case (MenuState::OUTPUT_VOLUMES):
         for (int i = 0; i < 8; i++)
         {
-            updatePBackgroundColorValue(OUTPUT_VOLUMES_FOR_DISPLAY[i], color);
+            updatePBackgroundColorValue(LOOP_NAMES[i] + _OUTPUT_VOLUME, color);
+            menuStateString = MENU_STATE_OUTPUT_VOLUMES;
         }
         break;
 
     case (MenuState::PAN):
         for (int i = 0; i < 8; i++)
         {
-            updatePBackgroundColorValue(PANS_FOR_DISPLAY[i], color);
+            updatePBackgroundColorValue(LOOP_NAMES[i] + _PAN, color);
+            menuStateString = MENU_STATE_PAN;
         }
         break;
 
     case (MenuState::PHASE):
-        for (int i = 0; i < 8; i++)
+        for (int i = 0; i < 7; i++)
         {
-            updatePBackgroundColorValue(LEFT_PHASES_FOR_DISPLAY[i], color);
+            updatePBackgroundColorValue(LOOP_NAMES[i] + _LEFT_PHASE, color);
         }
-        for (int i = 0; i < 8; i++)
+        for (int i = 0; i < 7; i++)
         {
-            updatePBackgroundColorValue(RIGHT_PHASES_FOR_DISPLAY[i], color);
+            updatePBackgroundColorValue(LOOP_NAMES[i] + _RIGHT_PHASE, color);
         }
+        menuStateString = MENU_STATE_PHASE;
         break;
     }
+    updateMenuStateDisplay(menuStateString);
 };
 
 void Display::sendLoopPosition(int position, int id)
 {
     String positionString = String(position);
-    String loop = LOOPS_FOR_DISPLAY[id];
+    String loop = LOOP_NAMES[id] + _LOOP_POS;
     updateTextValue(loop, positionString);
 };
 
@@ -94,6 +101,11 @@ void Display::sendInputVolume(int volume, int id)
 }
 
 //-----------------------Helpers---------------------------------
+
+void Display::updateMenuStateDisplay(String menuString)
+{
+    updateTextValue(MENU_STATE_FOR_DISPLAY, menuString);
+}
 
 void Display::updateTextValue(String id, String value)
 {

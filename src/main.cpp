@@ -4,7 +4,7 @@ RotaryButtons rotaryButtons(ROTARY_BUTTONS_ADDRESS);
 FootSwitches footSwitches(FOOTSWITCH_ADDRESS);
 EasyRotary easyRotaryEncoders(ROTARY_ENCODER_INTERUPT_PIN);
 Debugger *debugger; // Computer
-Menu menu;
+Menu menu; //
 
 const int NO_BUTTON_VALUE = 0;
 const int DOUBLE_BUTTON_PRESS_VALUE = -2;
@@ -33,7 +33,7 @@ void ROTARY_INTERUPT(bool isClockwise, int id)
 
 int idToArray(int id)
 {
-  return id -1;
+  return id - 1;
 }
 
 bool checkLongPress(int duration)
@@ -81,12 +81,13 @@ void handleFootButtonPress()
         menu.doFoot(previousFootValue);
       }
     }
+      previousFootValue = footID;
   }
-  previousFootValue = footID;
 }
 
 //--------------------------------------MAIN------------------------------------------
 //------------------------------------------------------------------------------------
+
 void setup()
 {
   debugger = &debugger->Instance();
