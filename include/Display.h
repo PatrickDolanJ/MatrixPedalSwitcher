@@ -9,7 +9,6 @@ class Display{
         Display();
         void setup(unsigned long baudRate);
         void updateAll();
-        void sendEndCommand();
         void bootScreen();
         void setHomeScreen();
         void highlightMenu(bool onOrOff, MenuState state);
@@ -24,6 +23,11 @@ class Display{
 
     private:
         unsigned long baudRate;
+        void sendMessage(String message);
+        void sendEndCommand();
+        void updateTextValue(String id, String value);
+        void updatePBackgroundColorValue(String id,String color);
+        void updatePage(String page);
     };
 
 #endif // ! DISPLAY_H
