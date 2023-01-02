@@ -44,7 +44,7 @@ void Display::highlightMenu(bool onOrOff, MenuState state)
     case (MenuState::LOOPS):
         for (int i = 0; i < 8; i++)
         {
-            updatePBackgroundColorValue(LOOP_NAMES[i]+_LOOP_POS , color);
+            updatePBackgroundColorValue(LOOP_NAMES[i] + _LOOP_POS, color);
             menuStateString = MENU_STATE_LOOPS;
         }
         break;
@@ -91,16 +91,50 @@ void Display::highlightMenu(bool onOrOff, MenuState state)
 void Display::sendLoopPosition(int position, int id)
 {
     String positionString = String(position);
-    String loop = LOOP_NAMES[id] + _LOOP_POS;
+    String loop = idToStringId(id) + _LOOP_POS;
     updateTextValue(loop, positionString);
 };
 
 void Display::sendInputVolume(int volume, int id)
 {
-    String volumeString = String(volume);
+    String volumeValueString = String(volume);
+    String volumeIdString = idToStringId(id) + _INPUT_VOLUME;
+    updateTextValue(volumeIdString, volumeValueString);
+}
+
+void Display::sendOutputVolume(int volume, int id)
+{
+    String volumeValueString = String(volume);
+    String volumeIdString = idToStringId(id) + _OUTPUT_VOLUME;
+    updateTextValue(volumeIdString, volumeValueString);
+}
+
+void Display::sendPan(int pan, int id)
+{
+    String panValueString = String(pan);
+    String panIdString = idToStringId(id) + _PAN;
+    updateTextValue(panValueString, panIdString);
+}
+
+void Display::sendReturn(bool isStereo, int id)
+{
+    String isStereoString = isStereo ? STEREO : MONO;
+    String returnIdString = idToStringId(id) + _RETURN;
+    updateTextValue(returnIdString, isStereoString);
+}
+
+void Display::sendDelayTrail(bool isDelayTrail, int id)
+{
+    String isDelayTraiString = isDelayTrail ? IS_DELAY_TRAIL : IS_NOT_DELAY_TRAIL;
+
 }
 
 //-----------------------Helpers---------------------------------
+
+String Display::idToStringId(int id)
+{
+    return LOOP_NAMES[id];
+}
 
 void Display::updateMenuStateDisplay(String menuString)
 {

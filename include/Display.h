@@ -29,6 +29,7 @@ private:
     void updatePBackgroundColorValue(String id, String color);
     void updatePage(String page);
     void updateMenuStateDisplay(String menuString);
+    String idToStringId(int id);
 };
 
 #endif // ! DISPLAY_H
