@@ -85,7 +85,11 @@ void Display::highlightMenu(bool onOrOff, MenuState state)
         menuStateString = MENU_STATE_PHASE;
         break;
     }
-    updateMenuStateDisplay(menuStateString);
+
+    if (onOrOff)
+    {
+        updateMenuStateDisplay(menuStateString);
+    }
 };
 
 void Display::sendLoopPosition(int position, int id)
@@ -126,7 +130,6 @@ void Display::sendReturn(bool isStereo, int id)
 void Display::sendDelayTrail(bool isDelayTrail, int id)
 {
     String isDelayTraiString = isDelayTrail ? IS_DELAY_TRAIL : IS_NOT_DELAY_TRAIL;
-
 }
 
 //-----------------------Helpers---------------------------------
@@ -138,12 +141,15 @@ String Display::idToStringId(int id)
 
 void Display::updateMenuStateDisplay(String menuString)
 {
+    String farts = MENU_STATE_FOR_DISPLAY + menuString;
+    Debugger::log(farts);
     updateTextValue(MENU_STATE_FOR_DISPLAY, menuString);
 }
 
 void Display::updateTextValue(String id, String value)
 {
-    sendMessage(id + ".txt=" + value);
+    String message = id + ".txt=" + value;
+    sendMessage(message);
 };
 
 void Display::updatePBackgroundColorValue(String id, String color)

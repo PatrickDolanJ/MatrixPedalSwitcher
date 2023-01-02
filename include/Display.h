@@ -20,6 +20,7 @@ public:
     void sendPan(int pan, int id);
     void sendReturn(bool isStereo, int id);
     void sendDelayTrail(bool isDelayTrail, int id);
+    void updateMenuStateDisplay(String menuString);
 
 private:
     unsigned long baudRate;
@@ -28,7 +29,6 @@ private:
     void updateTextValue(String id, String value);
     void updatePBackgroundColorValue(String id, String color);
     void updatePage(String page);
-    void updateMenuStateDisplay(String menuString);
     String idToStringId(int id);
 };
 
