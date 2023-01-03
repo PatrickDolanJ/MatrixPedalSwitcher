@@ -22,6 +22,8 @@ void Menu::setup()
   display.setHomeScreen();
   display.highlightMenu(true, menuState);
   updateAllValuesDisplay(bank.getCurrentPreset());
+  footLEDs.writeAllOff();
+  footLEDs.writeLed(true,bank.getCurrentPresetID());
 };
 
 void Menu::doButton(int id)
@@ -35,6 +37,8 @@ void Menu::doFoot(int id)
   Debugger::log("Foot pressed: " + String(id));
   bank.setCurrentPreset(id);
   updateAllValuesDisplay(bank.getCurrentPreset());
+  footLEDs.writeAllOff();
+  footLEDs.writeLed(true,bank.getCurrentPresetID());
 };
 
 void Menu::doDoubleFootPress()
@@ -195,6 +199,8 @@ int Menu::incrementPhase(bool isClockwise, int id)
   return bank.getCurrentPhase(id);
 };
 
+
+//----------------------------------------Hardware---------------------------------------
 void Menu::sendArrayMatrixData(int loopArray[7], int size)
 {
   matrixLeft.writeArray(loopArray, size);

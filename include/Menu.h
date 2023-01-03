@@ -7,6 +7,7 @@
 #include <MenuState.h>
 #include <Bank.h>
 #include <MatrixLibrary.h>
+#include <LEDs.h>
 
 class Menu
 {
@@ -27,6 +28,7 @@ private:
     Bank bank;
     AGD2188 matrixRight = AGD2188(RIGHT_MATRIX_ADDRESS);
     AGD2188 matrixLeft = AGD2188(LEFT_MATRIX_ADDRESS);
+    LEDs footLEDs;
 
     void updateAllValuesDisplay(Preset preset);
     int incrementLoops(bool isClockwise, int id);
@@ -36,6 +38,7 @@ private:
     int incrementPhase(bool isClockwise, int id);
     // sending data
     void sendArrayMatrixData(int loopArray[7], int size);
+    
 };
 
 #endif // MENU
