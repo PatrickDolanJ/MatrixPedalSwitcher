@@ -3,6 +3,7 @@
 #include <NextionCommands.h>
 #include <DeviceConfig.h>
 #include <Debugger.h>
+#include <Preset.h>
 
 Display::Display(){};
 
@@ -120,7 +121,7 @@ void Display::sendPan(int pan, int id)
     String panValueString = String(pan);
     String panIdString = idToStringId(id) + _PAN;
     Debugger::log(panIdString + " " + panValueString);
-    updateValue(panIdString,panValueString);
+    updateValue(panIdString, panValueString);
 };
 
 void Display::sendReturn(bool isStereo, int id)
@@ -134,6 +135,37 @@ void Display::sendDelayTrail(bool isDelayTrail, int id)
 {
     String isDelayTraiString = isDelayTrail ? IS_DELAY_TRAIL : IS_NOT_DELAY_TRAIL;
 };
+
+void Display::sendPhase(int phase, int id)
+{
+    String leftPhase;
+    String rightPhase;
+
+    switch (phase)
+    {
+    case (0):
+        leftPhase = IN_PHASE;
+        rightPhase = IN_PHASE;
+        break;
+    case (1):
+        leftPhase = IN_PHASE;
+        rightPhase = OUT_OF_PHASE;
+        break;
+    case (2):
+        leftPhase = OUT_OF_PHASE;
+        rightPhase = IN_PHASE;
+        break;
+    case (3):
+        leftPhase = OUT_OF_PHASE;
+        rightPhase = OUT_OF_PHASE;
+        break;
+    }
+
+    String leftPhaseId = LOOP_NAMES[id] + _LEFT_PHASE;
+    String rightPhaseId = LOOP_NAMES[id] + _RIGHT_PHASE;
+    updateTextValue(leftPhaseId, leftPhase);
+    updateTextValue(rightPhaseId, rightPhase);
+}
 
 //-----------------------Helpers---------------------------------
 
@@ -187,3 +219,10 @@ int Display::convertVolumeForDisplay(int volume)
     return map(volume, 0, MAX_VOLUME, 0, 100);
 };
 
+void Display::updateBankPresetInfo(int bankId, PresetID id)
+{
+    String presetIdString = FOOT_PRESETS[id];
+    String bankIdString = String(bankId);
+    updateValue(BANK_NUMBER, bankIdString);
+    updateTextValue(PRESET_LETTER,presetIdString);
+}

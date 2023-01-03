@@ -13,6 +13,8 @@ const String _PAN = "_PAN";
 const String _INPUT_VOLUME = "_VOL_IN";
 const String _OUTPUT_VOLUME = "_VOL_OUT";
 const String MENU_STATE_FOR_DISPLAY = "CURRENT_PARAM";
+const String BANK_NUMBER = "BANK_NUMBER";
+const String PRESET_LETTER = "FOOT_LETTER";
 
 //-------------Values-----------------
 const byte END_BYTE = 0xff;

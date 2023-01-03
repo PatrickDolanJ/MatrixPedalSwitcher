@@ -210,7 +210,7 @@ bool Preset::getIsDelayTrail(int id)
 
 int Preset::getPhase(int id)
 {
-    if(!checkIfMaster(id))
+    if (!checkIfMaster(id))
     {
         return loops[id].getPhase();
     }

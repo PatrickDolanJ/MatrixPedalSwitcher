@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include <MenuState.h>
+#include <Preset.h>
 
 class Display
 {
@@ -21,6 +22,8 @@ public:
     void sendReturn(bool isStereo, int id);
     void sendDelayTrail(bool isDelayTrail, int id);
     void updateMenuStateDisplay(String menuString);
+    void sendPhase(int phase, int id);
+    void updateBankPresetInfo(int bankId, PresetID id);
 
 private:
     unsigned long baudRate;

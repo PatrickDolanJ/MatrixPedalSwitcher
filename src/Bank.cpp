@@ -40,7 +40,7 @@ int Bank::getBankID() { return bankId; };
 Preset Bank::getCurrentPreset() { return currentPreset; };
 PresetID Bank::getCurrentPresetID() { return currentPreset.getPresetID(); };
 int Bank::getCurrentLoopPosition(int channelId) { return currentPreset.getLoopPosition(channelId); };
-LoopArray Bank::getCurrentLoopArray(){return currentPreset.getLoopArray();};
+LoopArray Bank::getCurrentLoopArray() { return currentPreset.getLoopArray(); };
 int Bank::getCurrentInputVolume(int channelId) { return currentPreset.getInputVolume(channelId); };
 int Bank::getCurrentOutputVolume(int channelId) { return currentPreset.getOutputVolume(channelId); };
 int Bank::getCurrentPan(int channelId) { return currentPreset.getPan(channelId); };
@@ -49,4 +49,4 @@ int Bank::getCurrentRightOutputVolume(int channelId) { return currentPreset.getR
 bool Bank::getCurrentIsStereo(int channelId) { return currentPreset.getIsStereo(channelId); };
 bool Bank::getCurrentIsDelayTrail(int channelId) { return currentPreset.getIsDelayTrail(channelId); };
 int Bank::getCurrentDrySend() { return currentPreset.getDrySend(); };
-int Bank::getCurrentPhase(int id) {return currentPreset.getPhase(id);};
+int Bank::getCurrentPhase(int id) { return currentPreset.getPhase(id); };

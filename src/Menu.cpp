@@ -31,16 +31,19 @@ void Menu::doFoot(int id)
 {
   Debugger::log("Foot pressed: " + String(id));
   bank.setCurrentPreset(id);
+  int bankId = bank.getBankID();
+  PresetID curPresetId = bank.getCurrentPresetID();
+  display.updateBankPresetInfo(bankId, curPresetId);
 };
 
 void Menu::doDoubleFootPress()
 {
-  //DO
+  // DO
   Debugger::log("Double Foot Button detected.");
 }
 
 void Menu::duringLongPress(int id){
-  //DO
+    // DO
 };
 
 void Menu::doLongPress(int id)
@@ -76,7 +79,6 @@ void Menu::doRotaryEnoderSpin(bool isClockwise, int id)
     Debugger::log("Spin InputVolumes");
     int curInputVolume = incrementInputVolume(isClockwise, id);
     display.sendInputVolume(curInputVolume, id);
-    Debugger::log(String(curInputVolume));
   }
   break;
 
@@ -91,6 +93,9 @@ void Menu::doRotaryEnoderSpin(bool isClockwise, int id)
   case (MenuState::PHASE):
   {
     Debugger::log("Spin Phase");
+    int curPhase = incrementPhase(isClockwise, id);
+    display.sendPhase(curPhase, id);
+    Debugger::log(String(curPhase));
   }
   break;
   }
@@ -160,10 +165,14 @@ int Menu::incrementPhase(bool isClockwise, int id)
 {
   // DO
   int curPhase = bank.getCurrentPhase(id);
+  curPhase = isClockwise ? (curPhase + 1) % 4 : (curPhase + 3) % 4;
+  bank.setCurrentPhase(curPhase, id);
+  return bank.getCurrentPhase(id);
 };
 
 void Menu::sendArrayMatrixData(int loopArray[7], int size)
 {
   matrixLeft.writeArray(loopArray, size);
   matrixRight.writeArray(loopArray, size);
-}
+};
+
