@@ -28,7 +28,7 @@ private:
     AGD2188 matrixRight = AGD2188(RIGHT_MATRIX_ADDRESS);
     AGD2188 matrixLeft = AGD2188(LEFT_MATRIX_ADDRESS);
 
-    void updateAllValues(Preset preset);
+    void updateAllValuesDisplay(Preset preset);
     int incrementLoops(bool isClockwise, int id);
     int incrementPan(bool isClockwise, int id);
     int incrementInputVolume(bool isClockwise, int id);

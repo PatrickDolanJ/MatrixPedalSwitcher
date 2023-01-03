@@ -120,7 +120,6 @@ void Display::sendPan(int pan, int id)
 {
     String panValueString = String(pan);
     String panIdString = idToStringId(id) + _PAN;
-    Debugger::log(panIdString + " " + panValueString);
     updateValue(panIdString, panValueString);
 };
 

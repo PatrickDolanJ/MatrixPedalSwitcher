@@ -6,6 +6,7 @@
 #include <DeviceConfig.h>
 #include <LoopArray.h>
 #include <MatrixLibrary.h>
+#include <MemoryFree.h>
 
 Menu::Menu(){};
 
@@ -14,11 +15,13 @@ void Menu::setup()
   // May want to switch back to custom animation(w/black background) to ensure this stays coherent
   display.setup(NEXTION_BAUD_RATE);
   display.bootScreen();
+  bank.setCurrentPreset(0);
   delay(4000);
   menuState = LOOPS;
   SPI.begin();
   display.setHomeScreen();
   display.highlightMenu(true, menuState);
+  updateAllValuesDisplay(bank.getCurrentPreset());
 };
 
 void Menu::doButton(int id)
@@ -123,9 +126,26 @@ void Menu::changeMenuState(int id)
 
 //-------------------------------------------------------------------------
 //------------------------------------helpers------------------------------
-void Menu::updateAllValues(Preset preset)
+void Menu::updateAllValuesDisplay(Preset preset)
 {
-  // DO
+  for (int i = 0; i < 8; i++)
+  {
+
+    display.sendPan(bank.getCurrentPan(i), i);
+    display.sendReturn(bank.getCurrentReturn(i), i);
+    Debugger::log("Index:" + String(i));
+    Debugger::log("Free memory: " + String(freeMemory()));
+    display.sendInputVolume(bank.getCurrentInputVolume(i), i);
+    display.sendOutputVolume(bank.getCurrentOutputVolume(i), i);
+    // display.sendDelayTrail(bank.getCurrentIsDelayTrail(i), i);
+    // display.sendDrySend(bank.getSendDry());
+  }
+  // Split up because unpredictable behavior when all in same scope??
+  for (size_t i = 0; i < 7; i++)
+  {
+    display.sendLoopPosition(bank.getCurrentLoopPosition(i), i);
+    display.sendPhase(bank.getCurrentPhase(i), i);
+  }
 }
 
 int Menu::incrementLoops(bool isClockwise, int id)
@@ -133,7 +153,6 @@ int Menu::incrementLoops(bool isClockwise, int id)
   int curLoop = bank.getCurrentLoopPosition(id);
   curLoop = isClockwise ? curLoop + 1 : curLoop - 1;
   bank.setCurrentLoopPosition(curLoop, id);
-  LoopArray loopArray = bank.getCurrentLoopArray();
   return bank.getCurrentLoopPosition(id);
 };
 
@@ -175,4 +194,3 @@ void Menu::sendArrayMatrixData(int loopArray[7], int size)
   matrixLeft.writeArray(loopArray, size);
   matrixRight.writeArray(loopArray, size);
 };
-

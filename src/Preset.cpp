@@ -228,6 +228,18 @@ LoopArray Preset::getLoopArray()
         loopArray.loopArray[i] = loops[i].getChannelPosition();
     }
     return loopArray;
+};
+
+bool Preset::getIsStereo(int id)
+{
+    if(!checkIfMaster(id))
+    {
+        return loops[id].getIsStereo();
+    }
+    else
+    {
+        return master.getIsStereo();
+    }
 }
 
 //----------------------------------Helpers--------------------------------------

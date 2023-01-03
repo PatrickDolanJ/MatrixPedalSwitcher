@@ -25,7 +25,7 @@ void Bank::setCurrentLoopPosition(int position, int channelId) { currentPreset.s
 void Bank::setCurrentInputVolume(int volume, int channelId) { currentPreset.setInputVolume(volume, channelId); };
 void Bank::setCurrentOutputVolume(int volume, int channelId) { currentPreset.setOutputVolume(volume, channelId); };
 void Bank::setCurrentPan(int pan, int channelId) { currentPreset.setPan(pan, channelId); };
-void Bank::setCurrentIsStereo(bool isStereoChannel, int channelId) { currentPreset.setIsStereo(isStereoChannel, channelId); };
+void Bank::setCurrentReturn(bool isStereoChannel, int channelId) { currentPreset.setIsStereo(isStereoChannel, channelId); };
 void Bank::setCurrentIsDelayTrail(bool isDelayTrail, int channelId) { currentPreset.setIsDelayTrail(isDelayTrail, channelId); };
 void Bank::setCurrentPhase(int phase, int channelId) { currentPreset.setPhase(phase, channelId); };
 void Bank::setCurrentDrySend(int id) { currentPreset.setDrySend(id); };
@@ -46,7 +46,7 @@ int Bank::getCurrentOutputVolume(int channelId) { return currentPreset.getOutput
 int Bank::getCurrentPan(int channelId) { return currentPreset.getPan(channelId); };
 int Bank::getCurrentLeftOutputVolume(int channelId) { return currentPreset.getLeftOutputVolume(channelId); };
 int Bank::getCurrentRightOutputVolume(int channelId) { return currentPreset.getRightOutputVolume(channelId); };
-bool Bank::getCurrentIsStereo(int channelId) { return currentPreset.getIsStereo(channelId); };
+bool Bank::getCurrentReturn(int channelId) { return currentPreset.getIsStereo(channelId); };
 bool Bank::getCurrentIsDelayTrail(int channelId) { return currentPreset.getIsDelayTrail(channelId); };
 int Bank::getCurrentDrySend() { return currentPreset.getDrySend(); };
 int Bank::getCurrentPhase(int id) { return currentPreset.getPhase(id); };

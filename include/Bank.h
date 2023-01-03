@@ -22,7 +22,7 @@ public:
     int getCurrentPan(int channelId);
     int getCurrentLeftOutputVolume(int channelId);
     int getCurrentRightOutputVolume(int channelId);
-    bool getCurrentIsStereo(int channelId);
+    bool getCurrentReturn(int channelId);
     bool getCurrentIsDelayTrail(int channelId);
     int getCurrentPhase(int id);
     int getCurrentDrySend();
@@ -34,7 +34,7 @@ public:
     void setCurrentInputVolume(int volume, int channelId);
     void setCurrentOutputVolume(int volume, int channelId);
     void setCurrentPan(int pan, int channelId);
-    void setCurrentIsStereo(bool isStereoChannelID, int channelId);
+    void setCurrentReturn(bool isStereoChannelID, int channelId);
     void setCurrentIsDelayTrail(bool isDelayTrail, int channelId);
     void setCurrentPhase(int phase, int channelId);
     void setCurrentDrySend(int id);

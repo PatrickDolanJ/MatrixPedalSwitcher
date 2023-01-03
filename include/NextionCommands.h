@@ -4,7 +4,7 @@
 #include <Arduino.h>
 
 //---------Display Objects -----------
-const String _NAME = "_NAME";
+const  String _NAME = "_NAME";
 const String _RETURN = "_RETURN";
 const String _LEFT_PHASE = "_L_PHASE";
 const String _RIGHT_PHASE = "_R_PHASE";
