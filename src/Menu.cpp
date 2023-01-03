@@ -34,9 +34,7 @@ void Menu::doFoot(int id)
 {
   Debugger::log("Foot pressed: " + String(id));
   bank.setCurrentPreset(id);
-  int bankId = bank.getBankID();
-  PresetID curPresetId = bank.getCurrentPresetID();
-  display.updateBankPresetInfo(bankId, curPresetId);
+  updateAllValuesDisplay(bank.getCurrentPreset());
 };
 
 void Menu::doDoubleFootPress()
@@ -62,10 +60,13 @@ void Menu::doRotaryEnoderSpin(bool isClockwise, int id)
   {
   case (MenuState::LOOPS):
   {
-    int curLoopPosition = incrementLoops(isClockwise, id);
-    display.sendLoopPosition(curLoopPosition, id);
-    LoopArray la = bank.getCurrentLoopArray();
-    sendArrayMatrixData(la.loopArray, la.arraySize);
+    if (id != 7)
+    {
+      int curLoopPosition = incrementLoops(isClockwise, id);
+      display.sendLoopPosition(curLoopPosition, id);
+      LoopArray la = bank.getCurrentLoopArray();
+      sendArrayMatrixData(la.loopArray, la.arraySize);
+    }
   }
   break;
 
@@ -95,10 +96,13 @@ void Menu::doRotaryEnoderSpin(bool isClockwise, int id)
 
   case (MenuState::PHASE):
   {
-    Debugger::log("Spin Phase");
-    int curPhase = incrementPhase(isClockwise, id);
-    display.sendPhase(curPhase, id);
-    Debugger::log(String(curPhase));
+    if (id != 7)
+    {
+      Debugger::log("Spin Phase");
+      int curPhase = incrementPhase(isClockwise, id);
+      display.sendPhase(curPhase, id);
+      Debugger::log(String(curPhase));
+    }
   }
   break;
   }
@@ -128,6 +132,8 @@ void Menu::changeMenuState(int id)
 //------------------------------------helpers------------------------------
 void Menu::updateAllValuesDisplay(Preset preset)
 {
+  display.updateBankPresetInfo(bank.getBankID(), preset.getPresetID());
+
   for (int i = 0; i < 8; i++)
   {
 

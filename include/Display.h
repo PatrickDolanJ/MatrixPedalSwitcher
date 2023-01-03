@@ -35,6 +35,7 @@ private:
     void updatePage(String page);
     String idToStringId(int id);
     int convertVolumeForDisplay(int volume);
+    void updateBaudRate(unsigned long baudRate);
 };
 
 #endif // ! DISPLAY_H

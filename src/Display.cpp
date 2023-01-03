@@ -15,8 +15,8 @@ void Display::setup(unsigned long baudRate)
     while (!Serial2)
     {
     }
-    Serial2.print("baud=" + String(baudRate));
-    sendEndCommand();
+    updateBaudRate(baudRate);
+    delay(100);
     Serial2.end();
     delay(100);
     Serial2.begin(baudRate);
@@ -224,4 +224,10 @@ void Display::updateBankPresetInfo(int bankId, PresetID id)
     String bankIdString = String(bankId);
     updateValue(BANK_NUMBER, bankIdString);
     updateTextValue(PRESET_LETTER,presetIdString);
+}
+
+void Display::updateBaudRate(unsigned long baudRate)
+{
+    Serial2.print("baud="+String(baudRate));
+    sendEndCommand();
 }
