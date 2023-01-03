@@ -87,6 +87,7 @@ void setup()
   debugger->setup(115200);
   Debugger::log(DEVICE_NAME + " is booting.");
 
+  SPI.begin();
   menu.setup();
 
   rotaryButtons.setup(0, ROTARY_INTERUPT_PIN, ROTARY_BUTTON_INTERUPT);
@@ -116,4 +117,6 @@ void loop()
   {
     menu.duringLongPress(previousButtonValue);
   }
+
+  
 };

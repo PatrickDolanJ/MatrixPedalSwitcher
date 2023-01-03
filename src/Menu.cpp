@@ -2,7 +2,6 @@
 #include <Menu.h>
 #include <Debugger.h>
 #include <I2Cscanner.h>
-#include <SPI.h>
 #include <DeviceConfig.h>
 #include <LoopArray.h>
 #include <MatrixLibrary.h>
@@ -18,12 +17,10 @@ void Menu::setup()
   bank.setCurrentPreset(0);
   delay(4000);
   menuState = LOOPS;
-  SPI.begin();
   display.setHomeScreen();
   display.highlightMenu(true, menuState);
   updateAllValuesDisplay(bank.getCurrentPreset());
-  footLEDs.writeAllOff();
-  footLEDs.writeLed(true,bank.getCurrentPresetID());
+  sendAllHardware(bank.getCurrentPreset());
 };
 
 void Menu::doButton(int id)
@@ -37,8 +34,7 @@ void Menu::doFoot(int id)
   Debugger::log("Foot pressed: " + String(id));
   bank.setCurrentPreset(id);
   updateAllValuesDisplay(bank.getCurrentPreset());
-  footLEDs.writeAllOff();
-  footLEDs.writeLed(true,bank.getCurrentPresetID());
+  sendAllHardware(bank.getCurrentPreset());
 };
 
 void Menu::doDoubleFootPress()
@@ -71,6 +67,7 @@ void Menu::doRotaryEnoderSpin(bool isClockwise, int id)
       LoopArray la = bank.getCurrentLoopArray();
       sendArrayMatrixData(la.loopArray, la.arraySize);
     }
+
   }
   break;
 
@@ -79,6 +76,7 @@ void Menu::doRotaryEnoderSpin(bool isClockwise, int id)
     Debugger::log("From inside doRotary Pan");
     int curPan = incrementPan(isClockwise, id);
     display.sendPan(curPan, id);
+    sendOutputVolumes(bank.getCurrentLeftOutputVolume(id), bank.getCurrentRightOutputVolume(id), id);
   }
   break;
 
@@ -87,6 +85,7 @@ void Menu::doRotaryEnoderSpin(bool isClockwise, int id)
     Debugger::log("Spin InputVolumes");
     int curInputVolume = incrementInputVolume(isClockwise, id);
     display.sendInputVolume(curInputVolume, id);
+    sendInputVolumes(curInputVolume, id);
   }
   break;
 
@@ -95,6 +94,7 @@ void Menu::doRotaryEnoderSpin(bool isClockwise, int id)
     Debugger::log("Spin OutputVolumes");
     int curInputVolume = incrementOutputVolume(isClockwise, id);
     display.sendOutputVolume(curInputVolume, id);
+    sendOutputVolumes(bank.getCurrentLeftOutputVolume(id), bank.getCurrentRightOutputVolume(id), id);
   }
   break;
 
@@ -199,10 +199,38 @@ int Menu::incrementPhase(bool isClockwise, int id)
   return bank.getCurrentPhase(id);
 };
 
-
 //----------------------------------------Hardware---------------------------------------
 void Menu::sendArrayMatrixData(int loopArray[7], int size)
 {
   matrixLeft.writeArray(loopArray, size);
   matrixRight.writeArray(loopArray, size);
+};
+
+void Menu::changeFootLeds(int id)
+{
+  footLEDs.writeAllOff();
+  footLEDs.writeLed(true, bank.getCurrentPresetID());
+};
+
+void Menu::sendInputVolumes(int value, int id)
+{
+  digitalPots.sendLeftInputVolume(value, id);
+  digitalPots.sendRightInputVolume(value, id);
+};
+
+void Menu::sendOutputVolumes(int leftValue, int rightValue, int id)
+{
+  digitalPots.sendLeftOutputVolume(leftValue, id);
+  digitalPots.sendRightOutPutVolume(rightValue, id);
+};
+
+void Menu::sendAllHardware(Preset preset)
+{
+  sendArrayMatrixData(preset.getLoopArray().loopArray, preset.getLoopArray().arraySize);
+  changeFootLeds(preset.getPresetID());
+  for (size_t i = 0; i < 8; i++)
+  {
+    sendInputVolumes(preset.getInputVolume(i), i);
+    sendOutputVolumes(preset.getLeftOutputVolume(i), preset.getRightOutputVolume(i), i);
+  }
 };

@@ -223,7 +223,7 @@ int Preset::getPhase(int id)
 LoopArray Preset::getLoopArray()
 {
     LoopArray loopArray;
-    for (size_t i = 0; i < loopArray.arraySize; i++)
+    for (int i = 0; i < loopArray.arraySize; i++)
     {
         loopArray.loopArray[i] = loops[i].getChannelPosition();
     }
