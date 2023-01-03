@@ -206,7 +206,29 @@ bool Preset::getIsDelayTrail(int id)
     {
         return false;
     }
+};
+
+int Preset::getPhase(int id)
+{
+    if(!checkIfMaster(id))
+    {
+        return loops[id].getPhase();
+    }
+    else
+    {
+        return -1;
+    }
+}
+
+LoopArray Preset::getLoopArray()
+{
+    LoopArray loopArray;
+    for (size_t i = 0; i < loopArray.arraySize; i++)
+    {
+        loopArray.loopArray[i] = loops[i].getChannelPosition();
+    }
+    return loopArray;
 }
 
 //----------------------------------Helpers--------------------------------------
-bool Preset::checkIfMaster(int id) { return id == channel_Master; }
+bool Preset::checkIfMaster(int id) { return id == channel_Master; };

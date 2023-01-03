@@ -96,59 +96,66 @@ void Display::sendLoopPosition(int position, int id)
 {
     String positionString = String(position);
     String loop = idToStringId(id) + _LOOP_POS;
-    updateTextValue(loop, positionString);
+    updateValue(loop, positionString);
 };
 
 void Display::sendInputVolume(int volume, int id)
 {
-    String volumeValueString = String(volume);
+    int volumeForDisplay = convertVolumeForDisplay(volume);
+    String volumeValueString = String(volumeForDisplay);
     String volumeIdString = idToStringId(id) + _INPUT_VOLUME;
-    updateTextValue(volumeIdString, volumeValueString);
-}
+    updateValue(volumeIdString, volumeValueString);
+};
 
 void Display::sendOutputVolume(int volume, int id)
 {
-    String volumeValueString = String(volume);
+    int volumeForDisplay = convertVolumeForDisplay(volume);
+    String volumeValueString = String(volumeForDisplay);
     String volumeIdString = idToStringId(id) + _OUTPUT_VOLUME;
-    updateTextValue(volumeIdString, volumeValueString);
-}
+    updateValue(volumeIdString, volumeValueString);
+};
 
 void Display::sendPan(int pan, int id)
 {
     String panValueString = String(pan);
     String panIdString = idToStringId(id) + _PAN;
-    updateTextValue(panValueString, panIdString);
-}
+    Debugger::log(panIdString + " " + panValueString);
+    updateValue(panIdString,panValueString);
+};
 
 void Display::sendReturn(bool isStereo, int id)
 {
     String isStereoString = isStereo ? STEREO : MONO;
     String returnIdString = idToStringId(id) + _RETURN;
-    updateTextValue(returnIdString, isStereoString);
-}
+    updateValue(returnIdString, isStereoString);
+};
 
 void Display::sendDelayTrail(bool isDelayTrail, int id)
 {
     String isDelayTraiString = isDelayTrail ? IS_DELAY_TRAIL : IS_NOT_DELAY_TRAIL;
-}
+};
 
 //-----------------------Helpers---------------------------------
 
 String Display::idToStringId(int id)
 {
     return LOOP_NAMES[id];
-}
+};
+
+void Display::updateValue(String id, String value)
+{
+    String message = id + ".val=" + value;
+    sendMessage(message);
+};
 
 void Display::updateMenuStateDisplay(String menuString)
 {
-    String farts = MENU_STATE_FOR_DISPLAY + menuString;
-    Debugger::log(farts);
     updateTextValue(MENU_STATE_FOR_DISPLAY, menuString);
-}
+};
 
 void Display::updateTextValue(String id, String value)
 {
-    String message = id + ".txt=" + value;
+    String message = id + ".txt=" + "\"" + value + "\"";
     sendMessage(message);
 };
 
@@ -166,11 +173,17 @@ void Display::sendMessage(String message)
 {
     Serial2.print(message);
     sendEndCommand();
-}
+};
 
 void Display::sendEndCommand()
 {
     Serial2.write(END_BYTE);
     Serial2.write(END_BYTE);
     Serial2.write(END_BYTE);
-}
+};
+
+int Display::convertVolumeForDisplay(int volume)
+{
+    return map(volume, 0, MAX_VOLUME, 0, 100);
+};
+

@@ -4,7 +4,8 @@
 #include <I2Cscanner.h>
 #include <SPI.h>
 #include <DeviceConfig.h>
-#include <Bank.h>
+#include <LoopArray.h>
+#include <MatrixLibrary.h>
 
 Menu::Menu(){};
 
@@ -29,16 +30,17 @@ void Menu::doButton(int id)
 void Menu::doFoot(int id)
 {
   Debugger::log("Foot pressed: " + String(id));
-  // change preset
+  bank.setCurrentPreset(id);
 };
 
 void Menu::doDoubleFootPress()
 {
+  //DO
   Debugger::log("Double Foot Button detected.");
 }
 
 void Menu::duringLongPress(int id){
-
+  //DO
 };
 
 void Menu::doLongPress(int id)
@@ -49,6 +51,49 @@ void Menu::doLongPress(int id)
 void Menu::doRotaryEnoderSpin(bool isClockwise, int id)
 {
   Debugger::log("Encoder spin: " + String(id));
+
+  switch (menuState)
+  {
+  case (MenuState::LOOPS):
+  {
+    int curLoopPosition = incrementLoops(isClockwise, id);
+    display.sendLoopPosition(curLoopPosition, id);
+    LoopArray la = bank.getCurrentLoopArray();
+    sendArrayMatrixData(la.loopArray, la.arraySize);
+  }
+  break;
+
+  case (MenuState::PAN):
+  {
+    Debugger::log("From inside doRotary Pan");
+    int curPan = incrementPan(isClockwise, id);
+    display.sendPan(curPan, id);
+  }
+  break;
+
+  case (MenuState::INPUT_VOLUMES):
+  {
+    Debugger::log("Spin InputVolumes");
+    int curInputVolume = incrementInputVolume(isClockwise, id);
+    display.sendInputVolume(curInputVolume, id);
+    Debugger::log(String(curInputVolume));
+  }
+  break;
+
+  case (MenuState::OUTPUT_VOLUMES):
+  {
+    Debugger::log("Spin OutputVolumes");
+    int curInputVolume = incrementOutputVolume(isClockwise, id);
+    display.sendOutputVolume(curInputVolume, id);
+  }
+  break;
+
+  case (MenuState::PHASE):
+  {
+    Debugger::log("Spin Phase");
+  }
+  break;
+  }
 };
 
 void Menu::changeMenuState(int id)
@@ -70,3 +115,55 @@ void Menu::changeMenuState(int id)
     display.highlightMenu(true, menuState);
   }
 };
+
+//-------------------------------------------------------------------------
+//------------------------------------helpers------------------------------
+void Menu::updateAllValues(Preset preset)
+{
+  // DO
+}
+
+int Menu::incrementLoops(bool isClockwise, int id)
+{
+  int curLoop = bank.getCurrentLoopPosition(id);
+  curLoop = isClockwise ? curLoop + 1 : curLoop - 1;
+  bank.setCurrentLoopPosition(curLoop, id);
+  LoopArray loopArray = bank.getCurrentLoopArray();
+  return bank.getCurrentLoopPosition(id);
+};
+
+int Menu::incrementPan(bool isClockwise, int id)
+{
+  int curPan = bank.getCurrentPan(id);
+  curPan = isClockwise ? curPan + PAN_SCROLL_AMOUNT : curPan - PAN_SCROLL_AMOUNT;
+  bank.setCurrentPan(curPan, id);
+  return bank.getCurrentPan(id);
+};
+
+int Menu::incrementInputVolume(bool isClockwise, int id)
+{
+  int curVolume = bank.getCurrentInputVolume(id);
+  curVolume = isClockwise ? curVolume + VOLUME_SCROLL_AMOUNT : curVolume - VOLUME_SCROLL_AMOUNT;
+  bank.setCurrentInputVolume(curVolume, id);
+  return bank.getCurrentInputVolume(id);
+};
+
+int Menu::incrementOutputVolume(bool isClockwise, int id)
+{
+  int curVolume = bank.getCurrentOutputVolume(id);
+  curVolume = isClockwise ? curVolume + VOLUME_SCROLL_AMOUNT : curVolume - VOLUME_SCROLL_AMOUNT;
+  bank.setCurrentOutputVolume(curVolume, id);
+  return bank.getCurrentOutputVolume(id);
+};
+
+int Menu::incrementPhase(bool isClockwise, int id)
+{
+  // DO
+  int curPhase = bank.getCurrentPhase(id);
+};
+
+void Menu::sendArrayMatrixData(int loopArray[7], int size)
+{
+  matrixLeft.writeArray(loopArray, size);
+  matrixRight.writeArray(loopArray, size);
+}

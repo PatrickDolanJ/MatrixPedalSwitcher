@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include <Preset.h>
+#include <LoopArray.h>
 
 class Bank
 {
@@ -15,6 +16,7 @@ public:
     PresetID getCurrentPresetID();
 
     int getCurrentLoopPosition(int channelId);
+    LoopArray getCurrentLoopArray();
     int getCurrentInputVolume(int channelId);
     int getCurrentOutputVolume(int channelId);
     int getCurrentPan(int channelId);
@@ -22,6 +24,7 @@ public:
     int getCurrentRightOutputVolume(int channelId);
     bool getCurrentIsStereo(int channelId);
     bool getCurrentIsDelayTrail(int channelId);
+    int getCurrentPhase(int id);
     int getCurrentDrySend();
 
     // Setters

@@ -36,7 +36,6 @@ public:
     int getLeftOutputVolume();
     int getRightOutputVolume();
 
-    
 private:
     int channelPosition = 0;
     int inputVolume = DEFAULT_VOLUME;
@@ -46,6 +45,10 @@ private:
     int pan = DEFAULT_PAN;
     bool isStereo = true;
     ChannelID channelID;
+
+    int clampVolume(int volume);
+    int clampPosition(int position);
+    int clampPan(int pan);
 };
 
 class Loop : public Channel

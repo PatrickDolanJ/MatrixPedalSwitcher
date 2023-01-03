@@ -5,16 +5,20 @@
 
 //--------------Settings---------------
 const String DEVICE_NAME = "HeighLiner";
-const int DEFAULT_VOLUME = 255;
+const int MAX_VOLUME = 255;
+const int DEFAULT_VOLUME = MAX_VOLUME;
 const int DEFAULT_PAN = 50; // 0(hard left) to 100 (hard right)
+const int MAX_PAN = 100;
 const int DEFAIUL_DELAY_TIME_S = 2;
 const String DEFAULT_COLOR = "19703";
 const String HIGHLIGHT_COLOR = "65535";
 const float LONG_PRESS_INTERVAL_S = 1.75;
 const int spiDelay = 1;
 const unsigned long NEXTION_BAUD_RATE = 512000;
-const int DOWN_ARROW_ID = 2;
-const int UP_ARROW_ID = 1;
+const int DOWN_ARROW_ID = 1;
+const int UP_ARROW_ID = 0;
+const int VOLUME_SCROLL_AMOUNT = 5;
+const int PAN_SCROLL_AMOUNT = 5;
 
 //------------I2C Addresses-------------
 const byte ROTARY_BUTTONS_ADDRESS = 0x21;

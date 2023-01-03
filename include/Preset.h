@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include <Loop.h>
+#include <LoopArray.h>
 
 enum PresetID
 {
@@ -30,6 +31,8 @@ public:
 
     // getters
     int getLoopPosition(int id);
+    LoopArray getLoopArray();
+
     int getInputVolume(int id);
     int getOutputVolume(int id);
     int getPan(int id);
@@ -37,9 +40,11 @@ public:
     int getRightOutputVolume(int id);
     bool getIsStereo(int id);
     bool getIsDelayTrail(int id);
+    int getPhase(int id);
     int getDrySend();
     ChannelID getLoopID(int arrayPosition);
     PresetID getPresetID() { return presetID; };
+
 
 private:
     PresetID presetID;

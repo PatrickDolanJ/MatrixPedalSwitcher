@@ -6,6 +6,7 @@
 #include <DeviceConfig.h>
 #include <MenuState.h>
 #include <Bank.h>
+#include <MatrixLibrary.h>
 
 class Menu
 {
@@ -23,7 +24,18 @@ public:
 private:
     Display display;
     MenuState menuState;
-    //Bank bank;
+    Bank bank;
+    AGD2188 matrixRight = AGD2188(RIGHT_MATRIX_ADDRESS);
+    AGD2188 matrixLeft = AGD2188(LEFT_MATRIX_ADDRESS);
+
+    void updateAllValues(Preset preset);
+    int incrementLoops(bool isClockwise, int id);
+    int incrementPan(bool isClockwise, int id);
+    int incrementInputVolume(bool isClockwise, int id);
+    int incrementOutputVolume(bool isClockwise, int id);
+    int incrementPhase(bool isClockwise, int id);
+    // sending data
+    void sendArrayMatrixData(int loopArray[7], int size);
 };
 
 #endif // MENU

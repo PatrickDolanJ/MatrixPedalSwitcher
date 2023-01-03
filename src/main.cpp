@@ -4,7 +4,7 @@ RotaryButtons rotaryButtons(ROTARY_BUTTONS_ADDRESS);
 FootSwitches footSwitches(FOOTSWITCH_ADDRESS);
 EasyRotary easyRotaryEncoders(ROTARY_ENCODER_INTERUPT_PIN);
 Debugger *debugger; // Computer
-Menu menu; //
+Menu menu;          //
 
 const int NO_BUTTON_VALUE = 0;
 const int DOUBLE_BUTTON_PRESS_VALUE = -2;
@@ -17,24 +17,15 @@ int previousButtonValue = NO_BUTTON_VALUE;
 int previousFootValue = NO_BUTTON_VALUE;
 long previousMillis = 0;
 
-void ROTARY_BUTTON_INTERUPT()
-{
-  rotaryFlag = true;
-};
-void FOOT_INTERUPT()
-{
-  footFlag = true;
-}
+void ROTARY_BUTTON_INTERUPT() { rotaryFlag = true; };
+void FOOT_INTERUPT() { footFlag = true; };
+int idToArray(int id) { return id - 1; };
 
 void ROTARY_INTERUPT(bool isClockwise, int id)
 {
-  menu.doRotaryEnoderSpin(isClockwise, id);
+  int arrayId = idToArray(id);
+  menu.doRotaryEnoderSpin(isClockwise, arrayId);
 };
-
-int idToArray(int id)
-{
-  return id - 1;
-}
 
 bool checkLongPress(int duration)
 {
@@ -55,7 +46,8 @@ void handleRotaryButtonPress()
 
   if (rotaryButtonValue == NO_BUTTON_VALUE && rotaryButtonValue != previousButtonValue)
   {
-    checkLongPress(LONG_PRESS_INTERVAL_S) ? menu.doLongPress(previousButtonValue) : menu.doButton(previousButtonValue);
+    int arrayId = idToArray(previousButtonValue);
+    checkLongPress(LONG_PRESS_INTERVAL_S) ? menu.doLongPress(arrayId) : menu.doButton(arrayId);
   }
   previousButtonValue = rotaryButtonValue;
 };
@@ -78,10 +70,11 @@ void handleFootButtonPress()
       }
       else
       {
-        menu.doFoot(previousFootValue);
+        int arrayId = idToArray(previousFootValue);
+        menu.doFoot(arrayId);
       }
     }
-      previousFootValue = footID;
+    previousFootValue = footID;
   }
 }
 

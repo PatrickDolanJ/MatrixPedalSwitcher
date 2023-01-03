@@ -26,11 +26,11 @@ const String IS_NOT_DELAY_TRAIL = "";
 const String LOOP_NAMES[8] = {"A", "B", "C", "D", "E", "F", "G", "M"};
 const String FOOT_PRESETS[5] = {"A", "B", "C", "D", "E"};
 
-const String MENU_STATE_LOOPS = "\"LOOP  ORDER\"";
-const String MENU_STATE_PAN = "\"OUTPUT  PAN\"";
-const String MENU_STATE_INPUT_VOLUMES = "\"INPUT  VOLUME\"";
-const String MENU_STATE_OUTPUT_VOLUMES = "\"OUTPUT  VOLUME\"";
-const String MENU_STATE_PHASE = "\"PHASE\"";
+const String MENU_STATE_LOOPS = "LOOP  ORDER";
+const String MENU_STATE_PAN = "OUTPUT  PAN";
+const String MENU_STATE_INPUT_VOLUMES = "INPUT  VOLUME";
+const String MENU_STATE_OUTPUT_VOLUMES = "OUTPUT  VOLUME";
+const String MENU_STATE_PHASE = "PHASE";
 
 //-----------------SCREENS-------------------
 const String HOME_PAGE = "main";

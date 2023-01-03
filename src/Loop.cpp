@@ -1,12 +1,13 @@
 #include <Arduino.h>
 #include <Loop.h>
+#include <DeviceConfig.h>
 
 Channel::Channel(){};
 //---------------------Setters-------------------------
-void Channel::setChannelPosition(int position) { channelPosition = position; };
-void Channel::setInputVolume(int volume) { inputVolume = volume; };
-void Channel::setOutputVolume(int volume) { outputVolume = volume; };
-void Channel::setPan(int pan) { Channel::pan = pan; };
+void Channel::setChannelPosition(int position) { channelPosition = clampPosition(position); };
+void Channel::setInputVolume(int volume) { inputVolume = clampVolume(volume); };
+void Channel::setOutputVolume(int volume) { outputVolume = clampVolume(volume); };
+void Channel::setPan(int pan) { Channel::pan = clampPan(pan); };
 void Channel::setIsStereo(bool isStereo) { Channel::isStereo = isStereo; };
 void Channel::setChannelID(ChannelID id) { this->channelID = id; };
 
@@ -41,3 +42,11 @@ bool Loop::getIsDelayTrail() { return isDelayTrail; };
 //--------------------Master------------------------
 void Master::setSendDry(int id) { Master::sendDry = id; };
 int Master::getSendDry() { return Master::sendDry; };
+
+//---------------------------"Data Validators"----------------------
+
+int Channel::clampVolume(int volume) { return constrain(volume, 0, MAX_VOLUME); };
+
+int Channel::clampPosition(int position) { return constrain(position, 0, 7); };
+
+int Channel::clampPan(int pan) { return constrain(pan, 0, MAX_PAN); };

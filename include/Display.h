@@ -28,8 +28,10 @@ private:
     void sendEndCommand();
     void updateTextValue(String id, String value);
     void updatePBackgroundColorValue(String id, String color);
+    void updateValue(String id, String value);
     void updatePage(String page);
     String idToStringId(int id);
+    int convertVolumeForDisplay(int volume);
 };
 
 #endif // ! DISPLAY_H
