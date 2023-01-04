@@ -2,7 +2,6 @@
 #define DIGITAL_POTS
 
 #include <Arduino.h>
-#include <SPI.h>
 #include <DeviceConfig.h>
 
 class DigitalPots

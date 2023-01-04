@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <DigitalPots.h>
 #include <Debugger.h>
+#include <SPI.h>
 
 void DigitalPots::sendLeftInputVolume(int value, int id)
 {
@@ -50,5 +51,4 @@ void DigitalPots::digitalPotWrite(int chipSelect, int internalPotId, int value)
     SPI.transfer(value);
     delayMicroseconds(SPI_DELAY);
     digitalWrite(chipSelect, HIGH);
-    Debugger::log(String(chipSelect) + String(internalPotId) + String(value));
 };

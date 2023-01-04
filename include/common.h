@@ -2,6 +2,7 @@
 #define COMMON_H
 
 #include <Arduino.h>
+#include <SPI.h>
 #include <DeviceConfig.h>
 #include <Display.h>
 #include <Debugger.h>
