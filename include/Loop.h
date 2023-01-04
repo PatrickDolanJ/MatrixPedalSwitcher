@@ -40,8 +40,6 @@ private:
     int channelPosition = 0;
     int inputVolume = DEFAULT_VOLUME;
     int outputVolume = DEFAULT_VOLUME;
-    int leftOutputVolume;
-    int rightOutputVolume;
     int pan = DEFAULT_PAN;
     bool isStereo = true;
     ChannelID channelID;

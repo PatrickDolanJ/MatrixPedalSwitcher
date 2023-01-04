@@ -14,6 +14,7 @@ public:
     void bootScreen();
     void setHomeScreen();
     void highlightMenu(bool onOrOff, MenuState state);
+    void highlightReturn(bool onOrOff, int id);
     // Updating Values
     void sendLoopPosition(int position, int id);
     void sendInputVolume(int volume, int id);

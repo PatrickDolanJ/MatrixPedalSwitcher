@@ -43,17 +43,27 @@ void Menu::doFoot(int id)
 
 void Menu::doDoubleFootPress()
 {
-  // DO
+  // ENTER BANK MENU
   Debugger::log("Double Foot Button detected.");
-}
+};
 
-void Menu::duringLongPress(int id){
-    // DO
+void Menu::duringLongPress(int id)
+{
+  if (!returnHighlighted)
+  {
+    display.highlightReturn(true, id);
+    returnHighlighted = true;
+  }
 };
 
 void Menu::doLongPress(int id)
 {
   Debugger::log("Long press finished: " + String(id));
+  display.highlightReturn(false, id);
+  bool isStereo = !bank.getCurrentReturn(id);
+  bank.setCurrentPreset(isStereo);
+  returnRelays.sendState(id,bank.getCurrentReturn(id));
+  returnHighlighted = false;
 };
 
 void Menu::doRotaryEnoderSpin(bool isClockwise, int id)
@@ -71,7 +81,6 @@ void Menu::doRotaryEnoderSpin(bool isClockwise, int id)
       LoopArray la = bank.getCurrentLoopArray();
       sendArrayMatrixData(la.loopArray, la.arraySize);
     }
-
   }
   break;
 
@@ -234,7 +243,13 @@ void Menu::sendAllHardware(Preset preset)
   changeFootLeds(preset.getPresetID());
   for (size_t i = 0; i < 8; i++)
   {
+    sendReturn(preset.getIsStereo(i),i);
     sendInputVolumes(preset.getInputVolume(i), i);
     sendOutputVolumes(preset.getLeftOutputVolume(i), preset.getRightOutputVolume(i), i);
   }
 };
+
+void Menu::sendReturn(bool value, int id)
+{
+  returnRelays.sendState(value,id);
+}

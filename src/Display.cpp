@@ -164,6 +164,16 @@ void Display::sendPhase(int phase, int id)
     String rightPhaseId = LOOP_NAMES[id] + _RIGHT_PHASE;
     updateTextValue(leftPhaseId, leftPhase);
     updateTextValue(rightPhaseId, rightPhase);
+};
+
+void Display::highlightReturn(bool onOrOff, int id)
+{
+    String color = onOrOff ? HIGHLIGHT_COLOR : DEFAULT_COLOR;
+    if (id != 7)
+    {
+        String idString = LOOP_NAMES[id] + _RETURN;
+        updatePBackgroundColorValue(idString, color);
+    }
 }
 
 //-----------------------Helpers---------------------------------
@@ -223,11 +233,11 @@ void Display::updateBankPresetInfo(int bankId, PresetID id)
     String presetIdString = FOOT_PRESETS[id];
     String bankIdString = String(bankId);
     updateValue(BANK_NUMBER, bankIdString);
-    updateTextValue(PRESET_LETTER,presetIdString);
+    updateTextValue(PRESET_LETTER, presetIdString);
 }
 
 void Display::updateBaudRate(unsigned long baudRate)
 {
-    Serial2.print("baud="+String(baudRate));
+    Serial2.print("baud=" + String(baudRate));
     sendEndCommand();
 }

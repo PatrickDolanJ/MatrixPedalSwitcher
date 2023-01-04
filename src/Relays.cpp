@@ -9,8 +9,7 @@ Relays::Relays(byte address){
 
 
 void Relays::sendState(int internalPin, bool onOrOff){
-    int value = onOrOff ? HIGH : LOW;
-    digitalWrite(relay, internalPin, value);
+    digitalWrite(relay, internalPin, boolToValue(onOrOff));
 };
 
 void Relays::sendAllStates (bool onOrOff){
@@ -18,8 +17,7 @@ void Relays::sendAllStates (bool onOrOff){
     for (size_t i = 0; i < 8; i++)
     {
         sendState(i,value);
-    }
-    
+    }  
 };
 
 int Relays::boolToValue(bool onOrOff){

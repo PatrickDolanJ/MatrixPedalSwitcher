@@ -9,6 +9,7 @@
 #include <MatrixLibrary.h>
 #include <LEDs.h>
 #include <DigitalPots.h>
+#include <Relays.h>
 
 class Menu
 {
@@ -27,6 +28,7 @@ private:
     Display display;
     MenuState menuState;
     Bank bank;
+    bool returnHighlighted = false;
     void updateAllValuesDisplay(Preset preset);
     int incrementLoops(bool isClockwise, int id);
     int incrementPan(bool isClockwise, int id);
@@ -38,12 +40,14 @@ private:
     AGD2188 matrixLeft = AGD2188(LEFT_MATRIX_ADDRESS);
     LEDs footLEDs;
     DigitalPots digitalPots;
+    Relays returnRelays = Relays(RETURN_RELAYS_ADDRESS);
     // sending data
     void sendAllHardware(Preset preset);
     void sendArrayMatrixData(int loopArray[7], int size);
     void changeFootLeds(int id);
     void sendInputVolumes(int value, int id);
     void sendOutputVolumes(int leftValue, int rightValue, int id);
+    void sendReturn(bool value, int id);
 };
 
 #endif // MENU
