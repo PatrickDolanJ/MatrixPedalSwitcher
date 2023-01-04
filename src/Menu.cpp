@@ -14,13 +14,17 @@ void Menu::setup()
   // May want to switch back to custom animation(w/black background) to ensure this stays coherent
   display.setup(NEXTION_BAUD_RATE);
   display.bootScreen();
+  //------------------HardWare Setup----------------
   bank.setCurrentPreset(0);
+  digitalPots.setup();
+
+  sendAllHardware(bank.getCurrentPreset());
+  //------------------------------------------------
   delay(4000);
   menuState = LOOPS;
   display.setHomeScreen();
   display.highlightMenu(true, menuState);
   updateAllValuesDisplay(bank.getCurrentPreset());
-  sendAllHardware(bank.getCurrentPreset());
 };
 
 void Menu::doButton(int id)

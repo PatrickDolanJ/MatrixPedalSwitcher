@@ -3,6 +3,17 @@
 #include <Debugger.h>
 #include <SPI.h>
 
+
+void DigitalPots::setup()
+{
+    size_t sizeOfChipSelectPinsArray = sizeof(POT_EXPANDER_PINS)/sizeof(POT_EXPANDER_PINS[0]);
+    for (size_t i = 0; i < sizeOfChipSelectPinsArray; i++)
+    {
+       pinMode(POT_EXPANDER_PINS[i],OUTPUT); 
+    }
+    
+}
+
 void DigitalPots::sendLeftInputVolume(int value, int id)
 {
     int interalPotIds[8] = {0, 4, 2, 0, 4, 2, 0, 4};

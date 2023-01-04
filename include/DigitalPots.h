@@ -7,6 +7,7 @@
 class DigitalPots
 {
 public:
+    void setup();  
     void sendLeftOutputVolume(int value,int id);
     void sendRightOutPutVolume(int value,int id);
     void sendLeftInputVolume(int value,int id);
