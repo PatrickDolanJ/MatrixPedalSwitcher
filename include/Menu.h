@@ -47,13 +47,12 @@ private:
     
     // sending data
     void sendAllHardware(Preset preset);
-    void sendArrayMatrixData(int loopArray[7], int size);
     void changeFootLeds(int id);
     void sendInputVolumes(int value, int id);
     void sendOutputVolumes(int leftValue, int rightValue, int id);
     void sendReturn(bool value, int id);
     void sendPhase(int phase, int id);
-    void sendDrySend(int drySend);
+    void updateMatrix(Preset preset);
 };
 
 #endif // MENU

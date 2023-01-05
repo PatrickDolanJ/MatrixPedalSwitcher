@@ -83,14 +83,13 @@ void Menu::doRotaryEnoderSpin(bool isClockwise, int id)
     {
       int curLoopPosition = incrementLoops(isClockwise, id);
       display.sendLoopPosition(curLoopPosition, id);
-      LoopArray la = bank.getCurrentLoopArray();
-      sendArrayMatrixData(la.loopArray, la.arraySize);
     }
     if (id == ChannelID::channel_Master)
     {
       int curDrysend = incrementDrySend(isClockwise, id);
       display.sendDrySend(curDrysend);
     }
+    updateMatrix(bank.getCurrentPreset());
   }
   break;
 
@@ -232,11 +231,6 @@ int Menu::incrementPhase(bool isClockwise, int id)
 };
 
 //----------------------------------------Hardware---------------------------------------
-void Menu::sendArrayMatrixData(int loopArray[7], int size)
-{
-  matrixLeft.writeArray(loopArray, size);
-  matrixRight.writeArray(loopArray, size);
-};
 
 void Menu::changeFootLeds(int id)
 {
@@ -258,7 +252,7 @@ void Menu::sendOutputVolumes(int leftValue, int rightValue, int id)
 
 void Menu::sendAllHardware(Preset preset)
 {
-  sendArrayMatrixData(preset.getLoopArray().loopArray, preset.getLoopArray().arraySize);
+  updateMatrix(preset);
   changeFootLeds(preset.getPresetID());
   for (size_t i = 0; i < 8; i++)
   {
@@ -272,9 +266,22 @@ void Menu::sendAllHardware(Preset preset)
 void Menu::sendReturn(bool value, int id)
 {
   returnRelays.sendState(value, id);
-}
+};
 
 void Menu::sendPhase(int phase, int id)
 {
   phaseRelays.sendPhase(phase, id);
+};
+
+void Menu::updateMatrix(Preset preset)
+{
+  matrixLeft.writeArray(preset.getLoopArray().loopArray, preset.getLoopArray().arraySize);
+  matrixRight.writeArray(preset.getLoopArray().loopArray, preset.getLoopArray().arraySize);
+
+  int drySend = preset.getDrySend();
+  if (drySend != -1)
+  {
+    matrixLeft.writeData(true,7,drySend);
+    matrixRight.writeData(true,7,drySend);
+  }
 }
