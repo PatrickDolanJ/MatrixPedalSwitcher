@@ -4,6 +4,7 @@
 #include <DeviceConfig.h>
 #include <Debugger.h>
 #include <Preset.h>
+#include <MenuState.h>
 
 Display::Display(){};
 
@@ -38,15 +39,12 @@ void Display::highlightMenu(bool onOrOff, MenuState state)
 {
     String color;
     color = onOrOff ? HIGHLIGHT_COLOR : DEFAULT_COLOR;
-    String menuStateString;
-
     switch (state)
     {
     case (MenuState::LOOPS):
         for (int i = 0; i < 8; i++)
         {
             updatePBackgroundColorValue(LOOP_NAMES[i] + _LOOP_POS, color);
-            menuStateString = MENU_STATE_LOOPS;
         }
         break;
 
@@ -54,7 +52,6 @@ void Display::highlightMenu(bool onOrOff, MenuState state)
         for (int i = 0; i < 8; i++)
         {
             updatePBackgroundColorValue(LOOP_NAMES[i] + _INPUT_VOLUME, color);
-            menuStateString = MENU_STATE_INPUT_VOLUMES;
         }
         break;
 
@@ -62,7 +59,6 @@ void Display::highlightMenu(bool onOrOff, MenuState state)
         for (int i = 0; i < 8; i++)
         {
             updatePBackgroundColorValue(LOOP_NAMES[i] + _OUTPUT_VOLUME, color);
-            menuStateString = MENU_STATE_OUTPUT_VOLUMES;
         }
         break;
 
@@ -70,7 +66,6 @@ void Display::highlightMenu(bool onOrOff, MenuState state)
         for (int i = 0; i < 8; i++)
         {
             updatePBackgroundColorValue(LOOP_NAMES[i] + _PAN, color);
-            menuStateString = MENU_STATE_PAN;
         }
         break;
 
@@ -83,13 +78,7 @@ void Display::highlightMenu(bool onOrOff, MenuState state)
         {
             updatePBackgroundColorValue(LOOP_NAMES[i] + _RIGHT_PHASE, color);
         }
-        menuStateString = MENU_STATE_PHASE;
         break;
-    }
-
-    if (onOrOff)
-    {
-        updateMenuStateDisplay(menuStateString);
     }
 };
 
@@ -166,6 +155,13 @@ void Display::sendPhase(int phase, int id)
     updateTextValue(rightPhaseId, rightPhase);
 };
 
+void Display::sendDrySend(int drySend)
+{
+    String id = LOOP_NAMES[ChannelID::channel_Master] + _LOOP_POS;
+    String drySendString = String(drySend);
+    updateValue(id,drySendString);
+}
+
 void Display::highlightReturn(bool onOrOff, int id)
 {
     String color = onOrOff ? HIGHLIGHT_COLOR : DEFAULT_COLOR;
@@ -174,7 +170,40 @@ void Display::highlightReturn(bool onOrOff, int id)
         String idString = LOOP_NAMES[id] + _RETURN;
         updatePBackgroundColorValue(idString, color);
     }
-}
+};
+
+void Display::setMenuStateReturn()
+{
+    updateMenuStateDisplay(MENU_STATE_RETURN);
+};
+
+void Display::setMenuState(MenuState state)
+{
+    String stateString;
+    switch (state)
+    {
+    case (MenuState::LOOPS):
+        stateString = MENU_STATE_LOOPS;
+        break;
+
+    case (MenuState::INPUT_VOLUMES):
+        stateString = MENU_STATE_INPUT_VOLUMES;
+        break;
+
+    case (MenuState::OUTPUT_VOLUMES):
+        stateString = MENU_STATE_OUTPUT_VOLUMES;
+        break;
+
+    case (MenuState::PAN):
+        stateString = MENU_STATE_PAN;
+        break;
+
+    case (MenuState::PHASE):
+        stateString = MENU_STATE_PHASE;
+        break;
+    }
+    updateMenuStateDisplay(stateString);
+};
 
 //-----------------------Helpers---------------------------------
 

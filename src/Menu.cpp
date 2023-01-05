@@ -51,6 +51,7 @@ void Menu::duringLongPress(int id)
   if (!returnHighlighted)
   {
     display.highlightReturn(true, id);
+    display.setMenuStateReturn();
     returnHighlighted = true;
   }
 };
@@ -62,6 +63,7 @@ void Menu::doLongPress(int id)
   bank.setCurrentReturn(!bank.getCurrentReturn(id),id);
   bool newReturn = bank.getCurrentReturn(id);
   returnRelays.sendState(id, newReturn);
+  display.setMenuState(menuState);
   display.sendReturn(newReturn,id);
   returnHighlighted = false;
 };
@@ -74,12 +76,16 @@ void Menu::doRotaryEnoderSpin(bool isClockwise, int id)
   {
   case (MenuState::LOOPS):
   {
-    if (id != 7)
+    if (id != ChannelID::channel_Master)
     {
       int curLoopPosition = incrementLoops(isClockwise, id);
       display.sendLoopPosition(curLoopPosition, id);
       LoopArray la = bank.getCurrentLoopArray();
       sendArrayMatrixData(la.loopArray, la.arraySize);
+    } if(id==ChannelID::channel_Master)
+    {
+      int curDrysend = incrementDrySend(isClockwise,id);
+      display.sendDrySend(curDrysend);
     }
   }
   break;
@@ -113,7 +119,7 @@ void Menu::doRotaryEnoderSpin(bool isClockwise, int id)
 
   case (MenuState::PHASE):
   {
-    if (id != 7)
+    if (id != ChannelID::channel_Master)
     {
       Debugger::log("Spin Phase");
       int curPhase = incrementPhase(isClockwise, id);
@@ -144,6 +150,7 @@ void Menu::changeMenuState(int id)
     Serial.println("MenuState = " + String(menuState));
     display.highlightMenu(true, menuState);
   }
+  display.setMenuState(menuState);
 };
 
 //-------------------------------------------------------------------------
@@ -151,6 +158,8 @@ void Menu::changeMenuState(int id)
 void Menu::updateAllValuesDisplay(Preset preset)
 {
   display.updateBankPresetInfo(bank.getBankID(), preset.getPresetID());
+  display.setMenuState(menuState);
+  display.sendDrySend(bank.getCurrentDrySend());
 
   for (int i = 0; i < 8; i++)
   {
@@ -177,6 +186,14 @@ int Menu::incrementLoops(bool isClockwise, int id)
   bank.setCurrentLoopPosition(curLoop, id);
   return bank.getCurrentLoopPosition(id);
 };
+
+int Menu::incrementDrySend(bool isClockwise, int id)
+{
+  int curDrySend = bank.getCurrentDrySend();
+  curDrySend = isClockwise ? curDrySend + 1 : curDrySend - 1;
+  bank.setCurrentDrySend(curDrySend);
+  return bank.getCurrentDrySend();
+}
 
 int Menu::incrementPan(bool isClockwise, int id)
 {

@@ -43,7 +43,7 @@ private:
     int pan = DEFAULT_PAN;
     bool isStereo = true;
     ChannelID channelID;
-
+protected:
     int clampVolume(int volume);
     int clampPosition(int position);
     int clampPan(int pan);

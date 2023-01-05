@@ -15,12 +15,15 @@ public:
     void setHomeScreen();
     void highlightMenu(bool onOrOff, MenuState state);
     void highlightReturn(bool onOrOff, int id);
+    void setMenuStateReturn();
+    void setMenuState(MenuState state);
     // Updating Values
     void sendLoopPosition(int position, int id);
     void sendInputVolume(int volume, int id);
     void sendOutputVolume(int volume, int id);
     void sendPan(int pan, int id);
     void sendReturn(bool isStereo, int id);
+    void sendDrySend(int id);
     void sendDelayTrail(bool isDelayTrail, int id);
     void updateMenuStateDisplay(String menuString);
     void sendPhase(int phase, int id);

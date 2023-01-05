@@ -36,6 +36,7 @@ private:
     int incrementInputVolume(bool isClockwise, int id);
     int incrementOutputVolume(bool isClockwise, int id);
     int incrementPhase(bool isClockwise, int id);
+    int incrementDrySend(bool isClockwise, int id);
     //--HardWare--
     AGD2188 matrixRight = AGD2188(RIGHT_MATRIX_ADDRESS);
     AGD2188 matrixLeft = AGD2188(LEFT_MATRIX_ADDRESS);
@@ -52,6 +53,7 @@ private:
     void sendOutputVolumes(int leftValue, int rightValue, int id);
     void sendReturn(bool value, int id);
     void sendPhase(int phase, int id);
+    void sendDrySend(int drySend);
 };
 
 #endif // MENU

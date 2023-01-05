@@ -40,7 +40,7 @@ void Loop::setIsDelayTrail(bool isDelayTrail) { Loop::isDelayTrail = isDelayTrai
 bool Loop::getIsDelayTrail() { return isDelayTrail; };
 
 //--------------------Master------------------------
-void Master::setSendDry(int id) { Master::sendDry = id; };
+void Master::setSendDry(int id) { Master::sendDry = clampPosition(id); };
 int Master::getSendDry() { return Master::sendDry; };
 
 //---------------------------"Data Validators"----------------------

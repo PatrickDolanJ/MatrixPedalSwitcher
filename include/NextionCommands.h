@@ -33,6 +33,7 @@ const String MENU_STATE_PAN = "OUTPUT  PAN";
 const String MENU_STATE_INPUT_VOLUMES = "INPUT  VOLUME";
 const String MENU_STATE_OUTPUT_VOLUMES = "OUTPUT  VOLUME";
 const String MENU_STATE_PHASE = "PHASE";
+const String MENU_STATE_RETURN = "MONO/STEREO";
 
 //-----------------SCREENS-------------------
 const String HOME_PAGE = "main";
