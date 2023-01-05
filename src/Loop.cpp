@@ -40,7 +40,7 @@ void Loop::setIsDelayTrail(bool isDelayTrail) { Loop::isDelayTrail = isDelayTrai
 bool Loop::getIsDelayTrail() { return isDelayTrail; };
 
 //--------------------Master------------------------
-void Master::setSendDry(int id) { Master::sendDry = clampPosition(id); };
+void Master::setSendDry(int id) { Master::sendDry = clampDrySend(id); };
 int Master::getSendDry() { return Master::sendDry; };
 
 //---------------------------"Data Validators"----------------------
@@ -50,3 +50,5 @@ int Channel::clampVolume(int volume) { return constrain(volume, 0, MAX_VOLUME); 
 int Channel::clampPosition(int position) { return constrain(position, 0, 7); };
 
 int Channel::clampPan(int pan) { return constrain(pan, 0, MAX_PAN); };
+
+int Master::clampDrySend(int drySend) {return constrain(drySend, -1, 7);};

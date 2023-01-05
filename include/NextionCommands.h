@@ -24,6 +24,7 @@ const String IN_PHASE = "I";
 const String OUT_OF_PHASE = "O";
 const String IS_DELAY_TRAIL = "";
 const String IS_NOT_DELAY_TRAIL = "";
+const String NO_DRY_SEND = "";
 
 const String LOOP_NAMES[8] = {"A", "B", "C", "D", "E", "F", "G", "M"};
 const String FOOT_PRESETS[5] = {"A", "B", "C", "D", "E"};

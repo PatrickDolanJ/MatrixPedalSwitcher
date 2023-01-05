@@ -158,8 +158,15 @@ void Display::sendPhase(int phase, int id)
 void Display::sendDrySend(int drySend)
 {
     String id = LOOP_NAMES[ChannelID::channel_Master] + _LOOP_POS;
-    String drySendString = LOOP_NAMES[drySend];
-    updateTextValue(id,drySendString);
+    String drySendString;
+    if (drySend >= 0)
+    {
+        drySendString = LOOP_NAMES[drySend];
+    } else if(drySend==-1) 
+    {
+        drySendString = NO_DRY_SEND;
+    }
+    updateTextValue(id, drySendString);
 }
 
 void Display::highlightReturn(bool onOrOff, int id)

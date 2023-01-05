@@ -35,7 +35,10 @@ void Menu::doButton(int id)
 void Menu::doFoot(int id)
 {
   Debugger::log("Foot pressed: " + String(id));
-  bank.setCurrentPreset(id);
+  if (id != bank.getCurrentPresetID())
+  {
+    bank.setCurrentPreset(id);
+  }
   updateAllValuesDisplay(bank.getCurrentPreset());
   sendAllHardware(bank.getCurrentPreset());
 };
@@ -60,11 +63,11 @@ void Menu::doLongPress(int id)
 {
   Debugger::log("Long press finished: " + String(id));
   display.highlightReturn(false, id);
-  bank.setCurrentReturn(!bank.getCurrentReturn(id),id);
+  bank.setCurrentReturn(!bank.getCurrentReturn(id), id);
   bool newReturn = bank.getCurrentReturn(id);
   returnRelays.sendState(id, newReturn);
   display.setMenuState(menuState);
-  display.sendReturn(newReturn,id);
+  display.sendReturn(newReturn, id);
   returnHighlighted = false;
 };
 
@@ -82,9 +85,10 @@ void Menu::doRotaryEnoderSpin(bool isClockwise, int id)
       display.sendLoopPosition(curLoopPosition, id);
       LoopArray la = bank.getCurrentLoopArray();
       sendArrayMatrixData(la.loopArray, la.arraySize);
-    } if(id==ChannelID::channel_Master)
+    }
+    if (id == ChannelID::channel_Master)
     {
-      int curDrysend = incrementDrySend(isClockwise,id);
+      int curDrysend = incrementDrySend(isClockwise, id);
       display.sendDrySend(curDrysend);
     }
   }
@@ -123,7 +127,7 @@ void Menu::doRotaryEnoderSpin(bool isClockwise, int id)
     {
       Debugger::log("Spin Phase");
       int curPhase = incrementPhase(isClockwise, id);
-      sendPhase(curPhase,id);
+      sendPhase(curPhase, id);
       display.sendPhase(curPhase, id);
       Debugger::log(String(curPhase));
     }
@@ -258,7 +262,7 @@ void Menu::sendAllHardware(Preset preset)
   changeFootLeds(preset.getPresetID());
   for (size_t i = 0; i < 8; i++)
   {
-    sendPhase(preset.getPhase(i),i);
+    sendPhase(preset.getPhase(i), i);
     sendReturn(preset.getIsStereo(i), i);
     sendInputVolumes(preset.getInputVolume(i), i);
     sendOutputVolumes(preset.getLeftOutputVolume(i), preset.getRightOutputVolume(i), i);
