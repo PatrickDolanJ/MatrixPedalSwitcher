@@ -9,7 +9,7 @@
 /// ---------------------------------------------------------------- /
 
 #include <Arduino.h>
-#include <Wire.h> //include Wire.h library
+#include <Wire.h> 
 #include <I2CScanner.h>
 
 I2CScanner::I2CScanner(){
@@ -19,7 +19,7 @@ I2CScanner::I2CScanner(){
 void I2CScanner::scan()
 {
   Wire.begin();
-  byte error, address; //variable for error and I2C address
+  byte error, address; 
   int nDevices;
 
   Serial.println("Scanning...");

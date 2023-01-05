@@ -17,9 +17,8 @@ void Menu::setup()
   //------------------HardWare Setup----------------
   bank.setCurrentPreset(0);
   digitalPots.setup();
-
   sendAllHardware(bank.getCurrentPreset());
-  //------------------------------------------------
+  //--------------------Display Setup-------------------
   delay(4000);
   menuState = LOOPS;
   display.setHomeScreen();
@@ -62,7 +61,7 @@ void Menu::doLongPress(int id)
   display.highlightReturn(false, id);
   bool isStereo = !bank.getCurrentReturn(id);
   bank.setCurrentPreset(isStereo);
-  returnRelays.sendState(id,bank.getCurrentReturn(id));
+  returnRelays.sendState(id, bank.getCurrentReturn(id));
   returnHighlighted = false;
 };
 
@@ -243,7 +242,7 @@ void Menu::sendAllHardware(Preset preset)
   changeFootLeds(preset.getPresetID());
   for (size_t i = 0; i < 8; i++)
   {
-    sendReturn(preset.getIsStereo(i),i);
+    sendReturn(preset.getIsStereo(i), i);
     sendInputVolumes(preset.getInputVolume(i), i);
     sendOutputVolumes(preset.getLeftOutputVolume(i), preset.getRightOutputVolume(i), i);
   }
@@ -251,5 +250,5 @@ void Menu::sendAllHardware(Preset preset)
 
 void Menu::sendReturn(bool value, int id)
 {
-  returnRelays.sendState(value,id);
+  returnRelays.sendState(value, id);
 }
