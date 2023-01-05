@@ -127,7 +127,7 @@ void Display::sendReturn(bool isStereo, int id)
 {
     String isStereoString = isStereo ? STEREO : MONO;
     String returnIdString = idToStringId(id) + _RETURN;
-    updateValue(returnIdString, isStereoString);
+    updateTextValue(returnIdString, isStereoString);
 };
 
 void Display::sendDelayTrail(bool isDelayTrail, int id)

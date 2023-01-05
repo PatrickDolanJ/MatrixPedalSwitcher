@@ -59,9 +59,10 @@ void Menu::doLongPress(int id)
 {
   Debugger::log("Long press finished: " + String(id));
   display.highlightReturn(false, id);
-  bool isStereo = !bank.getCurrentReturn(id);
-  bank.setCurrentPreset(isStereo);
-  returnRelays.sendState(id, bank.getCurrentReturn(id));
+  bank.setCurrentReturn(!bank.getCurrentReturn(id),id);
+  bool newReturn = bank.getCurrentReturn(id);
+  returnRelays.sendState(id, newReturn);
+  display.sendReturn(newReturn,id);
   returnHighlighted = false;
 };
 
@@ -116,6 +117,7 @@ void Menu::doRotaryEnoderSpin(bool isClockwise, int id)
     {
       Debugger::log("Spin Phase");
       int curPhase = incrementPhase(isClockwise, id);
+      sendPhase(curPhase,id);
       display.sendPhase(curPhase, id);
       Debugger::log(String(curPhase));
     }
@@ -155,8 +157,6 @@ void Menu::updateAllValuesDisplay(Preset preset)
 
     display.sendPan(bank.getCurrentPan(i), i);
     display.sendReturn(bank.getCurrentReturn(i), i);
-    Debugger::log("Index:" + String(i));
-    Debugger::log("Free memory: " + String(freeMemory()));
     display.sendInputVolume(bank.getCurrentInputVolume(i), i);
     display.sendOutputVolume(bank.getCurrentOutputVolume(i), i);
     // display.sendDelayTrail(bank.getCurrentIsDelayTrail(i), i);
@@ -204,7 +204,6 @@ int Menu::incrementOutputVolume(bool isClockwise, int id)
 
 int Menu::incrementPhase(bool isClockwise, int id)
 {
-  // DO
   int curPhase = bank.getCurrentPhase(id);
   curPhase = isClockwise ? (curPhase + 1) % 4 : (curPhase + 3) % 4;
   bank.setCurrentPhase(curPhase, id);
@@ -242,6 +241,7 @@ void Menu::sendAllHardware(Preset preset)
   changeFootLeds(preset.getPresetID());
   for (size_t i = 0; i < 8; i++)
   {
+    sendPhase(preset.getPhase(i),i);
     sendReturn(preset.getIsStereo(i), i);
     sendInputVolumes(preset.getInputVolume(i), i);
     sendOutputVolumes(preset.getLeftOutputVolume(i), preset.getRightOutputVolume(i), i);
@@ -251,4 +251,9 @@ void Menu::sendAllHardware(Preset preset)
 void Menu::sendReturn(bool value, int id)
 {
   returnRelays.sendState(value, id);
+}
+
+void Menu::sendPhase(int phase, int id)
+{
+  phaseRelays.sendPhase(phase, id);
 }

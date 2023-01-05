@@ -115,8 +115,7 @@ void loop()
 
   if (previousButtonValue != NO_BUTTON_VALUE && checkLongPress(LONG_PRESS_INTERVAL_S))
   {
-    menu.duringLongPress(previousButtonValue);
+    int arrayId = idToArray(previousButtonValue);
+    menu.duringLongPress(arrayId);
   }
-
-  
 };

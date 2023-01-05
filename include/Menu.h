@@ -9,7 +9,8 @@
 #include <MatrixLibrary.h>
 #include <LEDs.h>
 #include <DigitalPots.h>
-#include <Relays.h>
+#include <ReturnRelays.h>
+#include <PhaseRelays.h>
 
 class Menu
 {
@@ -40,7 +41,9 @@ private:
     AGD2188 matrixLeft = AGD2188(LEFT_MATRIX_ADDRESS);
     LEDs footLEDs;
     DigitalPots digitalPots;
-    Relays returnRelays = Relays(RETURN_RELAYS_ADDRESS);
+    ReturnRelays returnRelays;
+    PhaseRelays phaseRelays;
+    
     // sending data
     void sendAllHardware(Preset preset);
     void sendArrayMatrixData(int loopArray[7], int size);
@@ -48,6 +51,7 @@ private:
     void sendInputVolumes(int value, int id);
     void sendOutputVolumes(int leftValue, int rightValue, int id);
     void sendReturn(bool value, int id);
+    void sendPhase(int phase, int id);
 };
 
 #endif // MENU
