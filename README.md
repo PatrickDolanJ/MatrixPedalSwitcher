@@ -81,12 +81,8 @@ Lastly, the main display is a Nextion NX3224T024_01. These are programmed using 
 ## Next Steps
 
 1.) Adding SD card read/write to save/load presets.  
-2.) Add digital pots and relay functionality.  
-3.) Add loading screen while device boots up.  
-4.) Control foot switch LEDs (PCF8574) at 0x23.   
-5.) Make better indication of return switching.  
-6.) Add I2C scanning on start up for easier debugging.  
-7.) Address volume damping in parallel setup.
+2.) Add volume damping back in when changing data
+3.) 
 
 ## Made by
 ### Proto Co-op: 
