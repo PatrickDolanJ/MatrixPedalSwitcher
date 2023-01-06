@@ -1,5 +1,5 @@
 #ifndef NEXTION_COMMANDS
-#define NEXTION_COMMANDS
+#define NEXTION_COMMANDSD
 
 #include <Arduino.h>
 
@@ -15,6 +15,7 @@ const String _OUTPUT_VOLUME = "_VOL_OUT";
 const String MENU_STATE_FOR_DISPLAY = "CURRENT_PARAM";
 const String BANK_NUMBER = "BANK_NUMBER";
 const String PRESET_LETTER = "FOOT_LETTER";
+const String DATA_CHANGED = "PRESET_TOGGLE"; 
 
 //-------------Values-----------------
 const byte END_BYTE = 0xff;
@@ -22,7 +23,7 @@ const String STEREO = "S";
 const String MONO = "M";
 const String IN_PHASE = "I";
 const String OUT_OF_PHASE = "O";
-const String IS_DELAY_TRAIL = ".";
+const String IS_DELAY_TRAIL = "->";
 const String IS_NOT_DELAY_TRAIL = "";
 const String NO_DRY_SEND = "";
 
@@ -39,8 +40,9 @@ const String MENU_STATE_DELAY_TRAILS = "DELAY TRAILS";
 
 //-----------------SCREENS-------------------
 const String HOME_PAGE = "main";
-const String FOOTSWITCH_PAGE = "switchBank";
+const String BANK_SELECTION_PAGE = "switchBank";
 const String TITLE_PAGE = "title";
 const String SPACE_BACKGROUND = "space";
+const String SAVE_PAGE = "savePage"; //changing to savePage
 
 #endif //! NEXTION_COMMANDS

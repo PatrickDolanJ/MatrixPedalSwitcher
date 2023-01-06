@@ -51,16 +51,24 @@ void Menu::doFoot(int id)
     {
       if (prevDelay[i])
       {
-        Debugger::log(String(i) + " is a delay trail");
-        matrixLeft.writeData(true, i, ChannelID::channel_Master);
-        matrixRight.writeData(true, i, ChannelID::channel_Master);
+        matrixLeft.writeData(true, i, ChannelID::channel_Master + 1);
+        matrixRight.writeData(true, i, ChannelID::channel_Master + 1);
       }
     }
   }
 };
 
-void Menu::doDoubleFootPress(){
-    // ENTER BANK MENU
+void Menu::doDoubleFootPress()
+{
+  if (!isInBankMenu)
+  {
+    isInBankMenu = true;
+  }
+  for (size_t i = 0; i < PresetID::presetID_E+1; i++)
+  {
+    isDataChanged[i] = false;
+  }
+  
 };
 
 void Menu::duringLongPress(int id)
@@ -82,6 +90,8 @@ void Menu::doLongPress(int id)
   display.setMenuState(menuState);
   display.sendReturn(newReturn, id);
   returnHighlighted = false;
+  isDataChanged[bank.getCurrentPresetID()] = true;
+  display.changeSaveStatus(isDataChanged[bank.getCurrentPresetID()]);
 };
 
 void Menu::doRotaryEnoderSpin(bool isClockwise, int id)
@@ -144,33 +154,27 @@ void Menu::doRotaryEnoderSpin(bool isClockwise, int id)
   }
   break;
   }
+  isDataChanged[bank.getCurrentPresetID()] = true;
+  display.changeSaveStatus(isDataChanged[bank.getCurrentPresetID()]);
 };
 
 void Menu::changeMenuState(int id)
 {
-  if (id == DOWN_ARROW_ID)
+  if (id == DOWN_ARROW_ID || id == UP_ARROW_ID)
   {
     display.highlightMenu(false, menuState);
-    int newMenuState = (menuState + 1) % (NUM_MENU_OPTIONS);
+    int increment = (id == DOWN_ARROW_ID) ? 1 : (NUM_MENU_OPTIONS - 1);
+    int newMenuState = (menuState + increment) % (NUM_MENU_OPTIONS);
     menuState = static_cast<MenuState>(newMenuState);
-    Serial.println("MenuState = " + String(menuState));
-    display.highlightMenu(true, menuState);
-  }
-  else if (id == UP_ARROW_ID)
-  {
-    display.highlightMenu(false, menuState);
-    int newMenuState = (menuState + NUM_MENU_OPTIONS - 1) % (NUM_MENU_OPTIONS);
-    menuState = static_cast<MenuState>(newMenuState);
-    Serial.println("MenuState = " + String(menuState));
     display.highlightMenu(true, menuState);
   }
   display.setMenuState(menuState);
 };
 
-//-------------------------------------------------------------------------
 //------------------------------------helpers------------------------------
 void Menu::updateAllValuesDisplay(Preset preset)
 {
+  display.changeSaveStatus(isDataChanged[preset.getPresetID()]);
   display.updateBankPresetInfo(bank.getBankID(), preset.getPresetID());
   display.setMenuState(menuState);
   display.sendDrySend(bank.getCurrentDrySend());
@@ -205,7 +209,6 @@ int Menu::incrementDrySend(bool isClockwise, int id)
   int curDrySend = bank.getCurrentDrySend();
   curDrySend = isClockwise ? curDrySend + 1 : curDrySend - 1;
   bank.setCurrentDrySend(curDrySend);
-  Debugger::log(String(bank.getCurrentDrySend()));
   return bank.getCurrentDrySend();
 }
 
@@ -241,6 +244,13 @@ int Menu::incrementPhase(bool isClockwise, int id)
   return bank.getCurrentPhase(id);
 };
 
+bool Menu::checkSaveStatus(PresetID id)
+{
+  if (isDataChanged[id])
+  {
+    display.changeSaveStatus(isDataChanged[id]);
+  }
+}
 //----------------------------------------Hardware---------------------------------------
 
 void Menu::changeFootLeds(int id)
@@ -292,7 +302,6 @@ void Menu::updateMatrix(Preset preset)
   int drySend = preset.getDrySend();
   if (drySend >= ChannelID::channel_A)
   {
-    Debugger::log("drySend: " + String(drySend));
     matrixLeft.writeData(true, drySend, 7);
     matrixRight.writeData(true, drySend, 7);
   }
@@ -307,12 +316,10 @@ void Menu::connectDelayTrails(Preset preset)
 {
   for (size_t i = 0; i < ChannelID::channel_Master; i++)
   {
-    Debugger::log("Connected: " + String(i) + " to output");
     if (preset.getIsDelayTrail(i))
     {
       matrixLeft.writeData(true, i, 7);
       matrixRight.writeData(true, i, 7);
-      Debugger::log("Connected: " + String(i) + " to output");
     }
   }
 }

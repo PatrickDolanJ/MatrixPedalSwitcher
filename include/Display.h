@@ -17,6 +17,8 @@ public:
     void highlightReturn(bool onOrOff, int id);
     void setMenuStateReturn();
     void setMenuState(MenuState state);
+    void bankSelectionPage();
+    void saveMenu();
     // Updating Values
     void sendLoopPosition(int position, int id);
     void sendInputVolume(int volume, int id);
@@ -28,6 +30,7 @@ public:
     void sendPhase(int phase, int id);
     void updateBankPresetInfo(int bankId, PresetID id);
     void sendDelayTrail(bool isDelayTrail, int id);
+    void changeSaveStatus(bool isDataChanged);
 
 private:
     unsigned long baudRate;
@@ -35,6 +38,7 @@ private:
     void sendEndCommand();
     void updateTextValue(String id, String value);
     void updatePBackgroundColorValue(String id, String color);
+    void updateBBackgroundColorValue(String id, String color);
     void updateValue(String id, String value);
     void updatePage(String page);
     String idToStringId(int id);

@@ -21,18 +21,28 @@ void Display::setup(unsigned long baudRate)
     Serial2.end();
     delay(100);
     Serial2.begin(baudRate);
-}
+};
 
 void Display::bootScreen()
 {
     // Not entirely sure why, but only sending the Title page does not work, seems to needs two pages for some reason?
     updatePage(SPACE_BACKGROUND);
     updatePage(TITLE_PAGE);
-}
+};
 
 void Display::setHomeScreen()
 {
     updatePage(HOME_PAGE);
+};
+
+void Display::bankSelectionPage()
+{
+    updatePage(BANK_SELECTION_PAGE);
+}
+
+void Display::saveMenu()
+{
+    updatePage(SAVE_PAGE);
 }
 
 void Display::highlightMenu(bool onOrOff, MenuState state)
@@ -221,10 +231,14 @@ void Display::sendDelayTrail(bool isDelayTrail, int id)
 {
     String idString = idToStringId(id) + _NAME;
     String delay = idToStringId(id) + (isDelayTrail ? IS_DELAY_TRAIL : IS_NOT_DELAY_TRAIL);
-    Debugger::log(idString + delay);
-    updateTextValue(idString,delay);
+    updateTextValue(idString, delay);
 };
 
+void Display::changeSaveStatus(bool isDataChanged)
+{
+    String color = isDataChanged ? DATA_CHANGED_COLOR : DEFAULT_COLOR;
+    updateBBackgroundColorValue(DATA_CHANGED, color);
+}
 //-----------------------Helpers---------------------------------
 
 String Display::idToStringId(int id)
@@ -253,6 +267,12 @@ void Display::updatePBackgroundColorValue(String id, String color)
 {
     sendMessage(id + ".pco=" + color);
 };
+
+void Display::updateBBackgroundColorValue(String id, String color)
+{
+    Debugger::log(id + ".bco=" + color);
+    sendMessage(id + ".bco=" + color);
+}
 
 void Display::updatePage(String page)
 {
@@ -290,3 +310,5 @@ void Display::updateBaudRate(unsigned long baudRate)
     Serial2.print("baud=" + String(baudRate));
     sendEndCommand();
 }
+
+//------------------------------------------------------------

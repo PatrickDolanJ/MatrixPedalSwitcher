@@ -30,6 +30,8 @@ private:
     MenuState menuState;
     Bank bank;
     bool returnHighlighted = false;
+    bool isInBankMenu = false;
+    bool isDataChanged[PresetID::presetID_E+1] = {false,false,false,false,false};
 
     void updateAllValuesDisplay(Preset preset);
     int incrementLoops(bool isClockwise, int id);
@@ -38,6 +40,8 @@ private:
     int incrementOutputVolume(bool isClockwise, int id);
     int incrementPhase(bool isClockwise, int id);
     int incrementDrySend(bool isClockwise, int id);
+    void singleFootPress(); //DO
+    bool checkSaveStatus(PresetID id);
     //--HardWare--
     AGD2188 matrixRight = AGD2188(RIGHT_MATRIX_ADDRESS);
     AGD2188 matrixLeft = AGD2188(LEFT_MATRIX_ADDRESS);
@@ -45,7 +49,7 @@ private:
     DigitalPots digitalPots;
     ReturnRelays returnRelays;
     PhaseRelays phaseRelays;
-    
+
     // sending data
     void sendAllHardware(Preset preset);
     void changeFootLeds(int id);
