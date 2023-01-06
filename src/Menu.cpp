@@ -6,6 +6,7 @@
 #include <LoopArray.h>
 #include <MatrixLibrary.h>
 #include <MemoryFree.h>
+#include <Loop.h>
 
 Menu::Menu(){};
 
@@ -253,6 +254,7 @@ void Menu::sendOutputVolumes(int leftValue, int rightValue, int id)
 void Menu::sendAllHardware(Preset preset)
 {
   updateMatrix(preset);
+  connectDelayTrails(preset);
   changeFootLeds(preset.getPresetID());
   for (size_t i = 0; i < 8; i++)
   {
@@ -281,7 +283,19 @@ void Menu::updateMatrix(Preset preset)
   int drySend = preset.getDrySend();
   if (drySend != -1)
   {
-    matrixLeft.writeData(true,7,drySend);
-    matrixRight.writeData(true,7,drySend);
+    matrixLeft.writeData(true, drySend, 7);
+    matrixRight.writeData(true, drySend, 7);
+  }
+};
+
+void Menu::connectDelayTrails(Preset preset)
+{
+  for (size_t i = 0; i < ChannelID::channel_Master; i++)
+  {
+    if (preset.getIsDelayTrail(i))
+    {
+      matrixLeft.writeData(true, i, 7);
+      matrixRight.writeData(true, i, 7);
+    }
   }
 }

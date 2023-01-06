@@ -30,6 +30,7 @@ private:
     MenuState menuState;
     Bank bank;
     bool returnHighlighted = false;
+
     void updateAllValuesDisplay(Preset preset);
     int incrementLoops(bool isClockwise, int id);
     int incrementPan(bool isClockwise, int id);
@@ -53,6 +54,7 @@ private:
     void sendReturn(bool value, int id);
     void sendPhase(int phase, int id);
     void updateMatrix(Preset preset);
+    void connectDelayTrails(Preset preset);
 };
 
 #endif // MENU
