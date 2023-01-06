@@ -11,6 +11,7 @@ const int DEFAULT_PAN = 50; // 0(hard left) to 100 (hard right)
 const int MAX_PAN = 100;
 const String DEFAULT_COLOR = "19703";
 const String HIGHLIGHT_COLOR = "65535";
+const String DATA_CHANGED_COLOR = "62025";
 const float LONG_PRESS_INTERVAL_S = 1.75;
 const int SPI_DELAY = 1;
 const unsigned long NEXTION_BAUD_RATE = 115200;
