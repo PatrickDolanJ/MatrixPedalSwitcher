@@ -290,10 +290,16 @@ void Menu::updateMatrix(Preset preset)
   matrixRight.writeArray(preset.getLoopArray().loopArray, preset.getLoopArray().arraySize);
 
   int drySend = preset.getDrySend();
-  if (drySend >= 0)
+  if (drySend >= ChannelID::channel_A)
   {
+    Debugger::log("drySend: " + String(drySend));
     matrixLeft.writeData(true, drySend, 7);
     matrixRight.writeData(true, drySend, 7);
+  }
+
+  for (size_t i = 1; i < 9; i++)
+  {
+    matrixLeft.readData(i);
   }
 };
 

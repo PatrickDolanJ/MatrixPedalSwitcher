@@ -23,14 +23,15 @@ int Channel::getLeftOutputVolume()
 {
     float panValue = float(pan);
     float outValue = float(outputVolume);
-    return panValue < 51 ? outValue : outValue * (100.0 - panValue) / 50.0;
+    return panValue  > 50 ? outValue : outValue * panValue / 50.0;
 };
 
 int Channel::getRightOutputVolume()
 {
     float panValue = float(pan);
     float outValue = float(outputVolume);
-    return panValue > 50 ? outValue : outValue * panValue / 50.0;
+    return panValue < 51 ? outValue : outValue * (100.0 - panValue) / 50.0;
+    
 };
 
 //---------------------Loop-------------------------
