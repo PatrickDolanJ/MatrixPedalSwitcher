@@ -60,6 +60,8 @@ void Menu::doFoot(int id)
 
 void Menu::doDoubleFootPress()
 {
+  // TEMP
+  Debugger::log("SAVING...");
   if (!isInBankMenu)
   {
     isInBankMenu = true;
@@ -68,7 +70,7 @@ void Menu::doDoubleFootPress()
   {
     isDataChanged[i] = false;
   }
-  
+  display.changeSaveStatus( isDataChanged[bank.getCurrentPresetID()]);
 };
 
 void Menu::duringLongPress(int id)

@@ -238,7 +238,8 @@ void Display::changeSaveStatus(bool isDataChanged)
 {
     String color = isDataChanged ? DATA_CHANGED_COLOR : DEFAULT_COLOR;
     updateBBackgroundColorValue(DATA_CHANGED, color);
-}
+};
+
 //-----------------------Helpers---------------------------------
 
 String Display::idToStringId(int id)
@@ -270,7 +271,6 @@ void Display::updatePBackgroundColorValue(String id, String color)
 
 void Display::updateBBackgroundColorValue(String id, String color)
 {
-    Debugger::log(id + ".bco=" + color);
     sendMessage(id + ".bco=" + color);
 }
 
