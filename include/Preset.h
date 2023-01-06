@@ -1,29 +1,56 @@
-#ifndef PRESET_HEADER
-#define PRESET_HEADER
+#ifndef PRESET
+#define PRESET
 
 #include <Arduino.h>
-#include <DeviceConfig.h>
+#include <Loop.h>
+#include <LoopArray.h>
 
-struct PresetData{
-        int presetID= -1;
-        int bankID = 0;
-        int loopPositions[7] = {0,2,5,0,0,0,0}; // This may change ----> 8th position to allow for "Dry" loop to be sent to output
-        int inputVolumes[8] = {DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME};
-        int leftOutputVolumes[8] = {DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME}; // just for pots
-        int rightOutputVolumes[8] = {DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME}; // just for pots
-        int outputVolumes[8] = {DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME,DEFAULT_VOLUME};
-        int pan[8] = {DEFAULT_PAN,DEFAULT_PAN,DEFAULT_PAN,DEFAULT_PAN,DEFAULT_PAN,DEFAULT_PAN,DEFAULT_PAN,DEFAULT_PAN};
-        int phase[8] = {0,0,0,0,0,0,0,0};
-        bool returns[8] = {0,0,0,0,0,0,0,0}; // 0=Stereo, 1=Mono
-        bool delayTrails[7] = {0,0,0,0,0,0,0}; // 0=No trail, 1=Delay Trail 
+enum PresetID
+{
+    presetID_A = 0,
+    presetID_B = 1,
+    presetID_C = 2,
+    presetID_D = 3,
+    presetID_E = 4
+};
 
-        PresetData(int id){
-                presetID = id;
-        }
+class Preset
+{
+public:
+    Preset();
+    // setters
+    void setLoopPosition(int position, int id);
+    void setInputVolume(int volume, int id);
+    void setOutputVolume(int volume, int id);
+    void setPan(int pan, int id);
+    void setIsStereo(bool isStereoChannelID, int id);
+    void setIsDelayTrail(bool isDelayTrail, int id);
+    void setPhase(int phase, int id);
+    void setDrySend(int id);
+    void setPresetId(PresetID id);
 
-        PresetData(){}
-        
-        };
-#endif 
+    // getters
+    int getLoopPosition(int id);
+    LoopArray getLoopArray();
+
+    int getInputVolume(int id);
+    int getOutputVolume(int id);
+    int getPan(int id);
+    int getLeftOutputVolume(int id);
+    int getRightOutputVolume(int id);
+    bool getIsStereo(int id);
+    bool getIsDelayTrail(int id);
+    int getPhase(int id);
+    int getDrySend();
+    ChannelID getLoopID(int arrayPosition);
+    PresetID getPresetID() { return presetID; };
 
 
+private:
+    PresetID presetID;
+    Master master;
+    Loop loops[7] = {Loop(),Loop(),Loop(),Loop(),Loop(),Loop(),Loop()};
+    int sizeOfLoops = sizeof(loops) / sizeof(loops[0]);
+    bool checkIfMaster(int arrayId);
+};
+#endif // PRESET!

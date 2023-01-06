@@ -9,7 +9,8 @@ class SDCard
 {
 	public:
     SDCard(int chipSelectPin);
-    void makeTestFile();
+    void begin();
+    void readTestFile();
 	private:
     int chipSelectPin;
     File myfile;
