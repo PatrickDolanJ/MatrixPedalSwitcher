@@ -24,10 +24,10 @@ public:
     void sendPan(int pan, int id);
     void sendReturn(bool isStereo, int id);
     void sendDrySend(int id);
-    void sendDelayTrail(bool isDelayTrail, int id);
     void updateMenuStateDisplay(String menuString);
     void sendPhase(int phase, int id);
     void updateBankPresetInfo(int bankId, PresetID id);
+    void sendDelayTrail(bool isDelayTrail, int id);
 
 private:
     unsigned long baudRate;

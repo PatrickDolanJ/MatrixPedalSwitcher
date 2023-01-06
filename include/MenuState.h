@@ -6,7 +6,8 @@ enum MenuState
     PAN = 1,
     INPUT_VOLUMES = 2,
     OUTPUT_VOLUMES = 3,
-    PHASE = 4,
-    NUM_MENU_OPTIONS = 5
+    DELAY_TRILS = 4,
+    PHASE = 5,
+    NUM_MENU_OPTIONS = 6
 };
 #endif // MENU_STATE

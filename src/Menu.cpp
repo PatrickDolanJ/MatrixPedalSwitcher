@@ -29,25 +29,38 @@ void Menu::setup()
 
 void Menu::doButton(int id)
 {
-  Debugger::log("Button pressed: " + String(id));
   changeMenuState(id);
 };
 
 void Menu::doFoot(int id)
 {
-  Debugger::log("Foot pressed: " + String(id));
   if (id != bank.getCurrentPresetID())
   {
+    int prevDelay[7];
+    for (size_t i = 0; i < ChannelID::channel_Master; i++)
+    {
+      prevDelay[i] = bank.getCurrentIsDelayTrail(i);
+    }
+
     bank.setCurrentPreset(id);
+
+    updateAllValuesDisplay(bank.getCurrentPreset());
+    sendAllHardware(bank.getCurrentPreset());
+
+    for (int i = 0; i < ChannelID::channel_Master; i++)
+    {
+      if (prevDelay[i])
+      {
+        Debugger::log(String(i) + " is a delay trail");
+        matrixLeft.writeData(true, i, ChannelID::channel_Master);
+        matrixRight.writeData(true, i, ChannelID::channel_Master);
+      }
+    }
   }
-  updateAllValuesDisplay(bank.getCurrentPreset());
-  sendAllHardware(bank.getCurrentPreset());
 };
 
-void Menu::doDoubleFootPress()
-{
-  // ENTER BANK MENU
-  Debugger::log("Double Foot Button detected.");
+void Menu::doDoubleFootPress(){
+    // ENTER BANK MENU
 };
 
 void Menu::duringLongPress(int id)
@@ -62,7 +75,6 @@ void Menu::duringLongPress(int id)
 
 void Menu::doLongPress(int id)
 {
-  Debugger::log("Long press finished: " + String(id));
   display.highlightReturn(false, id);
   bank.setCurrentReturn(!bank.getCurrentReturn(id), id);
   bool newReturn = bank.getCurrentReturn(id);
@@ -74,8 +86,6 @@ void Menu::doLongPress(int id)
 
 void Menu::doRotaryEnoderSpin(bool isClockwise, int id)
 {
-  Debugger::log("Encoder spin: " + String(id));
-
   switch (menuState)
   {
   case (MenuState::LOOPS):
@@ -96,7 +106,6 @@ void Menu::doRotaryEnoderSpin(bool isClockwise, int id)
 
   case (MenuState::PAN):
   {
-    Debugger::log("From inside doRotary Pan");
     int curPan = incrementPan(isClockwise, id);
     display.sendPan(curPan, id);
     sendOutputVolumes(bank.getCurrentLeftOutputVolume(id), bank.getCurrentRightOutputVolume(id), id);
@@ -105,7 +114,6 @@ void Menu::doRotaryEnoderSpin(bool isClockwise, int id)
 
   case (MenuState::INPUT_VOLUMES):
   {
-    Debugger::log("Spin InputVolumes");
     int curInputVolume = incrementInputVolume(isClockwise, id);
     display.sendInputVolume(curInputVolume, id);
     sendInputVolumes(curInputVolume, id);
@@ -114,22 +122,24 @@ void Menu::doRotaryEnoderSpin(bool isClockwise, int id)
 
   case (MenuState::OUTPUT_VOLUMES):
   {
-    Debugger::log("Spin OutputVolumes");
     int curInputVolume = incrementOutputVolume(isClockwise, id);
     display.sendOutputVolume(curInputVolume, id);
     sendOutputVolumes(bank.getCurrentLeftOutputVolume(id), bank.getCurrentRightOutputVolume(id), id);
   }
   break;
 
+  case (MenuState::DELAY_TRILS):
+    bank.setCurrentIsDelayTrail(!bank.getCurrentIsDelayTrail(id), id);
+    display.sendDelayTrail(bank.getCurrentIsDelayTrail(id), id);
+    break;
+
   case (MenuState::PHASE):
   {
     if (id != ChannelID::channel_Master)
     {
-      Debugger::log("Spin Phase");
       int curPhase = incrementPhase(isClockwise, id);
       sendPhase(curPhase, id);
       display.sendPhase(curPhase, id);
-      Debugger::log(String(curPhase));
     }
   }
   break;
@@ -172,8 +182,7 @@ void Menu::updateAllValuesDisplay(Preset preset)
     display.sendReturn(bank.getCurrentReturn(i), i);
     display.sendInputVolume(bank.getCurrentInputVolume(i), i);
     display.sendOutputVolume(bank.getCurrentOutputVolume(i), i);
-    // display.sendDelayTrail(bank.getCurrentIsDelayTrail(i), i);
-    // display.sendDrySend(bank.getSendDry());
+    display.sendDelayTrail(bank.getCurrentIsDelayTrail(i), i);
   }
   // Split up because unpredictable behavior when all in same scope??
   for (size_t i = 0; i < 7; i++)
@@ -196,6 +205,7 @@ int Menu::incrementDrySend(bool isClockwise, int id)
   int curDrySend = bank.getCurrentDrySend();
   curDrySend = isClockwise ? curDrySend + 1 : curDrySend - 1;
   bank.setCurrentDrySend(curDrySend);
+  Debugger::log(String(bank.getCurrentDrySend()));
   return bank.getCurrentDrySend();
 }
 
@@ -254,7 +264,6 @@ void Menu::sendOutputVolumes(int leftValue, int rightValue, int id)
 void Menu::sendAllHardware(Preset preset)
 {
   updateMatrix(preset);
-  connectDelayTrails(preset);
   changeFootLeds(preset.getPresetID());
   for (size_t i = 0; i < 8; i++)
   {
@@ -281,7 +290,7 @@ void Menu::updateMatrix(Preset preset)
   matrixRight.writeArray(preset.getLoopArray().loopArray, preset.getLoopArray().arraySize);
 
   int drySend = preset.getDrySend();
-  if (drySend != -1)
+  if (drySend >= 0)
   {
     matrixLeft.writeData(true, drySend, 7);
     matrixRight.writeData(true, drySend, 7);
@@ -292,10 +301,12 @@ void Menu::connectDelayTrails(Preset preset)
 {
   for (size_t i = 0; i < ChannelID::channel_Master; i++)
   {
+    Debugger::log("Connected: " + String(i) + " to output");
     if (preset.getIsDelayTrail(i))
     {
       matrixLeft.writeData(true, i, 7);
       matrixRight.writeData(true, i, 7);
+      Debugger::log("Connected: " + String(i) + " to output");
     }
   }
 }

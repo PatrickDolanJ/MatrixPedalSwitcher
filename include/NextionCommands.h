@@ -4,7 +4,7 @@
 #include <Arduino.h>
 
 //---------Display Objects -----------
-const  String _NAME = "_NAME";
+const String _NAME = "_NAME";
 const String _RETURN = "_RETURN";
 const String _LEFT_PHASE = "_L_PHASE";
 const String _RIGHT_PHASE = "_R_PHASE";
@@ -22,7 +22,7 @@ const String STEREO = "S";
 const String MONO = "M";
 const String IN_PHASE = "I";
 const String OUT_OF_PHASE = "O";
-const String IS_DELAY_TRAIL = "";
+const String IS_DELAY_TRAIL = ".";
 const String IS_NOT_DELAY_TRAIL = "";
 const String NO_DRY_SEND = "";
 
@@ -35,6 +35,7 @@ const String MENU_STATE_INPUT_VOLUMES = "INPUT  VOLUME";
 const String MENU_STATE_OUTPUT_VOLUMES = "OUTPUT  VOLUME";
 const String MENU_STATE_PHASE = "PHASE";
 const String MENU_STATE_RETURN = "MONO/STEREO";
+const String MENU_STATE_DELAY_TRAILS = "DELAY TRAILS";
 
 //-----------------SCREENS-------------------
 const String HOME_PAGE = "main";

@@ -63,20 +63,26 @@ void Display::highlightMenu(bool onOrOff, MenuState state)
         break;
 
     case (MenuState::PAN):
-        for (int i = 0; i < 8; i++)
+        for (int i = 0; i < ChannelID::channel_Master + 1; i++)
         {
             updatePBackgroundColorValue(LOOP_NAMES[i] + _PAN, color);
         }
         break;
 
     case (MenuState::PHASE):
-        for (int i = 0; i < 7; i++)
+        for (int i = 0; i < ChannelID::channel_Master + 1; i++)
         {
             updatePBackgroundColorValue(LOOP_NAMES[i] + _LEFT_PHASE, color);
         }
         for (int i = 0; i < 7; i++)
         {
             updatePBackgroundColorValue(LOOP_NAMES[i] + _RIGHT_PHASE, color);
+        }
+        break;
+    case (MenuState::DELAY_TRILS):
+        for (int i = 0; i < ChannelID::channel_Master + 1; i++)
+        {
+            updatePBackgroundColorValue(LOOP_NAMES[i] + _NAME, color);
         }
         break;
     }
@@ -119,11 +125,6 @@ void Display::sendReturn(bool isStereo, int id)
     updateTextValue(returnIdString, isStereoString);
 };
 
-void Display::sendDelayTrail(bool isDelayTrail, int id)
-{
-    String isDelayTraiString = isDelayTrail ? IS_DELAY_TRAIL : IS_NOT_DELAY_TRAIL;
-};
-
 void Display::sendPhase(int phase, int id)
 {
     String leftPhase;
@@ -162,7 +163,8 @@ void Display::sendDrySend(int drySend)
     if (drySend >= 0)
     {
         drySendString = LOOP_NAMES[drySend];
-    } else if(drySend==-1) 
+    }
+    else if (drySend == -1)
     {
         drySendString = NO_DRY_SEND;
     }
@@ -204,12 +206,23 @@ void Display::setMenuState(MenuState state)
     case (MenuState::PAN):
         stateString = MENU_STATE_PAN;
         break;
+    case (MenuState::DELAY_TRILS):
+        stateString = MENU_STATE_DELAY_TRAILS;
+        break;
 
     case (MenuState::PHASE):
         stateString = MENU_STATE_PHASE;
         break;
     }
     updateMenuStateDisplay(stateString);
+};
+
+void Display::sendDelayTrail(bool isDelayTrail, int id)
+{
+    String idString = idToStringId(id) + _NAME;
+    String delay = idToStringId(id) + (isDelayTrail ? IS_DELAY_TRAIL : IS_NOT_DELAY_TRAIL);
+    Debugger::log(idString + delay);
+    updateTextValue(idString,delay);
 };
 
 //-----------------------Helpers---------------------------------
