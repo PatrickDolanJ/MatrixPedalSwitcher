@@ -95,6 +95,12 @@ void Menu::duringLongPress(int id)
 
 void Menu::doLongPress(int id)
 {
+  int input = bank.getCurrentInputVolume(ChannelID::channel_Master);
+  int rightOut = bank.getCurrentLeftOutputVolume(ChannelID::channel_Master);
+  int leftOut = bank.getCurrentRightOutputVolume(ChannelID::channel_Master);
+
+  digitalPots.volumeMuteStart(input, leftOut, rightOut);
+
   display.highlightReturn(false, id);
   bank.setCurrentReturn(!bank.getCurrentReturn(id), id);
   bool newReturn = bank.getCurrentReturn(id);
@@ -104,6 +110,8 @@ void Menu::doLongPress(int id)
   returnHighlighted = false;
   isDataChanged[bank.getCurrentPresetID()] = true;
   display.changeSaveStatus(isDataChanged[bank.getCurrentPresetID()]);
+
+  digitalPots.volumeMuteEnd(input, leftOut, rightOut);
 };
 
 void Menu::doRotaryEnoderSpin(bool isClockwise, int id)
@@ -111,8 +119,10 @@ void Menu::doRotaryEnoderSpin(bool isClockwise, int id)
   int input = bank.getCurrentInputVolume(ChannelID::channel_Master);
   int rightOut = bank.getCurrentLeftOutputVolume(ChannelID::channel_Master);
   int leftOut = bank.getCurrentRightOutputVolume(ChannelID::channel_Master);
-
-  digitalPots.volumeMuteStart(input, leftOut, rightOut);
+  if (menuState != MenuState::DELAY_TRILS)
+  {
+    digitalPots.volumeMuteStart(input, leftOut, rightOut);
+  }
 
   switch (menuState)
   {
@@ -172,8 +182,10 @@ void Menu::doRotaryEnoderSpin(bool isClockwise, int id)
   }
   break;
   }
-  digitalPots.volumeMuteEnd(input, leftOut, rightOut);
-
+  if (menuState != MenuState::DELAY_TRILS)
+  {
+    digitalPots.volumeMuteEnd(input, leftOut, rightOut);
+  }
   isDataChanged[bank.getCurrentPresetID()] = true;
   display.changeSaveStatus(isDataChanged[bank.getCurrentPresetID()]);
 };
@@ -324,6 +336,11 @@ void Menu::sendOutputVolumes(int leftValue, int rightValue, int id)
 
 void Menu::sendAllHardware(Preset preset)
 {
+  int input = bank.getCurrentInputVolume(ChannelID::channel_Master);
+  int rightOut = bank.getCurrentLeftOutputVolume(ChannelID::channel_Master);
+  int leftOut = bank.getCurrentRightOutputVolume(ChannelID::channel_Master);
+
+  digitalPots.volumeMuteStart(input, leftOut, rightOut);
   updateMatrix(preset);
   changeFootLeds(preset.getPresetID());
   for (size_t i = 0; i < 8; i++)
@@ -333,6 +350,8 @@ void Menu::sendAllHardware(Preset preset)
     sendInputVolumes(preset.getInputVolume(i), i);
     sendOutputVolumes(preset.getLeftOutputVolume(i), preset.getRightOutputVolume(i), i);
   }
+
+  digitalPots.volumeMuteEnd(input, leftOut, rightOut);
 };
 
 void Menu::sendReturn(bool value, int id)
