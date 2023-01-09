@@ -108,6 +108,12 @@ void Menu::doLongPress(int id)
 
 void Menu::doRotaryEnoderSpin(bool isClockwise, int id)
 {
+  int input = bank.getCurrentInputVolume(ChannelID::channel_Master);
+  int rightOut = bank.getCurrentLeftOutputVolume(ChannelID::channel_Master);
+  int leftOut = bank.getCurrentRightOutputVolume(ChannelID::channel_Master);
+
+  digitalPots.volumeMuteStart(input, leftOut, rightOut);
+
   switch (menuState)
   {
   case (MenuState::LOOPS):
@@ -166,6 +172,8 @@ void Menu::doRotaryEnoderSpin(bool isClockwise, int id)
   }
   break;
   }
+  digitalPots.volumeMuteEnd(input, leftOut, rightOut);
+
   isDataChanged[bank.getCurrentPresetID()] = true;
   display.changeSaveStatus(isDataChanged[bank.getCurrentPresetID()]);
 };
@@ -194,13 +202,13 @@ void Menu::changeMenuState(int id)
   }
   else if (menuState == MenuState::SAVE_PRESET && id == 6)
   {
-    //DO
+    // DO
     Debugger::log("Reloading previous Bank");
     returnToMain(bank.getCurrentPreset());
   }
   else if (menuState == MenuState::SAVE_PRESET && id == ChannelID::channel_Master)
   {
-    //DO
+    // DO
     Debugger::log("Saving...");
     returnToMain(bank.getCurrentPreset());
   }
