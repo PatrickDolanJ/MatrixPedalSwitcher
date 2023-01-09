@@ -30,7 +30,6 @@ private:
     MenuState menuState;
     Bank bank;
     bool returnHighlighted = false;
-    bool isInBankMenu = false;
     bool isDataChanged[PresetID::presetID_E+1] = {false,false,false,false,false};
 
     void updateAllValuesDisplay(Preset preset);
@@ -42,6 +41,7 @@ private:
     int incrementDrySend(bool isClockwise, int id);
     void singleFootPress(); //DO
     bool checkSaveStatus(PresetID id);
+    void returnToMain(Preset preset);
     //--HardWare--
     AGD2188 matrixRight = AGD2188(RIGHT_MATRIX_ADDRESS);
     AGD2188 matrixLeft = AGD2188(LEFT_MATRIX_ADDRESS);
@@ -58,7 +58,8 @@ private:
     void sendReturn(bool value, int id);
     void sendPhase(int phase, int id);
     void updateMatrix(Preset preset);
-    void connectDelayTrails(Preset preset);
+    void connectDelayTrails(int delayTrails[7]);
+    void resetSaveData();
 };
 
 #endif // MENU

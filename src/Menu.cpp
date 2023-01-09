@@ -34,41 +34,53 @@ void Menu::doButton(int id)
 
 void Menu::doFoot(int id)
 {
-  if (id != bank.getCurrentPresetID())
+  if (menuState < MenuState::NUM_MAIN_MENU_OPTIONS)
   {
-    int prevDelay[7];
-    for (size_t i = 0; i < ChannelID::channel_Master; i++)
+    if (id != bank.getCurrentPresetID())
     {
-      prevDelay[i] = bank.getCurrentIsDelayTrail(i);
-    }
-
-    bank.setCurrentPreset(id);
-
-    updateAllValuesDisplay(bank.getCurrentPreset());
-    sendAllHardware(bank.getCurrentPreset());
-
-    for (int i = 0; i < ChannelID::channel_Master; i++)
-    {
-      if (prevDelay[i])
+      int prevDelay[7];
+      for (size_t i = 0; i < ChannelID::channel_Master; i++)
       {
-        matrixLeft.writeData(true, i, ChannelID::channel_Master + 1);
-        matrixRight.writeData(true, i, ChannelID::channel_Master + 1);
+        prevDelay[i] = bank.getCurrentIsDelayTrail(i);
       }
+      bank.setCurrentPreset(id);
+      updateAllValuesDisplay(bank.getCurrentPreset());
+      sendAllHardware(bank.getCurrentPreset());
+      connectDelayTrails(prevDelay);
+    }
+  }
+  else if (menuState == MenuState::BANKS)
+  {
+    Debugger::log(String(id));
+    if (id == 0 || id == 1)
+    {
+      int curBankId = display.getNewBankId();
+      int newBankId = (id == 0) ? (curBankId - 1) : (curBankId + 1);
+      display.setNewBankId(newBankId);
+      display.sendBankID();
     }
   }
 };
 
 void Menu::doDoubleFootPress()
 {
-  if (!isInBankMenu)
+  if (menuState != MenuState::BANKS)
   {
-    isInBankMenu = true;
+    menuState = MenuState::BANKS;
+    display.bankSelectionPage();
+    int bankId = bank.getBankID();
+    display.setNewBankId(bankId);
+    display.sendBankID();
   }
-  for (size_t i = 0; i < PresetID::presetID_E+1; i++)
+  else if (menuState == MenuState::BANKS)
   {
-    isDataChanged[i] = false;
+    Debugger::log("LOADING NEW BANK");
+    menuState = MenuState::LOOPS;
+    display.setHomeScreen();
+    display.highlightMenu(true, menuState);
+    updateAllValuesDisplay(bank.getCurrentPreset());
+    sendAllHardware(bank.getCurrentPreset());
   }
-  
 };
 
 void Menu::duringLongPress(int id)
@@ -83,6 +95,12 @@ void Menu::duringLongPress(int id)
 
 void Menu::doLongPress(int id)
 {
+  int input = bank.getCurrentInputVolume(ChannelID::channel_Master);
+  int rightOut = bank.getCurrentLeftOutputVolume(ChannelID::channel_Master);
+  int leftOut = bank.getCurrentRightOutputVolume(ChannelID::channel_Master);
+
+  digitalPots.volumeMuteStart(input, leftOut, rightOut);
+
   display.highlightReturn(false, id);
   bank.setCurrentReturn(!bank.getCurrentReturn(id), id);
   bool newReturn = bank.getCurrentReturn(id);
@@ -92,10 +110,20 @@ void Menu::doLongPress(int id)
   returnHighlighted = false;
   isDataChanged[bank.getCurrentPresetID()] = true;
   display.changeSaveStatus(isDataChanged[bank.getCurrentPresetID()]);
+
+  digitalPots.volumeMuteEnd(input, leftOut, rightOut);
 };
 
 void Menu::doRotaryEnoderSpin(bool isClockwise, int id)
 {
+  int input = bank.getCurrentInputVolume(ChannelID::channel_Master);
+  int rightOut = bank.getCurrentLeftOutputVolume(ChannelID::channel_Master);
+  int leftOut = bank.getCurrentRightOutputVolume(ChannelID::channel_Master);
+  if (menuState != MenuState::DELAY_TRILS)
+  {
+    digitalPots.volumeMuteStart(input, leftOut, rightOut);
+  }
+
   switch (menuState)
   {
   case (MenuState::LOOPS):
@@ -154,24 +182,50 @@ void Menu::doRotaryEnoderSpin(bool isClockwise, int id)
   }
   break;
   }
+  if (menuState != MenuState::DELAY_TRILS)
+  {
+    digitalPots.volumeMuteEnd(input, leftOut, rightOut);
+  }
   isDataChanged[bank.getCurrentPresetID()] = true;
   display.changeSaveStatus(isDataChanged[bank.getCurrentPresetID()]);
 };
 
+//------------------------------------helpers------------------------------
 void Menu::changeMenuState(int id)
 {
-  if (id == DOWN_ARROW_ID || id == UP_ARROW_ID)
+  Debugger::log(String(id));
+  if (menuState != MenuState::SAVE_PRESET)
   {
-    display.highlightMenu(false, menuState);
-    int increment = (id == DOWN_ARROW_ID) ? 1 : (NUM_MENU_OPTIONS - 1);
-    int newMenuState = (menuState + increment) % (NUM_MENU_OPTIONS);
-    menuState = static_cast<MenuState>(newMenuState);
-    display.highlightMenu(true, menuState);
+    if (id == DOWN_ARROW_ID || id == UP_ARROW_ID)
+    {
+      display.highlightMenu(false, menuState);
+      int increment = (id == DOWN_ARROW_ID) ? 1 : (NUM_MAIN_MENU_OPTIONS - 1);
+      int newMenuState = (menuState + increment) % (NUM_MAIN_MENU_OPTIONS);
+      menuState = static_cast<MenuState>(newMenuState);
+      display.highlightMenu(true, menuState);
+      display.setMenuState(menuState);
+    }
+    if (id == ChannelID::channel_Master)
+    {
+      Debugger::log("Changing page");
+      menuState = MenuState::SAVE_PRESET;
+      display.setSaveMenu();
+    }
   }
-  display.setMenuState(menuState);
+  else if (menuState == MenuState::SAVE_PRESET && id == 6)
+  {
+    // DO
+    Debugger::log("Reloading previous Bank");
+    returnToMain(bank.getCurrentPreset());
+  }
+  else if (menuState == MenuState::SAVE_PRESET && id == ChannelID::channel_Master)
+  {
+    // DO
+    Debugger::log("Saving...");
+    returnToMain(bank.getCurrentPreset());
+  }
 };
 
-//------------------------------------helpers------------------------------
 void Menu::updateAllValuesDisplay(Preset preset)
 {
   display.changeSaveStatus(isDataChanged[preset.getPresetID()]);
@@ -250,7 +304,16 @@ bool Menu::checkSaveStatus(PresetID id)
   {
     display.changeSaveStatus(isDataChanged[id]);
   }
-}
+};
+
+void Menu::returnToMain(Preset preset)
+{
+  menuState = MenuState::LOOPS;
+  display.setHomeScreen();
+  updateAllValuesDisplay(preset);
+  sendAllHardware(preset);
+  display.highlightMenu(true, menuState);
+};
 //----------------------------------------Hardware---------------------------------------
 
 void Menu::changeFootLeds(int id)
@@ -273,6 +336,11 @@ void Menu::sendOutputVolumes(int leftValue, int rightValue, int id)
 
 void Menu::sendAllHardware(Preset preset)
 {
+  int input = bank.getCurrentInputVolume(ChannelID::channel_Master);
+  int rightOut = bank.getCurrentLeftOutputVolume(ChannelID::channel_Master);
+  int leftOut = bank.getCurrentRightOutputVolume(ChannelID::channel_Master);
+
+  digitalPots.volumeMuteStart(input, leftOut, rightOut);
   updateMatrix(preset);
   changeFootLeds(preset.getPresetID());
   for (size_t i = 0; i < 8; i++)
@@ -282,6 +350,8 @@ void Menu::sendAllHardware(Preset preset)
     sendInputVolumes(preset.getInputVolume(i), i);
     sendOutputVolumes(preset.getLeftOutputVolume(i), preset.getRightOutputVolume(i), i);
   }
+
+  digitalPots.volumeMuteEnd(input, leftOut, rightOut);
 };
 
 void Menu::sendReturn(bool value, int id)
@@ -302,24 +372,28 @@ void Menu::updateMatrix(Preset preset)
   int drySend = preset.getDrySend();
   if (drySend >= ChannelID::channel_A)
   {
-    matrixLeft.writeData(true, drySend, 7);
-    matrixRight.writeData(true, drySend, 7);
-  }
-
-  for (size_t i = 1; i < 9; i++)
-  {
-    matrixLeft.readData(i);
+    matrixLeft.writeData(true, drySend, ChannelID::channel_Master);
+    matrixRight.writeData(true, drySend, ChannelID::channel_Master);
   }
 };
 
-void Menu::connectDelayTrails(Preset preset)
+void Menu::connectDelayTrails(int delayTrails[7])
 {
   for (size_t i = 0; i < ChannelID::channel_Master; i++)
   {
-    if (preset.getIsDelayTrail(i))
+    if (delayTrails[i])
     {
       matrixLeft.writeData(true, i, 7);
       matrixRight.writeData(true, i, 7);
     }
   }
-}
+};
+
+void Menu::resetSaveData()
+{
+  for (size_t i = 0; i < PresetID::presetID_E + 1; i++)
+  {
+    isDataChanged[i] = false;
+  }
+  display.changeSaveStatus(isDataChanged[bank.getCurrentPresetID()]);
+};

@@ -7,6 +7,7 @@
 const String DEVICE_NAME = "HeighLiner";
 const int MAX_VOLUME = 255;
 const int DEFAULT_VOLUME = MAX_VOLUME;
+const int VOLUME_DAMPENING_INCREMENTS = 100;
 const int DEFAULT_PAN = 50; // 0(hard left) to 100 (hard right)
 const int MAX_PAN = 100;
 const String DEFAULT_COLOR = "19703";
@@ -19,6 +20,7 @@ const int DOWN_ARROW_ID = 1;
 const int UP_ARROW_ID = 0;
 const int VOLUME_SCROLL_AMOUNT = 5;
 const int PAN_SCROLL_AMOUNT = 5;
+const int MAX_NUM_BANKS = 100;
 
 //------------I2C Addresses-------------
 const byte ROTARY_BUTTONS_ADDRESS = 0x21;

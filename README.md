@@ -52,7 +52,7 @@ monitor_speed = 115200
 
 
 ## How it Works
-
+    
 The core of the project is two AGD2188 Unbuffered Analog Switch Arrays over I2C, one for right and one for left channels at 0x70 and 0x74 addresses respectively. The chip is an 8x8 matrix that allows any permutation of x and y connections. The basic principle is to connect an x(input) to y(output) when a pedal (loop) should be incorporated into the signal chain. This is handled by the "Matrix" library through the AGD2188 class.
 
 Each input and both left and right outputs volumes are controlled by digital pots (AD5206) over SPI.  
@@ -81,12 +81,8 @@ Lastly, the main display is a Nextion NX3224T024_01. These are programmed using 
 ## Next Steps
 
 1.) Adding SD card read/write to save/load presets.  
-2.) Add digital pots and relay functionality.  
-3.) Add loading screen while device boots up.  
-4.) Control foot switch LEDs (PCF8574) at 0x23.   
-5.) Make better indication of return switching.  
-6.) Add I2C scanning on start up for easier debugging.  
-7.) Address volume damping in parallel setup.
+2.) Add volume damping back in when changing data
+3.) 
 
 ## Made by
 ### Proto Co-op: 
