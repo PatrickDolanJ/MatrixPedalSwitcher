@@ -16,6 +16,7 @@ const String MENU_STATE_FOR_DISPLAY = "CURRENT_PARAM";
 const String BANK_NUMBER = "BANK_NUMBER";
 const String PRESET_LETTER = "FOOT_LETTER";
 const String DATA_CHANGED = "PRESET_TOGGLE"; 
+const String FOOT_BANK_NUM = "FOOT_BANK_NUM";
 
 //-------------Values-----------------
 const byte END_BYTE = 0xff;
@@ -23,7 +24,7 @@ const String STEREO = "S";
 const String MONO = "M";
 const String IN_PHASE = "I";
 const String OUT_OF_PHASE = "O";
-const String IS_DELAY_TRAIL = "->";
+const String IS_DELAY_TRAIL = ">";
 const String IS_NOT_DELAY_TRAIL = "";
 const String NO_DRY_SEND = "";
 

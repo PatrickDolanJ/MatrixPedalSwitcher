@@ -12,7 +12,7 @@ void DigitalPots::setup()
        pinMode(POT_EXPANDER_PINS[i],OUTPUT); 
     }
     
-}
+};
 
 void DigitalPots::sendLeftInputVolume(int value, int id)
 {
@@ -63,3 +63,13 @@ void DigitalPots::digitalPotWrite(int chipSelect, int internalPotId, int value)
     delayMicroseconds(SPI_DELAY);
     digitalWrite(chipSelect, HIGH);
 };
+
+void DigitalPots::volumeMuteStart(int leftVolume, int rightVolume)
+{
+    for (int i = 0; i < VOLUME_DAMPENING_INCREMENTS; i++)
+    {
+        /* code */
+    }
+    
+
+}

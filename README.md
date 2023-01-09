@@ -52,7 +52,7 @@ monitor_speed = 115200
 
 
 ## How it Works
-
+    
 The core of the project is two AGD2188 Unbuffered Analog Switch Arrays over I2C, one for right and one for left channels at 0x70 and 0x74 addresses respectively. The chip is an 8x8 matrix that allows any permutation of x and y connections. The basic principle is to connect an x(input) to y(output) when a pedal (loop) should be incorporated into the signal chain. This is handled by the "Matrix" library through the AGD2188 class.
 
 Each input and both left and right outputs volumes are controlled by digital pots (AD5206) over SPI.  

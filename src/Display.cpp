@@ -40,7 +40,7 @@ void Display::bankSelectionPage()
     updatePage(BANK_SELECTION_PAGE);
 }
 
-void Display::saveMenu()
+void Display::setSaveMenu()
 {
     updatePage(SAVE_PAGE);
 }
@@ -240,6 +240,21 @@ void Display::changeSaveStatus(bool isDataChanged)
     updateBBackgroundColorValue(DATA_CHANGED, color);
 };
 
+void Display::sendBankID()
+{
+    String idString = String(newBankId);
+    updateValue(FOOT_BANK_NUM,idString);
+};
+
+int Display::getNewBankId()
+{
+    return newBankId;
+};
+
+void Display::setNewBankId(int id)
+{
+    newBankId = constrain(id,0,MAX_NUM_BANKS);
+};
 //-----------------------Helpers---------------------------------
 
 String Display::idToStringId(int id)
@@ -310,5 +325,6 @@ void Display::updateBaudRate(unsigned long baudRate)
     Serial2.print("baud=" + String(baudRate));
     sendEndCommand();
 }
+
 
 //------------------------------------------------------------

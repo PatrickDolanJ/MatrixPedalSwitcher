@@ -8,6 +8,8 @@ enum MenuState
     OUTPUT_VOLUMES = 3,
     DELAY_TRILS = 4,
     PHASE = 5,
-    NUM_MENU_OPTIONS = 6
+    NUM_MAIN_MENU_OPTIONS = 6, // FOR BUTTON PRESS CYCLING
+    BANKS = 7,
+    SAVE_PRESET = 8
 };
 #endif // MENU_STATE

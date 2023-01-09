@@ -94,6 +94,7 @@ void AGD2188::readData(int x)
   Wire.write(data_array, 2);
   Wire.endTransmission();
   Wire.requestFrom(matrix_address, 2);
+  byte dataRecieved;
   while (Wire.available())
   {
     /*
@@ -103,11 +104,11 @@ void AGD2188::readData(int x)
     returned byte 10001001
     means that x3 is connected to y 0,4 and 7
     */
-    String message = String(x) + "connected to: ";
-    Serial.print(message);
-    Serial.println(Wire.read(), BIN);
+    dataRecieved = Wire.read();
   }
-  Serial.println();
+  String message = String(x) + "connected to: ";
+  Serial.print(message);
+  Serial.println(dataRecieved,BIN);
 }
 
 void AGD2188::writeData(bool OnOrOff, int x, int y)
