@@ -5,6 +5,7 @@
 
 //--------------Settings---------------
 const String DEVICE_NAME = "HeighLiner";
+const String  SAVE_FILE_NAME = "bankdata.txt";
 const int MAX_VOLUME = 255;
 const int DEFAULT_VOLUME = MAX_VOLUME;
 const int VOLUME_DAMPENING_INCREMENTS = 100;
@@ -54,7 +55,4 @@ const int POT_EXPANDER_PINS[6] = {
     POT_EXPANDER_PIN_6};
 
 const int SD_CARD_CHIP_SELECT_PIN = 38;
-
-//-------------Foot Switches------------
-
 #endif // !DEVICE_CONFIG

@@ -11,6 +11,7 @@
 #include <DigitalPots.h>
 #include <ReturnRelays.h>
 #include <PhaseRelays.h>
+#include <SDCard.h>
 
 class Menu
 {
@@ -49,6 +50,7 @@ private:
     DigitalPots digitalPots;
     ReturnRelays returnRelays;
     PhaseRelays phaseRelays;
+    SDCard sdCard = SDCard(SD_CARD_CHIP_SELECT_PIN);
 
     // sending data
     void sendAllHardware(Preset preset);

@@ -10,10 +10,15 @@ class SDCard
 	public:
     SDCard(int chipSelectPin);
     void begin();
-    void readTestFile();
+    void setSaveFileName(String fileName);
+    bool checkForSaveFile();
+    int getPrevBankId();
 	private:
     int chipSelectPin;
-    File myfile;
+    String bankSaveFileName;
+    const char * bankSaveFileName_cc;
+    char * bankSaveFileName_c;
+
 };
  
 #endif

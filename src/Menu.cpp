@@ -15,8 +15,13 @@ void Menu::setup()
   // May want to switch back to custom animation(w/black background) to ensure this stays coherent
   display.setup(NEXTION_BAUD_RATE);
   display.bootScreen();
-  //------------------HardWare Setup----------------
+  //------------------Load Data--------------------
+  sdCard.begin();
+  sdCard.setSaveFileName(SAVE_FILE_NAME);
+  sdCard.checkForSaveFile();
+  Debugger::log(String(sdCard.getPrevBankId()));
   bank.setCurrentPreset(0);
+  //------------------HardWare Setup----------------
   digitalPots.setup();
   sendAllHardware(bank.getCurrentPreset());
   //--------------------Display Setup-------------------

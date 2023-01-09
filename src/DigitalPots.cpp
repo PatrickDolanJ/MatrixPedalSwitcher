@@ -73,7 +73,6 @@ void DigitalPots::volumeMuteStart(int inputVolume, int leftOutputVolume, int rig
         sendLeftOutputVolume(newLeftOutputVol, 7);
         int newRightOutputVool = rightOutputVolume * (1 - (float(VOLUME_DAMPENING_INCREMENTS) / float(i)));
         sendRightOutPutVolume(newRightOutputVool, 7);
-        Debugger::log(String(newInputVol));
     }
     sendLeftInputVolume(0, 7);
     sendRightInputVolume(0, 7);
@@ -92,7 +91,6 @@ void DigitalPots::volumeMuteEnd(int inputVolume, int leftOutputVolume, int right
         sendLeftOutputVolume(newLeftOutputVol, 7);
         int newRightOutputVool = rightOutputVolume * (1 - (float(VOLUME_DAMPENING_INCREMENTS) / float(i)));
         sendRightOutPutVolume(newRightOutputVool, 7);
-        Debugger::log(String(newInputVol));
     }
     sendLeftInputVolume(inputVolume, 7);
     sendRightInputVolume(inputVolume, 7);
