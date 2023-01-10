@@ -4,25 +4,35 @@
 #include <Arduino.h>
 
 //--------------Settings---------------
+const unsigned long NEXTION_BAUD_RATE = 115200;
+const unsigned long DEBUGGER_BAUD_RATE = 115200;
+
 const String DEVICE_NAME = "HeighLiner";
-const String  SAVE_FILE_NAME = "bankdata.txt";
+
+const String GLOBAL_DATA_FILENAME = "gdata.txt";
+const String BANKS_FOLDER = "banks/";
+const String BANK_DATA_TEMPLATE = "bankData.txt";
+const int BANK_DATA_CAPACITY = 1024;
+const int GLOBAL_DATA_CAPACITY = 32;
+const int MAX_NUM_BANKS = 100;
+
 const int MAX_VOLUME = 255;
 const int DEFAULT_VOLUME = MAX_VOLUME;
 const int VOLUME_DAMPENING_INCREMENTS = 100;
 const int DEFAULT_PAN = 50; // 0(hard left) to 100 (hard right)
 const int MAX_PAN = 100;
+
 const String DEFAULT_COLOR = "19703";
 const String HIGHLIGHT_COLOR = "65535";
 const String DATA_CHANGED_COLOR = "62025";
+
 const float LONG_PRESS_INTERVAL_S = 1.75;
-const int SPI_DELAY = 1;
-const unsigned long NEXTION_BAUD_RATE = 115200;
 const int DOWN_ARROW_ID = 1;
 const int UP_ARROW_ID = 0;
 const int VOLUME_SCROLL_AMOUNT = 5;
 const int PAN_SCROLL_AMOUNT = 5;
-const int MAX_NUM_BANKS = 100;
 
+const int SPI_DELAY = 1;
 //------------I2C Addresses-------------
 const byte ROTARY_BUTTONS_ADDRESS = 0x21;
 const byte FOOTSWITCH_ADDRESS = 0x22;

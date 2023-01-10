@@ -17,9 +17,10 @@ void Menu::setup()
   display.bootScreen();
   //------------------Load Data--------------------
   sdCard.begin();
-  sdCard.setSaveFileName(SAVE_FILE_NAME);
-  sdCard.checkForSaveFile();
-  Debugger::log(String(sdCard.getPrevBankId()));
+  if (sdCard.checkForGlobalDataFile(GLOBAL_DATA_FILENAME))
+  {
+    Debugger::log(String(sdCard.getPrevBankId()));
+  }
   bank.setCurrentPreset(0);
   //------------------HardWare Setup----------------
   digitalPots.setup();

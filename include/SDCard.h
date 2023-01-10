@@ -1,24 +1,26 @@
-#ifndef sd_card_inteface    
+#ifndef sd_card_inteface
 #define sd_card_inteface
- 
+
 #include <Arduino.h>
 #include <SD.h>
 #include <SPI.h>
+#include <DeviceConfig.h>
 
 class SDCard
 {
-	public:
+public:
     SDCard(int chipSelectPin);
     void begin();
-    void setSaveFileName(String fileName);
-    bool checkForSaveFile();
-    int getPrevBankId();
-	private:
-    int chipSelectPin;
-    String bankSaveFileName;
-    const char * bankSaveFileName_cc;
-    char * bankSaveFileName_c;
+    bool checkForGlobalDataFile(String fileName);
 
+    int getPrevBankId();
+    void setPrevBankId(int id);
+    int getNumBanks();
+    void addBank();
+
+private:
+    int chipSelectPin;
+    void initiateGlobalData();
 };
- 
+
 #endif

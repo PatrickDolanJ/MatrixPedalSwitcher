@@ -83,7 +83,7 @@ void handleFootButtonPress()
 void setup()
 {
   debugger = &debugger->Instance();
-  debugger->setup(115200);
+  debugger->setup(DEBUGGER_BAUD_RATE);
   Debugger::log(DEVICE_NAME + " is booting.");
 
   SPI.begin();
