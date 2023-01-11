@@ -3,8 +3,8 @@
 RotaryButtons rotaryButtons(ROTARY_BUTTONS_ADDRESS);
 FootSwitches footSwitches(FOOTSWITCH_ADDRESS);
 EasyRotary easyRotaryEncoders(ROTARY_ENCODER_INTERUPT_PIN);
-Debugger *debugger; // Computer
-Menu menu;          //
+Debugger *debugger; 
+Menu menu;          
 
 const int NO_BUTTON_VALUE = 0;
 const int DOUBLE_BUTTON_PRESS_VALUE = -2;
@@ -84,7 +84,8 @@ void setup()
 {
   debugger = &debugger->Instance();
   debugger->setup(DEBUGGER_BAUD_RATE);
-  Debugger::log(DEVICE_NAME + " is booting.");
+  Debugger::log(readStringFromFlash(DEVICE_NAME));
+  Debugger::log(String("is booting."));
 
   SPI.begin();
   menu.setup();
@@ -92,8 +93,7 @@ void setup()
   rotaryButtons.setup(0, ROTARY_INTERUPT_PIN, ROTARY_BUTTON_INTERUPT);
   footSwitches.setup(1, FOOT_INTERUPT_PIN, FOOT_INTERUPT);
   easyRotaryEncoders.startup(*ROTARY_INTERUPT);
-
-  Debugger::log(DEVICE_NAME + " ready.");
+  Debugger::log(readStringFromFlash(DEVICE_NAME) + " is ready.");
 };
 
 void loop()
@@ -114,7 +114,6 @@ void loop()
 
   if (previousButtonValue != NO_BUTTON_VALUE && checkLongPress(LONG_PRESS_INTERVAL_S))
   {
-    int arrayId = idToArray(previousButtonValue);
-    menu.duringLongPress(arrayId);
+    menu.duringLongPress(idToArray(previousButtonValue));
   }
 };

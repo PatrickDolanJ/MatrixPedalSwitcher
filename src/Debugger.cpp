@@ -43,3 +43,4 @@ void Debugger::log(int number, int base)
 {
   Serial.println(number, HEX);
 };
+

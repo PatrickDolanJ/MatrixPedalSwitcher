@@ -26,73 +26,73 @@ void Display::setup(unsigned long baudRate)
 void Display::bootScreen()
 {
     // Not entirely sure why, but only sending the Title page does not work, seems to needs two pages for some reason?
-    updatePage(SPACE_BACKGROUND);
-    updatePage(TITLE_PAGE);
+    updatePage(readStringFromFlash(SPACE_BACKGROUND));
+    updatePage(readStringFromFlash(TITLE_PAGE));
 };
 
 void Display::setHomeScreen()
 {
-    updatePage(HOME_PAGE);
+    updatePage(readStringFromFlash(HOME_PAGE));
 };
 
 void Display::bankSelectionPage()
 {
-    updatePage(BANK_SELECTION_PAGE);
+    updatePage(readStringFromFlash(BANK_SELECTION_PAGE));
 }
 
 void Display::setSaveMenu()
 {
-    updatePage(SAVE_PAGE);
+    updatePage(readStringFromFlash(SAVE_PAGE));
 }
 
 void Display::highlightMenu(bool onOrOff, MenuState state)
 {
     String color;
-    color = onOrOff ? HIGHLIGHT_COLOR : DEFAULT_COLOR;
+    color = onOrOff ? readStringFromFlash(HIGHLIGHT_COLOR) : readStringFromFlash(DEFAULT_COLOR);
     switch (state)
     {
     case (MenuState::LOOPS):
         for (int i = 0; i < 8; i++)
         {
-            updatePBackgroundColorValue(LOOP_NAMES[i] + _LOOP_POS, color);
+            updatePBackgroundColorValue(LOOP_NAMES[i] + readStringFromFlash(_LOOP_POS), color);
         }
         break;
 
     case (MenuState::INPUT_VOLUMES):
         for (int i = 0; i < 8; i++)
         {
-            updatePBackgroundColorValue(LOOP_NAMES[i] + _INPUT_VOLUME, color);
+            updatePBackgroundColorValue(LOOP_NAMES[i] + readStringFromFlash(_INPUT_VOLUME), color);
         }
         break;
 
     case (MenuState::OUTPUT_VOLUMES):
         for (int i = 0; i < 8; i++)
         {
-            updatePBackgroundColorValue(LOOP_NAMES[i] + _OUTPUT_VOLUME, color);
+            updatePBackgroundColorValue(LOOP_NAMES[i] + readStringFromFlash(_OUTPUT_VOLUME), color);
         }
         break;
 
     case (MenuState::PAN):
         for (int i = 0; i < ChannelID::channel_Master + 1; i++)
         {
-            updatePBackgroundColorValue(LOOP_NAMES[i] + _PAN, color);
+            updatePBackgroundColorValue(LOOP_NAMES[i] + readStringFromFlash(_PAN), color);
         }
         break;
 
     case (MenuState::PHASE):
         for (int i = 0; i < ChannelID::channel_Master + 1; i++)
         {
-            updatePBackgroundColorValue(LOOP_NAMES[i] + _LEFT_PHASE, color);
+            updatePBackgroundColorValue(LOOP_NAMES[i] + readStringFromFlash(_LEFT_PHASE), color);
         }
         for (int i = 0; i < 7; i++)
         {
-            updatePBackgroundColorValue(LOOP_NAMES[i] + _RIGHT_PHASE, color);
+            updatePBackgroundColorValue(LOOP_NAMES[i] + readStringFromFlash(_RIGHT_PHASE), color);
         }
         break;
     case (MenuState::DELAY_TRILS):
         for (int i = 0; i < ChannelID::channel_Master + 1; i++)
         {
-            updatePBackgroundColorValue(LOOP_NAMES[i] + _NAME, color);
+            updatePBackgroundColorValue(LOOP_NAMES[i] + readStringFromFlash(_NAME), color);
         }
         break;
     }
@@ -101,7 +101,7 @@ void Display::highlightMenu(bool onOrOff, MenuState state)
 void Display::sendLoopPosition(int position, int id)
 {
     String positionString = String(position);
-    String loop = idToStringId(id) + _LOOP_POS;
+    String loop = idToStringId(id) + readStringFromFlash(_LOOP_POS);
     updateValue(loop, positionString);
 };
 
@@ -109,7 +109,7 @@ void Display::sendInputVolume(int volume, int id)
 {
     int volumeForDisplay = convertVolumeForDisplay(volume);
     String volumeValueString = String(volumeForDisplay);
-    String volumeIdString = idToStringId(id) + _INPUT_VOLUME;
+    String volumeIdString = idToStringId(id) + readStringFromFlash(_INPUT_VOLUME);
     updateValue(volumeIdString, volumeValueString);
 };
 
@@ -117,21 +117,21 @@ void Display::sendOutputVolume(int volume, int id)
 {
     int volumeForDisplay = convertVolumeForDisplay(volume);
     String volumeValueString = String(volumeForDisplay);
-    String volumeIdString = idToStringId(id) + _OUTPUT_VOLUME;
+    String volumeIdString = idToStringId(id) + readStringFromFlash(_OUTPUT_VOLUME);
     updateValue(volumeIdString, volumeValueString);
 };
 
 void Display::sendPan(int pan, int id)
 {
     String panValueString = String(pan);
-    String panIdString = idToStringId(id) + _PAN;
+    String panIdString = idToStringId(id) + readStringFromFlash(_PAN);
     updateValue(panIdString, panValueString);
 };
 
 void Display::sendReturn(bool isStereo, int id)
 {
-    String isStereoString = isStereo ? STEREO : MONO;
-    String returnIdString = idToStringId(id) + _RETURN;
+    String isStereoString = isStereo ? readStringFromFlash(STEREO) : readStringFromFlash(MONO);
+    String returnIdString = idToStringId(id) + readStringFromFlash(_RETURN);
     updateTextValue(returnIdString, isStereoString);
 };
 
@@ -143,32 +143,32 @@ void Display::sendPhase(int phase, int id)
     switch (phase)
     {
     case (0):
-        leftPhase = IN_PHASE;
-        rightPhase = IN_PHASE;
+        leftPhase = readStringFromFlash(IN_PHASE);
+        rightPhase = readStringFromFlash(IN_PHASE);
         break;
     case (1):
-        leftPhase = IN_PHASE;
-        rightPhase = OUT_OF_PHASE;
+        leftPhase = readStringFromFlash(IN_PHASE);
+        rightPhase = readStringFromFlash(IN_PHASE);
         break;
     case (2):
-        leftPhase = OUT_OF_PHASE;
-        rightPhase = IN_PHASE;
+        leftPhase = readStringFromFlash(IN_PHASE);
+        rightPhase = readStringFromFlash(IN_PHASE);
         break;
     case (3):
-        leftPhase = OUT_OF_PHASE;
-        rightPhase = OUT_OF_PHASE;
+        leftPhase = readStringFromFlash(IN_PHASE);
+        rightPhase = readStringFromFlash(IN_PHASE);
         break;
     }
 
-    String leftPhaseId = LOOP_NAMES[id] + _LEFT_PHASE;
-    String rightPhaseId = LOOP_NAMES[id] + _RIGHT_PHASE;
+    String leftPhaseId = LOOP_NAMES[id] + readStringFromFlash(_LEFT_PHASE);
+    String rightPhaseId = LOOP_NAMES[id] + readStringFromFlash(_RIGHT_PHASE);
     updateTextValue(leftPhaseId, leftPhase);
     updateTextValue(rightPhaseId, rightPhase);
 };
 
 void Display::sendDrySend(int drySend)
 {
-    String id = LOOP_NAMES[ChannelID::channel_Master] + _LOOP_POS;
+    String id = LOOP_NAMES[ChannelID::channel_Master] + readStringFromFlash(_LOOP_POS);
     String drySendString;
     if (drySend >= 0)
     {
@@ -176,24 +176,24 @@ void Display::sendDrySend(int drySend)
     }
     else if (drySend == -1)
     {
-        drySendString = NO_DRY_SEND;
+        drySendString = readStringFromFlash(NO_DRY_SEND);
     }
     updateTextValue(id, drySendString);
 }
 
 void Display::highlightReturn(bool onOrOff, int id)
 {
-    String color = onOrOff ? HIGHLIGHT_COLOR : DEFAULT_COLOR;
+    String color = onOrOff ? readStringFromFlash(HIGHLIGHT_COLOR) : readStringFromFlash(DEFAULT_COLOR);
     if (id != 7)
     {
-        String idString = LOOP_NAMES[id] + _RETURN;
+        String idString = LOOP_NAMES[id] + readStringFromFlash(_RETURN);
         updatePBackgroundColorValue(idString, color);
     }
 };
 
 void Display::setMenuStateReturn()
 {
-    updateMenuStateDisplay(MENU_STATE_RETURN);
+    updateMenuStateDisplay(readStringFromFlash(MENU_STATE_RETURN));
 };
 
 void Display::setMenuState(MenuState state)
@@ -202,26 +202,26 @@ void Display::setMenuState(MenuState state)
     switch (state)
     {
     case (MenuState::LOOPS):
-        stateString = MENU_STATE_LOOPS;
+        stateString = readStringFromFlash(MENU_STATE_LOOPS);
         break;
 
     case (MenuState::INPUT_VOLUMES):
-        stateString = MENU_STATE_INPUT_VOLUMES;
+        stateString = readStringFromFlash(MENU_STATE_INPUT_VOLUMES);
         break;
 
     case (MenuState::OUTPUT_VOLUMES):
-        stateString = MENU_STATE_OUTPUT_VOLUMES;
+        stateString = readStringFromFlash(MENU_STATE_OUTPUT_VOLUMES);
         break;
 
     case (MenuState::PAN):
-        stateString = MENU_STATE_PAN;
+        stateString = readStringFromFlash(MENU_STATE_PAN);
         break;
     case (MenuState::DELAY_TRILS):
-        stateString = MENU_STATE_DELAY_TRAILS;
+        stateString = readStringFromFlash(MENU_STATE_DELAY_TRAILS);
         break;
 
     case (MenuState::PHASE):
-        stateString = MENU_STATE_PHASE;
+        stateString = readStringFromFlash(MENU_STATE_PHASE);
         break;
     }
     updateMenuStateDisplay(stateString);
@@ -229,21 +229,21 @@ void Display::setMenuState(MenuState state)
 
 void Display::sendDelayTrail(bool isDelayTrail, int id)
 {
-    String idString = idToStringId(id) + _NAME;
-    String delay = idToStringId(id) + (isDelayTrail ? IS_DELAY_TRAIL : IS_NOT_DELAY_TRAIL);
+    String idString = idToStringId(id) + readStringFromFlash(_NAME);
+    String delay = idToStringId(id) + (isDelayTrail ? readStringFromFlash(IS_DELAY_TRAIL) : readStringFromFlash(IS_NOT_DELAY_TRAIL));
     updateTextValue(idString, delay);
 };
 
 void Display::changeSaveStatus(bool isDataChanged)
 {
-    String color = isDataChanged ? DATA_CHANGED_COLOR : DEFAULT_COLOR;
-    updateBBackgroundColorValue(DATA_CHANGED, color);
+    String color = isDataChanged ? readStringFromFlash(DATA_CHANGED_COLOR) : readStringFromFlash(DEFAULT_COLOR);
+    updateBBackgroundColorValue(readStringFromFlash(DATA_CHANGED), color);
 };
 
 void Display::sendBankID()
 {
     String idString = String(newBankId);
-    updateValue(FOOT_BANK_NUM,idString);
+    updateValue(readStringFromFlash(FOOT_BANK_NUM), idString);
 };
 
 int Display::getNewBankId()
@@ -253,7 +253,7 @@ int Display::getNewBankId()
 
 void Display::setNewBankId(int id)
 {
-    newBankId = constrain(id,0,MAX_NUM_BANKS);
+    newBankId = constrain(id, 0, MAX_NUM_BANKS);
 };
 //-----------------------Helpers---------------------------------
 
@@ -270,7 +270,7 @@ void Display::updateValue(String id, String value)
 
 void Display::updateMenuStateDisplay(String menuString)
 {
-    updateTextValue(MENU_STATE_FOR_DISPLAY, menuString);
+    updateTextValue(readStringFromFlash(MENU_STATE_FOR_DISPLAY), menuString);
 };
 
 void Display::updateTextValue(String id, String value)
@@ -316,8 +316,8 @@ void Display::updateBankPresetInfo(int bankId, PresetID id)
 {
     String presetIdString = FOOT_PRESETS[id];
     String bankIdString = String(bankId);
-    updateValue(BANK_NUMBER, bankIdString);
-    updateTextValue(PRESET_LETTER, presetIdString);
+    updateValue(readStringFromFlash(BANK_NUMBER), bankIdString);
+    updateTextValue(readStringFromFlash(PRESET_LETTER), presetIdString);
 }
 
 void Display::updateBaudRate(unsigned long baudRate)
@@ -325,6 +325,5 @@ void Display::updateBaudRate(unsigned long baudRate)
     Serial2.print("baud=" + String(baudRate));
     sendEndCommand();
 }
-
 
 //------------------------------------------------------------

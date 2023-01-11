@@ -5,13 +5,14 @@
 #include <SD.h>
 #include <SPI.h>
 #include <DeviceConfig.h>
+#include <Flash.h>
 
 class SDCard
 {
 public:
     SDCard(int chipSelectPin);
     void begin();
-    bool checkForGlobalDataFile(String fileName);
+    bool checkForGlobalDataFile();
 
     int getPrevBankId();
     void setPrevBankId(int id);

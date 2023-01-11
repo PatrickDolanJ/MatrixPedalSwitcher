@@ -4,6 +4,7 @@
 #include <SD.h>
 #include <ArduinoJson.h>
 #include <Debugger.h>
+#include <MemoryFree.h>
 
 int chipSelectPin;
 
@@ -25,12 +26,16 @@ void SDCard::begin()
     Debugger::log("initialization done.");
 };
 
-bool SDCard::checkForGlobalDataFile(String fileName)
+bool SDCard::checkForGlobalDataFile()
 {
+    Debugger::log("Begining of check func"+String(freeMemory()));
     File myFile;
 
-    const char *fileName_cc = fileName.c_str();
+    String fileName = readStringFromFlash(GLOBAL_DATA_FILENAME);
+    const char *fileName_cc = readStringFromFlash(GLOBAL_DATA_FILENAME).c_str();
     char *fileName_c = &fileName[0];
+    
+
 
     Debugger::log("Checking SD card for bank save data...");
     if (!SD.exists(fileName_c))
@@ -46,11 +51,10 @@ bool SDCard::checkForGlobalDataFile(String fileName)
     }
     else
     {
-        Debugger::log("Opened file: " + fileName);
+        Debugger::log("Opened file: " + readStringFromFlash(GLOBAL_DATA_FILENAME));
         StaticJsonDocument<GLOBAL_DATA_CAPACITY> doc;
-        myFile = SD.open(GLOBAL_DATA_FILENAME.c_str(),FILE_READ);
+        myFile = SD.open(fileName_cc, O_READ);
         DeserializationError err = deserializeJson(doc, myFile);
-        myFile.close();
         if (err)
         {
             Debugger::log("Error: ");
@@ -67,6 +71,7 @@ bool SDCard::checkForGlobalDataFile(String fileName)
             }
         }
     }
+    Debugger::log("End of check func"+String(freeMemory()));
 };
 
 void SDCard::initiateGlobalData()
@@ -74,20 +79,16 @@ void SDCard::initiateGlobalData()
     File myFile;
     StaticJsonDocument<GLOBAL_DATA_CAPACITY> doc;
     doc["prevBankId"].set(0);
-    myFile = SD.open(GLOBAL_DATA_FILENAME.c_str(),FILE_WRITE | O_TRUNC);
-    serializeJsonPretty(doc,myFile);
+    myFile = SD.open(readStringFromFlash(GLOBAL_DATA_FILENAME).c_str(), FILE_WRITE | O_TRUNC);
+    serializeJsonPretty(doc, myFile);
     myFile.close();
-
 }
 
 int SDCard::getPrevBankId()
 {
     File myFile;
-    String globalDataFileName = GLOBAL_DATA_FILENAME;
-    const char *globalData_cc = globalDataFileName.c_str();
-
-    myFile = SD.open(globalData_cc, FILE_READ);
-    Debugger::log("Opening: " + globalDataFileName);
+    myFile = SD.open(readStringFromFlash(GLOBAL_DATA_FILENAME).c_str(), FILE_READ);
+    Debugger::log("Opening: " + String(readStringFromFlash(GLOBAL_DATA_FILENAME)));
     StaticJsonDocument<GLOBAL_DATA_CAPACITY> doc;
     StaticJsonDocument<32> filter;
     filter["prevBankId"] = true;
@@ -106,7 +107,7 @@ int SDCard::getPrevBankId()
 void SDCard::setPrevBankId(int id)
 {
     File myFile;
-    String globalDataFileName = GLOBAL_DATA_FILENAME;
+    String globalDataFileName = readStringFromFlash(GLOBAL_DATA_FILENAME);
     const char *globalData_cc = globalDataFileName.c_str();
     myFile = SD.open(globalData_cc, FILE_READ);
     StaticJsonDocument<GLOBAL_DATA_CAPACITY> doc;

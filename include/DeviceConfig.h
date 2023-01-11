@@ -7,13 +7,14 @@
 const unsigned long NEXTION_BAUD_RATE = 115200;
 const unsigned long DEBUGGER_BAUD_RATE = 115200;
 
-const String DEVICE_NAME = "HeighLiner";
-
-const String GLOBAL_DATA_FILENAME = "gdata.txt";
-const String BANKS_FOLDER = "banks/";
-const String BANK_DATA_TEMPLATE = "bankData.txt";
+const static char DEVICE_NAME[] PROGMEM = "HeighLiner";
+const static char GLOBAL_DATA_FILENAME[] PROGMEM = "g_data.txt";
+const static char BANKS_FOLDER[] PROGMEM = "banks/";
+const static char BANK_DATA_TEMPLATE[] PROGMEM = "b_Data.txt";
+const static char PRESET_FOLDER_TEMPLATE[] PROGMEM = "/presets";
+const static char PRESET_DATA_TEMPLATE[] PROGMEM = "p_data";
 const int BANK_DATA_CAPACITY = 1024;
-const int GLOBAL_DATA_CAPACITY = 32;
+const int GLOBAL_DATA_CAPACITY = 512;
 const int MAX_NUM_BANKS = 100;
 
 const int MAX_VOLUME = 255;
@@ -22,9 +23,9 @@ const int VOLUME_DAMPENING_INCREMENTS = 100;
 const int DEFAULT_PAN = 50; // 0(hard left) to 100 (hard right)
 const int MAX_PAN = 100;
 
-const String DEFAULT_COLOR = "19703";
-const String HIGHLIGHT_COLOR = "65535";
-const String DATA_CHANGED_COLOR = "62025";
+const char DEFAULT_COLOR[] PROGMEM = "19703";
+const char HIGHLIGHT_COLOR[] PROGMEM = "65535";
+const char DATA_CHANGED_COLOR[] PROGMEM = "62025";
 
 const float LONG_PRESS_INTERVAL_S = 1.75;
 const int DOWN_ARROW_ID = 1;

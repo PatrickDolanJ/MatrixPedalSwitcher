@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include <MenuState.h>
 #include <Preset.h>
+#include <Flash.h>
 
 class Display
 {
