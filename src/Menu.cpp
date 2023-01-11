@@ -17,11 +17,12 @@ void Menu::setup()
   display.bootScreen();
   //------------------Load Data--------------------
   sdCard.begin();
-  Debugger::log("Before check func" + String(freeMemory()));
+  //Debugger::log("Before check func" + String(freeMemory()));
   sdCard.checkForGlobalDataFile();
-  Debugger::log(String(freeMemory()));
-  Debugger::log(String(sdCard.getPrevBankId()));
-  Debugger::log("After check func" + String(freeMemory()));
+  //Debugger::log(String(freeMemory()));
+  Debugger::log("Previous Bank: " + String(sdCard.getPrevBankId()));
+  //Debugger::log("After check func" + String(freeMemory()));
+  sdCard.addBank();
   bank.setCurrentPreset(0);
   //------------------HardWare Setup----------------
   digitalPots.setup();
@@ -32,7 +33,7 @@ void Menu::setup()
   display.setHomeScreen();
   display.highlightMenu(true, menuState);
   updateAllValuesDisplay(bank.getCurrentPreset());
-  Debugger::log("End of setup" + String(freeMemory()));
+  //Debugger::log("End of setup" + String(freeMemory()));
 };
 
 void Menu::doButton(int id)

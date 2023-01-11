@@ -13,8 +13,9 @@ const static char BANKS_FOLDER[] PROGMEM = "banks/";
 const static char BANK_DATA_TEMPLATE[] PROGMEM = "b_Data.txt";
 const static char PRESET_FOLDER_TEMPLATE[] PROGMEM = "/presets";
 const static char PRESET_DATA_TEMPLATE[] PROGMEM = "p_data";
-const int BANK_DATA_CAPACITY = 1024;
-const int GLOBAL_DATA_CAPACITY = 512;
+
+const int BANK_DATA_CAPACITY = 3072;
+const int GLOBAL_DATA_CAPACITY = 32;
 const int MAX_NUM_BANKS = 100;
 
 const int MAX_VOLUME = 255;

@@ -84,8 +84,7 @@ void setup()
 {
   debugger = &debugger->Instance();
   debugger->setup(DEBUGGER_BAUD_RATE);
-  Debugger::log(readStringFromFlash(DEVICE_NAME));
-  Debugger::log(String("is booting."));
+  Debugger::log(readStringFromFlash(DEVICE_NAME) + " is booting");
 
   SPI.begin();
   menu.setup();
