@@ -26,13 +26,10 @@ void SDCard::begin()
 
 bool SDCard::checkForGlobalDataFile()
 {
-    // Debugger::log("Begining of check func" + String(freeMemory()));
     File myFile;
-
     String fileName = readStringFromFlash(GLOBAL_DATA_FILENAME);
     const char *fileName_cc = readStringFromFlash(GLOBAL_DATA_FILENAME).c_str();
     char *fileName_c = &fileName[0];
-
     Debugger::log("Checking SD card for " + String(fileName_c) + "...");
     if (!SD.exists(fileName_c))
     {
@@ -69,7 +66,6 @@ bool SDCard::checkForGlobalDataFile()
         Debugger::log(F("Global sava data found."));
         return true;
     }
-    // Debugger::log("End of check func" + String(freeMemory()));
 };
 
 void SDCard::initiateGlobalData()
@@ -91,23 +87,7 @@ int SDCard::getPrevBankId()
 
 void SDCard::setPrevBankId(int id)
 {
-    File myFile;
-    String globalDataFileName = readStringFromFlash(GLOBAL_DATA_FILENAME);
-    const char *globalData_cc = globalDataFileName.c_str();
-    myFile = SD.open(globalData_cc, FILE_READ);
-    StaticJsonDocument<GLOBAL_DATA_CAPACITY> doc;
-    DeserializationError err = deserializeJson(doc, myFile);
-    myFile.close();
-    if (err)
-    {
-        Debugger::log("Error: ");
-        Debugger::log(err.f_str());
-        return;
-    }
-    doc["prevBankId"].set(id);
-    myFile = SD.open(globalData_cc, FILE_WRITE | O_TRUNC);
-    serializeJsonPretty(doc, myFile);
-    myFile.close();
+    setGlobalValue("prevBankId",id);
 };
 
 int SDCard::getHighestBank()
@@ -115,9 +95,13 @@ int SDCard::getHighestBank()
     return getGlobalValue("highestBankNum");
 };
 
-int SDCard::addBank()
+void SDCard::setHighestBank(int highestBankNum)
 {
-    int newBankId = getHighestBank() + 1;
+    setGlobalValue("highestBankNum",highestBankNum);
+}
+
+int SDCard::createBankFile(int newBankId)
+{
     if (checkForBankFile(newBankId))
     {
         Debugger::log(F("Bank already exists!"));
@@ -162,6 +146,7 @@ int SDCard::addBank()
     myFile = SD.open(newFileName.c_str(), FILE_WRITE | O_CREAT);
     serializeJsonPretty(doc, myFile);
     myFile.close();
+
     return newBankId;
 };
 
@@ -184,6 +169,48 @@ int SDCard::getGlobalValue(String valueName)
     int value = doc[valueName];
     return value;
 };
+
+void SDCard::setGlobalValue(String valueName, int value)
+{
+    File myFile;
+    String globalDataFileName = readStringFromFlash(GLOBAL_DATA_FILENAME);
+    const char *globalData_cc = globalDataFileName.c_str();
+    myFile = SD.open(globalData_cc, FILE_READ);
+    StaticJsonDocument<GLOBAL_DATA_CAPACITY> doc;
+    DeserializationError err = deserializeJson(doc, myFile);
+    myFile.close();
+    if (err)
+    {
+        Debugger::log("Error: ");
+        Debugger::log(err.f_str());
+        return;
+    }
+    doc[valueName] = value;
+    myFile = SD.open(globalData_cc, FILE_WRITE | O_TRUNC);
+    serializeJsonPretty(doc, myFile);
+    myFile.close();
+}
+
+void SDCard::setGlobalValue(String valueName, bool value)
+{
+        File myFile;
+    String globalDataFileName = readStringFromFlash(GLOBAL_DATA_FILENAME);
+    const char *globalData_cc = globalDataFileName.c_str();
+    myFile = SD.open(globalData_cc, FILE_READ);
+    StaticJsonDocument<GLOBAL_DATA_CAPACITY> doc;
+    DeserializationError err = deserializeJson(doc, myFile);
+    myFile.close();
+    if (err)
+    {
+        Debugger::log("Error: ");
+        Debugger::log(err.f_str());
+        return;
+    }
+    doc[valueName].set(value);
+    myFile = SD.open(globalData_cc, FILE_WRITE | O_TRUNC);
+    serializeJsonPretty(doc, myFile);
+    myFile.close();
+}
 
 bool SDCard::checkForBankFile(int id)
 {

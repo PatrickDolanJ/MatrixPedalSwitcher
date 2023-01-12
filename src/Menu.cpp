@@ -17,12 +17,8 @@ void Menu::setup()
   display.bootScreen();
   //------------------Load Data--------------------
   sdCard.begin();
-  //Debugger::log("Before check func" + String(freeMemory()));
   sdCard.checkForGlobalDataFile();
-  //Debugger::log(String(freeMemory()));
   Debugger::log("Previous Bank: " + String(sdCard.getPrevBankId()));
-  //Debugger::log("After check func" + String(freeMemory()));
-  sdCard.addBank();
   bank.setCurrentPreset(0);
   //------------------HardWare Setup----------------
   digitalPots.setup();
@@ -33,7 +29,6 @@ void Menu::setup()
   display.setHomeScreen();
   display.highlightMenu(true, menuState);
   updateAllValuesDisplay(bank.getCurrentPreset());
-  //Debugger::log("End of setup" + String(freeMemory()));
 };
 
 void Menu::doButton(int id)
@@ -65,7 +60,8 @@ void Menu::doFoot(int id)
     if (id == 0 || id == 1)
     {
       int curBankId = display.getNewBankId();
-      int newBankId = (id == 0) ? (curBankId - 1) : (curBankId + 1);
+      int newBankId = (id == 0) ? (curBankId - 1) :(curBankId + 1);
+      newBankId = constrain(newBankId,0,sdCard.getHighestBank()+1);
       display.setNewBankId(newBankId);
       display.sendBankID();
     }
@@ -85,6 +81,11 @@ void Menu::doDoubleFootPress()
   else if (menuState == MenuState::BANKS)
   {
     Debugger::log("LOADING NEW BANK");
+    int newBankId = display.getNewBankId();
+    if(!sdCard.checkForBankFile(newBankId))
+    {
+      sdCard.createBankFile(newBankId);
+    }
     menuState = MenuState::LOOPS;
     display.setHomeScreen();
     display.highlightMenu(true, menuState);
