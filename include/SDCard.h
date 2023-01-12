@@ -6,6 +6,7 @@
 #include <SPI.h>
 #include <DeviceConfig.h>
 #include <Flash.h> 
+#include <Bank.h>
 
 class SDCard
 {
@@ -17,11 +18,14 @@ public:
     int getPrevBankId();
     void setPrevBankId(int id);
     int getHighestBank();
-    int addBank();
+    void setHighestBank(int highestBankNum);
+    int createBankFile(int newBankId);
 
 private:
     int chipSelectPin;
     void initiateGlobalData();
     int getGlobalValue(String valueName);
+    void setGlobalValue(String valueName, int value);
+    void setGlobalValue(String valueName, bool value);
 };
 #endif
